@@ -198,7 +198,7 @@ app.on('second-instance', () => {
 })
 
 // Chiusa la finestra, l'applicazione finisce: non resta acceso niente
-// (con una versione nuova pronta, si installa e il programma si riapre: vedi aggiornamento.ts).
+// (con una versione nuova scaricata, si installa e il programma si riapre: vedi aggiornamento.ts).
 app.on('window-all-closed', () => chiudi())
 
 void app.whenReady().then(() => {

@@ -1,6 +1,7 @@
 // L'aggiornamento dell'applicazione: all'apertura si controlla su GitHub se c'è una versione nuova
-// e si chiede "È disponibile una nuova versione: installarla?". Con il sì si scarica e si installa alla chiusura;
-// con "Non ora" non si fa niente e si richiede la volta dopo. Mai controlli ad applicazione chiusa.
+// e si chiede "È disponibile una nuova versione: installarla?". Con il sì si scarica e, appena scaricata, il programma
+// si chiude, l'installatore mostra la sua finestra di avanzamento e al termine riapre il programma.
+// Con "Non ora" non si fa niente e si richiede la volta dopo. Mai controlli ad applicazione chiusa.
 // Modulo puro: il processo principale tiene lo stato con prossimoStato(), le pagine lo mostrano con inParole().
 
 export type StatoAggiornamento =
@@ -8,8 +9,8 @@ export type StatoAggiornamento =
   | { stato: 'nessuno' }
   | { stato: 'disponibile'; versione: string }
   | { stato: 'scarico'; versione: string; percento: number }
-  /** Scaricata: si installa quando si chiude l'applicazione, che poi si riapre automaticamente. */
-  | { stato: 'pronta'; versione: string }
+  /** Scaricata: tra un attimo il programma si chiude, si installa (con la finestra di avanzamento) e si riapre. */
+  | { stato: 'installo'; versione: string }
   | { stato: 'non-scaricata'; versione: string }
 
 export type EventoAggiornamento =
@@ -36,7 +37,7 @@ export function prossimoStato(s: StatoAggiornamento, e: EventoAggiornamento): St
       if (s.stato !== 'scarico') return s
       return { ...s, percento: Math.max(s.percento, Math.min(100, Math.round(e.percento))) }
     case 'scaricata':
-      return s.stato === 'scarico' ? { stato: 'pronta', versione: s.versione } : s
+      return s.stato === 'scarico' ? { stato: 'installo', versione: s.versione } : s
     case 'errore':
       // Un errore del controllo (niente internet, GitHub che non risponde) non si dice: si riprova la volta dopo.
       // Un errore mentre si scarica si dice, perché hai appena risposto "sì".
@@ -45,13 +46,13 @@ export function prossimoStato(s: StatoAggiornamento, e: EventoAggiornamento): St
 }
 
 /**
- * Che cosa fare quando si chiude la finestra. Con una versione pronta la si installa e poi il programma
- * si riapre da solo: l'installazione dura circa un minuto senza niente a schermo, e chi riapriva il programma
- * manualmente in quel minuto ritrovava la versione vecchia e la domanda "installarla?".
+ * Che cosa fare quando il programma si chiude. Con una versione scaricata la si installa mostrando la finestra
+ * di avanzamento, e alla fine il programma si riapre da solo: un'installazione in silenzio non diceva niente,
+ * e chi riapriva il programma a metà ritrovava la versione vecchia e la domanda "installarla?".
  * Con la finta fonte di versioni (prove) non si installa mai.
  */
 export function allaChiusura(s: StatoAggiornamento, { prova }: { prova: boolean }): 'installa-e-riapri' | 'chiudi' {
-  return s.stato === 'pronta' && !prova ? 'installa-e-riapri' : 'chiudi'
+  return s.stato === 'installo' && !prova ? 'installa-e-riapri' : 'chiudi'
 }
 
 export type Bottone = { testo: string; installa: boolean; primario?: boolean }
@@ -79,15 +80,15 @@ export function inParole(s: StatoAggiornamento): InParole | null {
       }
     case 'scarico':
       return {
-        testo: `Scaricamento della versione ${s.versione}… ${s.percento}%. L'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.`,
+        testo: `Scaricamento della versione ${s.versione}… ${s.percento}%. Al termine il programma si chiude, installa la versione nuova e si riapre automaticamente.`,
         bottoni: [],
-        chiudibile: true,
+        chiudibile: false,
       }
-    case 'pronta':
+    case 'installo':
       return {
-        testo: `La versione ${s.versione} è pronta: l'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.`,
+        testo: `Installazione della versione ${s.versione}: il programma si chiude e si riapre automaticamente al termine. Non occorre fare nulla.`,
         bottoni: [],
-        chiudibile: true,
+        chiudibile: false,
       }
     case 'non-scaricata':
       return {
@@ -121,7 +122,7 @@ export function fonteDiProva(indirizzo: string | undefined): string | null {
 export type PonteAggiornamento = {
   /** Lo stato di adesso. */
   leggi(): Promise<StatoAggiornamento>
-  /** La risposta a "installarla?": true installa (scarica ora, installa alla chiusura), false "Non ora". */
+  /** La risposta a "installarla?": true installa (scarica, poi chiude, installa e riapre), false "Non ora". */
   rispondi(installa: boolean): Promise<StatoAggiornamento>
   /** Chiamata a ogni cambio di stato; restituisce la funzione per smettere di ascoltare. */
   quandoCambia(fai: (s: StatoAggiornamento) => void): () => void

@@ -35,7 +35,7 @@ npm run dev -- --cartella="C:\percorso\dei\dati" --profilo="C:\percorso\di\un\pr
 
 - `npm run installatore` costruisce sul PC l'installatore per Windows in `installatore/` (`Portafoglio-titoli-<versione>.exe`, più `latest.yml`), senza pubblicare niente. Configurazione in `electron-builder.yml`.
 - L'installatore pubblico lo costruisce la GitHub Action `Installatore` (`.github/workflows/installatore.yml`) e lo mette nella Release `v<versione>` di questo repository. Parte a ogni modifica di `main`, ma lavora solo se la versione di `package.json` non ha ancora la sua Release: **per pubblicare una versione nuova si cambia `version` in `package.json`**.
-- All'apertura l'applicazione installata guarda le Release e, se c'è una versione nuova, chiede "C'è una versione nuova: la installo?". Con il sì la scarica e la installa quando la chiudi, in silenzio; finita l'installazione (circa un minuto) l'applicazione si riapre da sola, così nessuno la riapre a metà trovando la versione vecchia; con "Non ora" lo richiede la volta dopo. Ad applicazione chiusa non resta acceso niente. Il codice è in `electron/aggiornamento.ts` e `src/dati/aggiornamento.ts`; il registro in `AppData\Roaming\Portafoglio titoli\aggiornamento.log`.
+- All'apertura l'applicazione installata guarda le Release e, se c'è una versione nuova, chiede "C'è una versione nuova: la installo?". Con il sì la scarica e, appena scaricata (tre secondi per leggere la striscia), si chiude e lancia l'installatore non silenzioso: si vede la sua finestra "Installazione in corso" con la barra, e alla fine l'applicazione si riapre da sola, così nessuno la riapre a metà trovando la versione vecchia; con "Non ora" lo richiede la volta dopo. Ad applicazione chiusa non resta acceso niente. Il codice è in `electron/aggiornamento.ts` e `src/dati/aggiornamento.ts`; il registro in `AppData\Roaming\Portafoglio titoli\aggiornamento.log`.
 - L'installatore non è firmato: al primo avvio Windows dice "app non riconosciuta"; si sceglie "Ulteriori informazioni" e poi "Esegui comunque".
 
 Per provare la domanda senza pubblicare niente, con una finta fonte di versioni sul PC (una cartella con `latest.yml` e l'installatore di una versione più alta, servita su `http://localhost`):
@@ -44,7 +44,7 @@ Per provare la domanda senza pubblicare niente, con una finta fonte di versioni 
 "installatore/win-unpacked/Portafoglio titoli.exe" --fonte-versioni=http://127.0.0.1:8765/ --profilo="C:\percorso\di\un\profilo\di\prova"
 ```
 
-Con la finta fonte l'applicazione scarica la versione nuova ma alla chiusura **non** la installa: scrive solo nel registro che cosa installerebbe. Nelle pagine aperte nel browser la striscia si vede con `?versione=nuova`.
+Con la finta fonte l'applicazione scarica la versione nuova ma **non** si chiude e non la installa: scrive solo nel registro che cosa installerebbe. Nelle pagine aperte nel browser la striscia si vede con `?versione=nuova`.
 
 ## Prima di pubblicare
 

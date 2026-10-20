@@ -33,7 +33,7 @@ export function VersioneNuova() {
   const parole = inParole(stato)
   if (!ponteAggiornamento || !parole || nascosta) return null
 
-  const icona = stato.stato === 'pronta' ? 'ok' : stato.stato === 'scarico' ? 'aggiorna' : 'info'
+  const icona = stato.stato === 'scarico' || stato.stato === 'installo' ? 'aggiorna' : 'info'
   return (
     <div className="striscia" role="status">
       <span>
