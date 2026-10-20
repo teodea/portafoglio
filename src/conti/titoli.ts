@@ -25,7 +25,7 @@ import {
 import { controlloInParole } from '../dati/aggiorna/controllo-prezzo.ts'
 import { eUfficiale, FONTE } from '../dati/aggiorna/fonti.ts'
 import { fonteInParole } from './fonti.ts'
-import { cambio, euro, guadagno, percentuale, prezzo, quote, riga, testo, type Numero, type RigaConto, type Spiegazione } from './spiegazione.ts'
+import { cambio, euro, guadagno, percentuale, prezzo, prezzoEsatto, quote, riga, testo, type Numero, type RigaConto, type Spiegazione } from './spiegazione.ts'
 import { anniTra, xirr, type Flusso } from './xirr.ts'
 
 /** Sotto questo tempo il medio annuo non si mostra: su pochi mesi direbbe poco. */
@@ -182,7 +182,7 @@ function spiegaValore(nome: string, giorno: string, v: ValoreAl, borsa: string):
   const note: string[] = []
   if (p && v.valore !== null) {
     conto.push(riga('Quote', quote(v.quote)))
-    conto.push(riga(`× prezzo del ${data(p.data)}`, prezzo(p.prezzo, p.valuta)))
+    conto.push(riga(`× prezzo del ${data(p.data)}`, prezzoEsatto(p.prezzo, p.valuta)))
     if (p.valuta !== 'EUR' && p.cambio) {
       conto.push(riga(`= in ${nomeValuta(p.valuta)}`, prezzo(v.quote * p.prezzo, p.valuta)))
       conto.push(riga('÷ cambio BCE', cambio(p.cambio)))
@@ -698,7 +698,7 @@ export function contiDeiTitoli(dati: FileDati): ContiTitoli {
     valore: {
       n: valoreAperti,
       perche: {
-        titolo: 'Controvalore dei titoli',
+        titolo: 'Controvalore dei titoli in portafoglio',
         grande: euro(valoreAperti),
         frase: `Somma dei ${aperti.length} titoli in portafoglio, ${quandoFine}.`,
         conto: [...perValore.map((c) => riga(c.nomeCorto, euro(c.valore.n ?? 0))), riga('Controvalore dei titoli', euro(valoreAperti))],
@@ -708,7 +708,7 @@ export function contiDeiTitoli(dati: FileDati): ContiTitoli {
     pagato: {
       n: pagatoAperti,
       perche: {
-        titolo: "Costo d'acquisto",
+        titolo: "Costo d'acquisto dei titoli in portafoglio",
         grande: euro(pagatoAperti),
         frase: `Costo d'acquisto dei ${aperti.length} titoli in portafoglio, commissioni comprese.`,
         conto: [...perValore.map((c) => riga(c.nomeCorto, euro(c.pagato.n ?? 0))), riga("Costo d'acquisto", euro(pagatoAperti))],
@@ -720,7 +720,7 @@ export function contiDeiTitoli(dati: FileDati): ContiTitoli {
     guadagno: {
       n: guadagnoAperti,
       perche: {
-        titolo: `${plusMinus(guadagnoAperti)} dei titoli`,
+        titolo: `${plusMinus(guadagnoAperti)} dei titoli in portafoglio`,
         grande: guadagno(guadagnoAperti),
         frase: `Somma dei risultati dei ${aperti.length} titoli in portafoglio: controvalore + dividendi netti + ricavo delle vendite − costo d'acquisto.`,
         conto: [...perGuadagno.map((c) => riga(c.nomeCorto, guadagno(c.guadagno.n ?? 0))), riga(plusMinus(guadagnoAperti), guadagno(guadagnoAperti))],

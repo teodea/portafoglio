@@ -27,7 +27,7 @@ import {
 import { fonteDaMostrare } from '../dati/aggiorna/fonti.ts'
 import { Icona } from '../icone.tsx'
 import { useAggiorna } from './contesto.tsx'
-import { cambio, euro, giorno, percentuale, prezzo, simboloValuta } from './numeri.ts'
+import { cambio, euro, giorno, percentuale, prezzo } from './numeri.ts'
 
 /** La prima lettera maiuscola, ma non nei nomi dei siti: "investing.com non ha risposto". */
 const Maiuscola = (t: string) => (!t || t.startsWith('investing') ? t : t[0].toUpperCase() + t.slice(1))
@@ -62,7 +62,7 @@ function Pronto() {
   )
 }
 
-/** I due riquadri in alto: "Riferimenti 5 di 6, in arrivo, non necessari per salvare" e "Inflazione fino a settembre". */
+/** I due riquadri in alto: "Indici 4 di 5, in arrivo, non necessari per salvare" e "Inflazione fino a settembre". */
 export function RiquadriRiferimenti({ p }: { p: ParteRiferimenti }) {
   const pronti = riferimentiPronti(p)
   const inCorso = p.righe.some((r) => r.stato.tipo === 'attesa' || r.stato.tipo === 'scarica')
@@ -72,7 +72,7 @@ export function RiquadriRiferimenti({ p }: { p: ParteRiferimenti }) {
   return (
     <>
       <div className="numero">
-        <small>Riferimenti</small>
+        <small>Indici di borsa</small>
         <b>
           {pronti} di {p.righe.length}
         </b>
@@ -105,7 +105,7 @@ export function RigheRiferimenti({ p, colonne }: { p: ParteRiferimenti; colonne:
     <>
       <tr className="agg-gruppo">
         <td colSpan={colonne}>
-          Riferimenti <span className="tenue">· non necessari per salvare</span>
+          Indici di borsa <span className="tenue">· non necessari per salvare</span>
           {p.primaVolta && p.dal && <span className="tenue"> · con lo storico da {meseEAnno(p.dal)}</span>}
         </td>
       </tr>
@@ -216,7 +216,7 @@ function RigaDelRiferimento({
       <td />
       <td className="n">
         <button type="button" className="agg-num" aria-expanded={aperta} onClick={apri}>
-          {prezzo(v.valore)} {simboloValuta(d.valuta)}
+          {prezzo(v.valore)} punti
         </button>
       </td>
       <td className={`n ${sm === null ? '' : sm >= 0 ? 'agg-su' : 'agg-giu'}`}>{sm === null ? '' : percentuale(sm)}</td>
@@ -271,7 +271,7 @@ function DettaglioRiferimento({ p, r, colonne }: { p: ParteRiferimenti; r: RigaR
         <div className="agg-dettaglio-corpo">
           <div>
             <p>
-              <b>{d.nome}</b>: {d.cosa}. Si misura come se lo stesso capitale fosse stato investito nelle stesse date dei movimenti.
+              <b>{d.nome}</b>: {d.cosa}. Nella pagina Portafoglio se ne mostra l’andamento accanto a quello del portafoglio.
             </p>
             {v && (
               <p>
@@ -281,7 +281,7 @@ function DettaglioRiferimento({ p, r, colonne }: { p: ParteRiferimenti; r: RigaR
             {storia.arrivate > 0 && (
               <p>
                 Insieme al valore di fine {nomeMese(p.mese)} sono arrivati {storia.arrivate} valori dello storico: i fine mese
-                {p.dal ? ` da ${meseEAnno(p.dal)}` : ''} e le date dei movimenti.
+                {p.dal ? ` da ${meseEAnno(p.dal)}` : ''}.
                 {storia.mancano.length > 0 && ` Ancora mancanti: ${elenco(storia.mancano.slice(0, 6).map(giorno))}${storia.mancano.length > 6 ? '…' : ''}.`}
               </p>
             )}
@@ -289,7 +289,7 @@ function DettaglioRiferimento({ p, r, colonne }: { p: ParteRiferimenti; r: RigaR
           {v && d.valuta !== 'EUR' && (
             <div className="agg-conto">
               <div>
-                <span>Valore in dollari</span>
+                <span>Punti, in dollari</span>
                 <span>{prezzo(v.valore)} $</span>
               </div>
               <div>
@@ -369,7 +369,7 @@ function RigaDelNic({ p, riga, colonne, primaRiga }: { p: ParteRiferimenti; riga
         <td />
         <td colSpan={colonne - 5} className="tenue">
           <span className="agg-sotto">
-            ISTAT lo pubblica {quandoEsceNic(mese)}. Il confronto è disponibile {finoAl(prima)}; {nomeMese(mese)} si acquisisce al
+            ISTAT lo pubblica {quandoEsceNic(mese)}. L’inflazione è disponibile {finoAl(prima)}; {nomeMese(mese)} si acquisisce al
             prossimo aggiornamento.
           </span>
         </td>

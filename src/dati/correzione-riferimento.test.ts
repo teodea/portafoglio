@@ -21,15 +21,15 @@ const QUANDO = '2026-10-19T18:00:00.000Z'
 function file(): FileDati {
   return {
     formato: 'portafoglio',
-    versione: 3,
+    versione: 4,
     creato: '2026-01-01T00:00:00.000Z',
     titoli: [],
     operazioni: [],
     dividendi: [],
     prezzi: [],
     riferimenti: [
-      { riferimento: 'btp10', data: '2026-08-31', valore: 150, valuta: 'EUR', fonte: 'investing.com', seduta: '2026-08-31' },
-      { riferimento: 'btp10', data: SET, valore: 146.1, valuta: 'EUR', fonte: 'investing.com', seduta: SET },
+      { riferimento: 'ftsemib', data: '2026-08-31', valore: 150, valuta: 'EUR', fonte: 'investing.com', seduta: '2026-08-31' },
+      { riferimento: 'ftsemib', data: SET, valore: 146.1, valuta: 'EUR', fonte: 'investing.com', seduta: SET },
       { riferimento: 'sp500', data: SET, valore: 11000, valuta: 'USD', cambio: 1.1, fonte: 'investing.com', seduta: SET, nota: 'cambio BCE del 29/09/2026' },
     ],
     nic: [
@@ -67,9 +67,9 @@ describe('correggere a mano il valore di un riferimento', () => {
   })
 
   it('corretto due volte, "prima" resta il valore di partenza', () => {
-    const una = applicaScrittura(file(), correggi('btp10', 140), QUANDO)
-    const due = applicaScrittura(una, correggi('btp10', 141), QUANDO)
-    expect(trovaValore(due, { id: 'btp10', data: SET })).toMatchObject({ valore: 141, fonte: 'a mano', prima: { valore: 146.1, fonte: 'investing.com' } })
+    const una = applicaScrittura(file(), correggi('ftsemib', 140), QUANDO)
+    const due = applicaScrittura(una, correggi('ftsemib', 141), QUANDO)
+    expect(trovaValore(due, { id: 'ftsemib', data: SET })).toMatchObject({ valore: 141, fonte: 'a mano', prima: { valore: 146.1, fonte: 'investing.com' } })
   })
 
   it('un valore che mancava si scrive a mano; in dollari serve anche il cambio', () => {
@@ -82,9 +82,9 @@ describe('correggere a mano il valore di un riferimento', () => {
   })
 
   it('rifiuta un numero che non va o uguale a quello che c’è', () => {
-    expect(controllaScrittura(file(), correggi('btp10', 0)).ok).toBe(false)
-    expect(controllaScrittura(file(), correggi('btp10', 146.1))).toEqual({ ok: false, perche: 'il valore nuovo è uguale a quello presente' })
-    expect(() => applicaScrittura(file(), correggi('btp10', -3), QUANDO)).toThrow()
+    expect(controllaScrittura(file(), correggi('ftsemib', 0)).ok).toBe(false)
+    expect(controllaScrittura(file(), correggi('ftsemib', 146.1))).toEqual({ ok: false, perche: 'il valore nuovo è uguale a quello presente' })
+    expect(() => applicaScrittura(file(), correggi('ftsemib', -3), QUANDO)).toThrow()
   })
 })
 
@@ -104,18 +104,18 @@ describe('correggere a mano il NIC', () => {
 
 describe('i valori scaricati di nuovo', () => {
   it('sostituiscono quelli con lo stesso giorno (anche a mano) e aggiungono quelli che mancavano, in ordine', () => {
-    const aMano = applicaScrittura(file(), correggi('btp10', 140), QUANDO)
+    const aMano = applicaScrittura(file(), correggi('ftsemib', 140), QUANDO)
     const s: ScritturaRiferimento = {
       tipo: 'scaricati',
-      id: 'btp10',
+      id: 'ftsemib',
       riferimenti: [
-        { riferimento: 'btp10', data: SET, valore: 146.2, valuta: 'EUR', fonte: 'investing.com', seduta: SET },
-        { riferimento: 'btp10', data: '2026-07-31', valore: 151, valuta: 'EUR', fonte: 'investing.com', seduta: '2026-07-31' },
+        { riferimento: 'ftsemib', data: SET, valore: 146.2, valuta: 'EUR', fonte: 'investing.com', seduta: SET },
+        { riferimento: 'ftsemib', data: '2026-07-31', valore: 151, valuta: 'EUR', fonte: 'investing.com', seduta: '2026-07-31' },
       ],
       nic: [],
     }
     const d = applicaScrittura(aMano, s, QUANDO)
-    expect(d.riferimenti!.filter((v) => v.riferimento === 'btp10').map((v) => [v.data, v.valore, v.fonte])).toEqual([
+    expect(d.riferimenti!.filter((v) => v.riferimento === 'ftsemib').map((v) => [v.data, v.valore, v.fonte])).toEqual([
       ['2026-07-31', 151, 'investing.com'],
       ['2026-08-31', 150, 'investing.com'],
       [SET, 146.2, 'investing.com'],
@@ -124,9 +124,9 @@ describe('i valori scaricati di nuovo', () => {
   })
 
   it('rifiuta valori di un altro riferimento, senza fonte o senza il cambio del dollaro', () => {
-    const v = { riferimento: 'btp10' as const, data: SET, valore: 1, valuta: 'EUR', fonte: 'investing.com' }
+    const v = { riferimento: 'ftsemib' as const, data: SET, valore: 1, valuta: 'EUR', fonte: 'investing.com' }
     expect(controllaScrittura(file(), { tipo: 'scaricati', id: 'sp500', riferimenti: [v], nic: [] }).ok).toBe(false)
-    expect(controllaScrittura(file(), { tipo: 'scaricati', id: 'btp10', riferimenti: [{ ...v, fonte: 'a mano' }], nic: [] }).ok).toBe(false)
+    expect(controllaScrittura(file(), { tipo: 'scaricati', id: 'ftsemib', riferimenti: [{ ...v, fonte: 'a mano' }], nic: [] }).ok).toBe(false)
     expect(controllaScrittura(file(), { tipo: 'scaricati', id: 'sp500', riferimenti: [{ ...v, riferimento: 'sp500', valuta: 'USD' }], nic: [] }).ok).toBe(false)
     expect(controllaScrittura(file(), { tipo: 'scaricati', id: 'nic', riferimenti: [], nic: [] }).ok).toBe(false)
   })
@@ -148,6 +148,6 @@ describe('le richieste dalle pagine e il nome della copia', () => {
     expect(qualeValore({ id: 'nic', data: SET })).toBe('il NIC di settembre 2026')
     expect(percheDellaCopiaRiferimento(correggi('sp500', 1))).toBe('prima di correggere a mano S&P 500 a fine settembre 2026')
     expect(percheDellaCopiaRiferimento({ tipo: 'torna', id: 'nic', data: SET })).toBe('prima di tornare al NIC di prima di settembre 2026')
-    expect(percheDellaCopiaRiferimento({ tipo: 'scaricati', id: 'btp10', riferimenti: [], nic: [] })).toBe('prima di scrivere BTP 10 anni scaricato di nuovo')
+    expect(percheDellaCopiaRiferimento({ tipo: 'scaricati', id: 'ftsemib', riferimenti: [], nic: [] })).toBe('prima di scrivere FTSE MIB scaricato di nuovo')
   })
 })

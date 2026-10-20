@@ -1,7 +1,7 @@
 // Dal PDF alla bozza di Registra, e il titolo nuovo nel file (ticket 12), sul portafoglio inventato
 // e con i campi di PDF inventati.
 import { describe, expect, it } from 'vitest'
-import { aVersione3 } from '../../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../../dati/aggiorna/versione3.ts'
 import { controllaFile } from '../../dati/controllo.ts'
 import { applicaModifica, controllaModifica, percheDellaCopia } from '../../dati/movimenti.ts'
 import { campiAcquisto, campiDividendo } from '../../dati/pdf-inventati.ts'
@@ -10,7 +10,7 @@ import { bozzaDaiPdf, leggiBozzaPdf, NUOVO, type BozzaPdf } from './dal-pdf.ts'
 
 const MOND = 'ZZ0000000001-MIL'
 const QUANDO = '2026-10-19T18:00:00.000Z'
-const base = () => aVersione3(portafoglioInventato())
+const base = () => aVersioneAttuale(portafoglioInventato())
 const pdf = (nome: string, campi = campiAcquisto()) => ({ nome, percorso: `C:\\Prove\\${nome}`, campi })
 
 function bozza(aperti: Parameters<typeof bozzaDaiPdf>[1], dati = base()): BozzaPdf {

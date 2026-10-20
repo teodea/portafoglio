@@ -1,13 +1,13 @@
 // I numeri della pagina Dati (ticket 13, mappa 27): da dove viene ogni prezzo di un fine mese, il conto
 // delle fonti, e l'inflazione, i cambi e i riferimenti mese per mese con "manca" dove non ci sono.
 // Ogni dato porta la sua spiegazione per il pannello "Da dove viene", con la correzione a mano.
-// Modulo puro: niente React, niente file. Si usa sul file già passato alla versione 3 (aVersione3), così
+// Modulo puro: niente React, niente file. Si usa sul file già passato alla versione 3 (aVersioneAttuale), così
 // le fonti hanno il loro nome fisso e i cambi sono nel loro elenco anche per un file ancora alla versione 2.
 import { confronta, controlloInParole, type Confronto } from '../dati/aggiorna/controllo-prezzo.ts'
 import { fineMese, meseDi, meseDopo, nomeMese } from '../dati/aggiorna/calendario.ts'
 import { eUfficiale, FONTE } from '../dati/aggiorna/fonti.ts'
 import { nomeValuta, quoteAFineMese, ultimoMeseSalvato } from '../dati/aggiorna/mesi.ts'
-import { aVersione3 } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../dati/aggiorna/versione3.ts'
 import { DESCRIZIONE, nicAgganciato, primoMese, quandoEsceNic } from '../dati/aggiorna/riferimenti.ts'
 import { baseNic, primaDelDato, trovaDato, valoreDelDato, type RifDato } from '../dati/correzione-dati.ts'
 import type { RifPrezzo } from '../dati/correzione.ts'
@@ -103,7 +103,7 @@ export function fraseFonti(conto: { nome: string; quanti: number }[]): string {
 
 /** Il "Da dove viene" di un prezzo nella pagina Dati: il prezzo, la fonte, il perché, il controllo, la correzione. */
 export function spiegaPrezzo(grezzi: FileDati, rif: RifPrezzo): Spiegazione | null {
-  const dati = aVersione3(grezzi)
+  const dati = aVersioneAttuale(grezzi)
   const p = (dati.prezzi ?? []).find((x) => x.titolo === rif.titolo && x.data === rif.data)
   if (!p) return null
   const t = (dati.titoli ?? []).find((x) => x.id === rif.titolo)
@@ -268,7 +268,7 @@ const BASE = (b: 2015 | 2025) => `base ${b} = 100`
 
 /** Il "Da dove viene" di un NIC, un cambio o un riferimento, anche quando manca. */
 export function spiegaDato(grezzi: FileDati, d: RifDato): Spiegazione {
-  const dati = aVersione3(grezzi)
+  const dati = aVersioneAttuale(grezzi)
   const x = trovaDato(dati, d)
   // Un dato a mano: lo dicono il chip, la data e il valore di prima, sotto nel pannello (CorreggiDato).
   const aMano = x?.fonte === FONTE.aMano
@@ -302,9 +302,9 @@ export function spiegaDato(grezzi: FileDati, d: RifDato): Spiegazione {
     frase = `${r.cosa[0].toUpperCase() + r.cosa.slice(1)}: il valore di chiusura a fine mese.`
     const v = x as { valore: number; cambio?: number; seduta?: string; nota?: string } | undefined
     if (v && r.valuta !== 'EUR' && v.cambio) {
-      conto.push(riga('Valore in dollari', testo(`${datoInCifre(d, v.valore)} $`)))
+      conto.push(riga('Punti, in dollari', testo(datoInCifre(d, v.valore))))
       conto.push(riga('÷ cambio BCE del dollaro', cambio(v.cambio)))
-      conto.push(riga('Valore in euro', euro(v.valore / v.cambio)))
+      conto.push(riga('Equivalente in euro', euro(v.valore / v.cambio)))
     }
     if (!aMano) note.push(`Fonte: ${x ? x.fonte : 'investing.com'}${v?.seduta ? `, chiusura del ${dataTesto(v.seduta)}` : ''}.`)
     if (v?.nota) note.push(v.nota[0].toUpperCase() + v.nota.slice(1) + '.')

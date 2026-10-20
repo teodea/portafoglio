@@ -1,7 +1,7 @@
-// I riferimenti e l'inflazione (ticket 9): cosa sono i sei riferimenti di borsa, quali date e quali mesi
-// servono al confronto "gli stessi euro, nelle stesse date", la parte della lista di Aggiorna che li scarica
-// (nel gruppo che può aspettare) e come si scrivono nel file. Le fonti sono in electron/fonti/riferimenti.ts
-// (investing.com e BCE) ed electron/fonti/istat.ts (NIC).
+// I riferimenti e l'inflazione (ticket 9): cosa sono i cinque indici di borsa, quali mesi servono al grafico
+// degli andamenti, la parte della lista di Aggiorna che li scarica (nel gruppo che può aspettare) e come si
+// scrivono nel file. Le fonti sono in electron/fonti/riferimenti.ts (investing.com e BCE) ed
+// electron/fonti/istat.ts (NIC).
 // Modulo puro: lo usano le pagine e il processo principale. Ogni funzione restituisce un oggetto nuovo.
 import { RIFERIMENTI, type FileDati, type IdRiferimento, type NicDelMese, type ValoreRiferimento } from '../tipi.ts'
 import { fineMese, meseDi, meseDopo, meseEAnno, nomeMese } from './calendario.ts'
@@ -15,70 +15,70 @@ export type Riferimento = {
   id: IdRiferimento
   /** Il nome nelle tabelle: "S&P 500". */
   nome: string
-  /** Cosa si scarica davvero, in parole: "l'indice con i dividendi reinvestiti, in dollari". */
+  /** Cosa si scarica davvero, in parole: "l'indice S&P 500 in punti, senza dividendi, in dollari". */
   cosa: string
-  /** In breve, sotto il nome: "indice con i dividendi, in dollari". */
+  /** In breve, sotto il nome: "in punti, in dollari". */
   breve: string
   valuta: 'EUR' | 'USD'
-  /** La linea su investing.com (pairId): sono codici pubblici dei riferimenti, non dei titoli dell'utente. */
+  /** La linea su investing.com (pairId): sono codici pubblici degli indici, non dei titoli dell'utente. */
   codiceInvesting: number
 }
 
 /**
- * I sei riferimenti di borsa, tutti con i dividendi reinvestiti (decisione 05 della mappa). Dove l'indice
- * con i dividendi non è gratuito (FTSE MIB, Euro Stoxx 50) si usa un ETF ad accumulazione che lo segue;
- * il BTP 10 anni è l'ETF Amundi BTP 10 anni, che reinveste le cedole. I codici sono quelli provati nella
- * ricerca 18 della mappa (stesso valore del sito ufficiale per Nasdaq-100 e di Yahoo per l'S&P 500).
+ * I cinque indici di borsa, in punti e senza dividendi, come li pubblica la borsa (e come nel file Excel di
+ * riepilogo delle gestioni): la chiusura di fine mese da investing.com. Codici provati il 20/10/2026: il Dow Jones
+ * del 29/02/2024 è 38.996,39 punti, il FTSE MIB 32.580,94, l'Euro Stoxx 50 4.877,77.
  */
 export const DESCRIZIONE: Record<IdRiferimento, Riferimento> = {
-  btp10: {
-    id: 'btp10',
-    breve: 'ETF BTP10, con le cedole',
-    nome: 'BTP 10 anni',
-    cosa: 'ETF Amundi BTP 10 anni (BTP10, Borsa Italiana), con le cedole reinvestite',
-    valuta: 'EUR',
-    codiceInvesting: 1052106,
-  },
   ftsemib: {
     id: 'ftsemib',
-    breve: 'ETF ad accumulazione, con i dividendi',
+    breve: 'in punti',
     nome: 'FTSE MIB',
-    cosa: 'ETF iShares FTSE MIB ad accumulazione (CSMIB, Borsa Italiana), con i dividendi reinvestiti',
+    cosa: 'l’indice FTSE MIB della Borsa di Milano, in punti, senza dividendi',
     valuta: 'EUR',
-    codiceInvesting: 46888,
+    codiceInvesting: 177,
   },
   eurostoxx50: {
     id: 'eurostoxx50',
-    breve: 'ETF ad accumulazione, con i dividendi',
+    breve: 'in punti',
     nome: 'Euro Stoxx 50',
-    cosa: 'ETF iShares Core Euro Stoxx 50 ad accumulazione (CSSX5E, Borsa Italiana), con i dividendi reinvestiti',
+    cosa: 'l’indice Euro Stoxx 50 delle borse dell’area euro, in punti, senza dividendi',
     valuta: 'EUR',
-    codiceInvesting: 46895,
+    codiceInvesting: 175,
   },
   nasdaq100: {
     id: 'nasdaq100',
-    breve: 'indice con i dividendi, in dollari',
+    breve: 'in punti, in dollari',
     nome: 'Nasdaq-100',
-    cosa: 'indice Nasdaq-100 con i dividendi reinvestiti (XNDX), in dollari',
+    cosa: 'l’indice Nasdaq-100 di New York, in punti, senza dividendi',
     valuta: 'USD',
-    codiceInvesting: 943722,
+    codiceInvesting: 20,
   },
   dowjones: {
     id: 'dowjones',
-    breve: 'indice con i dividendi, in dollari',
+    breve: 'in punti, in dollari',
     nome: 'Dow Jones',
-    cosa: 'indice Dow Jones con i dividendi reinvestiti, in dollari',
+    cosa: 'l’indice Dow Jones Industrial Average di New York, in punti, senza dividendi',
     valuta: 'USD',
-    codiceInvesting: 998997,
+    codiceInvesting: 169,
   },
   sp500: {
     id: 'sp500',
-    breve: 'indice con i dividendi, in dollari',
+    breve: 'in punti, in dollari',
     nome: 'S&P 500',
-    cosa: 'indice S&P 500 con i dividendi reinvestiti, in dollari',
+    cosa: 'l’indice S&P 500 di New York, in punti, senza dividendi',
     valuta: 'USD',
-    codiceInvesting: 951245,
+    codiceInvesting: 166,
   },
+}
+
+/**
+ * I valori degli indici che valgono: quelli di un file della versione 4. In un file più vecchio i valori erano
+ * di ETF e di indici con i dividendi, e c'era il BTP 10 anni: non si usano, e il prossimo Aggiorna fine mese
+ * li riscarica in punti (alla scrittura il file passa alla versione 4 e li toglie).
+ */
+export function riferimentiDelFile(dati: FileDati): ValoreRiferimento[] {
+  return dati.versione >= 4 ? (dati.riferimenti ?? []) : []
 }
 
 export const NOME_NIC = 'Inflazione NIC'
@@ -93,18 +93,15 @@ export function primoMese(dati: FileDati): string | null {
 }
 
 /**
- * Le date che servono per un riferimento fino al mese indicato: la fine di ogni mese dal primo movimento,
- * e la data di ogni movimento (acquisti e vendite, data di regolamento come nei conti del portafoglio).
- * Esempio: primo acquisto il 23/02/2024, mese ottobre 2026 → 2024-02-23, 2024-02-29, 2024-03-31, … 2026-10-31.
+ * Le date che servono per un indice fino al mese indicato: la fine di ogni mese dal primo movimento.
+ * Esempio: primo acquisto il 23/02/2024, mese ottobre 2026 → 2024-02-29, 2024-03-31, … 2026-10-31.
  */
 export function dateNecessarie(dati: FileDati, mese: string): string[] {
   const primo = primoMese(dati)
   if (!primo) return []
-  const fine = fineMese(mese)
-  const date = new Set<string>()
-  for (let m = primo; m <= mese; m = meseDopo(m)) date.add(fineMese(m))
-  for (const o of dati.operazioni ?? []) if (o.data <= fine) date.add(o.data)
-  return [...date].sort()
+  const date: string[] = []
+  for (let m = primo; m <= mese; m = meseDopo(m)) date.push(fineMese(m))
+  return date
 }
 
 /** I mesi del NIC che servono: dal mese prima del primo movimento (la base del primo acquisto) fino al mese. */
@@ -118,7 +115,7 @@ export function mesiNicNecessari(dati: FileDati, mese: string): string[] {
 
 /** I valori del riferimento nel file, per data. */
 function valoriNelFile(dati: FileDati, id: IdRiferimento): Map<string, ValoreRiferimento> {
-  return new Map((dati.riferimenti ?? []).filter((v) => v.riferimento === id).map((v) => [v.data, v]))
+  return new Map(riferimentiDelFile(dati).filter((v) => v.riferimento === id).map((v) => [v.data, v]))
 }
 
 function nicNelFile(dati: FileDati): Map<string, NicDelMese> {
@@ -189,7 +186,7 @@ export type ParteNic = {
 
 export type ParteRiferimenti = {
   mese: string
-  /** Nel file non c'è ancora niente: questo aggiornamento scarica anche la storia. */
+  /** Nel file non ci sono ancora gli indici: questo aggiornamento scarica anche la storia. */
   primaVolta: boolean
   /** Il primo mese della storia (quello del primo movimento). */
   dal: string | null
@@ -217,7 +214,7 @@ export function creaRiferimenti(dati: FileDati, mese: string, rifai: boolean): P
   const nelFile = [...(dati.nic ?? [])].sort((a, b) => a.data.localeCompare(b.data))
   return {
     mese,
-    primaVolta: !(dati.riferimenti ?? []).length && !(dati.nic ?? []).length,
+    primaVolta: !riferimentiDelFile(dati).length,
     dal: primoMese(dati),
     righe,
     nic: {
@@ -266,21 +263,18 @@ export function valorePrecedente(p: ParteRiferimenti, r: RigaRiferimento): { val
   return v ?? null
 }
 
-/** In euro: i riferimenti in dollari si dividono per il cambio BCE dello stesso giorno. */
+/** In euro: gli indici in dollari si dividono per il cambio BCE dello stesso giorno (solo per il dettaglio). */
 export function inEuro(v: { valore: number; cambio?: number }, valuta: string): number | null {
   if (valuta === 'EUR') return v.valore
   return v.cambio ? v.valore / v.cambio : null
 }
 
-/** Quanto è cambiato sul mese, in % e in euro (come lo vedi da qui). */
+/** Quanto è cambiato l'indice sul mese, in %, in punti come lo pubblica la borsa. */
 export function sulMeseRiferimento(p: ParteRiferimenti, r: RigaRiferimento): number | null {
   const ora = valoreDelMese(p, r)
   const prima = valorePrecedente(p, r)
-  const valuta = DESCRIZIONE[r.id].valuta
   if (!ora || !prima) return null
-  const a = inEuro(ora, valuta)
-  const b = inEuro(prima, valuta)
-  return a !== null && b !== null ? (a / b - 1) * 100 : null
+  return (ora.valore / prima.valore - 1) * 100
 }
 
 /** Quante date della storia (oltre alla fine del mese) arrivano con questa riga. */
@@ -426,11 +420,12 @@ export function scriviRiferimenti(dati: FileDati, m: Partial<RiferimentiDaSalvar
   const nuoviNic = m.nic ?? []
   if (!nuoviRif.length && !nuoviNic.length) return dati
   const chiave = (v: { riferimento: string; data: string }) => v.riferimento + '|' + v.data
-  const aMano = new Set((dati.riferimenti ?? []).filter((v) => v.fonte === FONTE_RIFERIMENTO.aMano).map(chiave))
+  const vecchi = riferimentiDelFile(dati)
+  const aMano = new Set(vecchi.filter((v) => v.fonte === FONTE_RIFERIMENTO.aMano).map(chiave))
   const daScrivere = nuoviRif.filter((v) => !aMano.has(chiave(v)))
   const sostituiti = new Set(daScrivere.map(chiave))
   const ordine = new Map(RIFERIMENTI.map((id, i) => [id as string, i]))
-  const riferimenti = [...(dati.riferimenti ?? []).filter((v) => !sostituiti.has(chiave(v))), ...daScrivere].sort(
+  const riferimenti = [...vecchi.filter((v) => !sostituiti.has(chiave(v))), ...daScrivere].sort(
     (a, b) => (ordine.get(a.riferimento) ?? 99) - (ordine.get(b.riferimento) ?? 99) || a.data.localeCompare(b.data),
   )
   const nicAMano = new Set((dati.nic ?? []).filter((n) => n.fonte === FONTE_NIC.aMano).map((n) => n.data))
@@ -475,12 +470,12 @@ export function frasiDopoIlSalvataggio(dati: FileDati, mese: string, primaVolta:
   const senzaMese = RIFERIMENTI.filter((id) => manca.riferimenti[id]?.includes(fine)).map((id) => DESCRIZIONE[id].nome)
   const senzaStoria = RIFERIMENTI.filter((id) => manca.riferimenti[id]?.some((d) => d !== fine)).map((id) => DESCRIZIONE[id].nome)
   const dal = primoMese(dati)
-  if (!senzaMese.length) frasi.push(`I 6 riferimenti di borsa hanno il valore di fine ${nomeMese(mese)}.`)
+  if (!senzaMese.length) frasi.push(`I ${RIFERIMENTI.length} indici di borsa hanno il valore di fine ${nomeMese(mese)}.`)
   else
     frasi.push(
-      `${senzaMese.length === 1 ? 'Il riferimento' : 'I riferimenti'} ${elenco(senzaMese)} ${senzaMese.length === 1 ? 'è mancante' : 'sono mancanti'}: si richiede di nuovo al prossimo aggiornamento.`,
+      `${senzaMese.length === 1 ? 'L’indice' : 'Gli indici'} ${elenco(senzaMese)} ${senzaMese.length === 1 ? 'è mancante' : 'sono mancanti'}: si richiede di nuovo al prossimo aggiornamento.`,
     )
-  if (dal && primaVolta && !senzaStoria.length) frasi.push(`Lo storico dei riferimenti da ${meseEAnno(dal)} è completo, con il valore alle date dei movimenti.`)
+  if (dal && primaVolta && !senzaStoria.length) frasi.push(`Lo storico degli indici da ${meseEAnno(dal)} è completo, un valore per ogni fine mese.`)
   else if (senzaStoria.length) frasi.push(`Allo storico di ${elenco(senzaStoria)} mancano ancora alcune date: si completano al prossimo aggiornamento.`)
   const nonAncora = manca.nic
   if (!nonAncora.length) frasi.push(`L’inflazione è disponibile ${finoAl(mese)}.`)

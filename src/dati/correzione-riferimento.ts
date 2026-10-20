@@ -1,22 +1,22 @@
-// Il valore di fine mese di un riferimento o il NIC di un mese, dal pannello "Da dove viene" della classifica
-// "Fai meglio dei riferimenti?" (ticket 10): correggerlo a mano, tornare al valore di prima, scrivere i valori
+// Il valore di fine mese di un indice o il NIC di un mese, dal pannello "Da dove viene" dell'"Andamento dei
+// mercati" (ticket 10): correggerlo a mano, tornare al valore di prima, scrivere i valori
 // scaricati di nuovo. Come la correzione di un prezzo (correzione.ts, ticket 8) si usa nel processo principale,
-// sul file appena riletto dal disco e già passato alla versione 3, subito prima della scrittura sicura.
+// sul file appena riletto dal disco e già passato alla versione attuale, subito prima della scrittura sicura.
 // Modulo puro: niente file, non cambia mai l'oggetto ricevuto.
 //
-// Esempio: l'S&P 500 a fine settembre è 17.160,41 USD da investing.com, con il cambio BCE 1,1355. Lo correggi in 17.200:
-// nel file diventa { valore: 17200, cambio: 1.1355, fonte: "a mano", quando: "…", prima: { valore: 17160.41, fonte: "investing.com", … } }.
-// "Torna al valore di prima" rimette 17.160,41 USD da investing.com, con la sua seduta.
+// Esempio: l'S&P 500 a fine settembre è 7.651,54 punti in dollari da investing.com, con il cambio BCE 1,1355. Lo correggi in 7.660:
+// nel file diventa { valore: 7660, cambio: 1.1355, fonte: "a mano", quando: "…", prima: { valore: 7651.54, fonte: "investing.com", … } }.
+// "Torna al valore di prima" rimette 7.651,54 da investing.com, con la sua seduta.
 import { fineMese, meseDi, meseEAnno } from './aggiorna/calendario.ts'
-import { controllaRiferimenti, DESCRIZIONE, FONTE_NIC, FONTE_RIFERIMENTO } from './aggiorna/riferimenti.ts'
+import { controllaRiferimenti, DESCRIZIONE, FONTE_NIC, FONTE_RIFERIMENTO, riferimentiDelFile } from './aggiorna/riferimenti.ts'
 import type { EsitoCorrezione } from './correzione.ts'
 import { RIFERIMENTI, type FileDati, type IdRiferimento, type NicDelMese, type ValoreRiferimento } from './tipi.ts'
 
-/** Un riferimento del confronto: i sei di borsa e l'inflazione NIC. */
+/** Un riferimento: i cinque indici di borsa e l'inflazione NIC. */
 export type IdConfronto = IdRiferimento | 'nic'
 export const CONFRONTI: readonly IdConfronto[] = [...RIFERIMENTI, 'nic']
 
-/** Quale valore: il riferimento e il giorno (per il pannello, il fine mese del confronto, es. "2026-09-30"). */
+/** Quale valore: il riferimento e il giorno (per il pannello, l'ultimo fine mese, es. "2026-09-30"). */
 export type RifValore = { id: IdConfronto; data: string }
 
 export type ScritturaRiferimento =
@@ -54,7 +54,7 @@ export function baseDelNic(data: string): 2015 | 2025 {
 
 export function trovaValore(dati: FileDati, rif: RifValore): ValoreRiferimento | NicDelMese | undefined {
   if (rif.id === 'nic') return (dati.nic ?? []).find((n) => n.data === rif.data)
-  return (dati.riferimenti ?? []).find((v) => v.riferimento === rif.id && v.data === rif.data)
+  return riferimentiDelFile(dati).find((v) => v.riferimento === rif.id && v.data === rif.data)
 }
 
 /** Una richiesta arrivata dalle pagine ha la forma giusta? (Il processo principale non si fida.) */

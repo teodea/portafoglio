@@ -4,6 +4,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { aVersioneAttuale } from '../src/dati/aggiorna/versione3.ts'
 import { comeTesto, portafoglioInventato } from '../src/dati/portafoglio-inventato.ts'
 import type { FileDati } from '../src/dati/tipi.ts'
 import { impronta } from './cartella-dati.ts'
@@ -17,7 +18,7 @@ const SET = '2026-09-30'
 
 function conRiferimento(): FileDati {
   return {
-    ...portafoglioInventato(),
+    ...aVersioneAttuale(portafoglioInventato()),
     riferimenti: [{ riferimento: 'sp500', data: SET, valore: 11000, valuta: 'USD', cambio: 1.1, fonte: 'investing.com', seduta: SET }],
   }
 }
@@ -32,7 +33,7 @@ afterEach(async () => {
 })
 
 describe('scrivere il valore di un riferimento', () => {
-  it('copia prima, poi il valore "a mano" (il file passa alla versione 3); poi torna al valore di prima', async () => {
+  it('copia prima, poi il valore "a mano"; poi torna al valore di prima', async () => {
     const prima = await readFile(file(), 'utf8')
     const scritto = await scriviRiferimento(cartella, impronta(prima), { tipo: 'correggi', id: 'sp500', data: SET, valore: 11200 }, orologio)
     expect(scritto.esito).toBe('scritto')
@@ -40,7 +41,7 @@ describe('scrivere il valore di un riferimento', () => {
     expect(scritto.copia).toBe('portafoglio 2026-10-19 1800 prima di correggere a mano S&P 500 a fine settembre 2026.json')
     expect(await readFile(join(cartella, 'copie', scritto.copia), 'utf8')).toBe(prima)
     const dopo = await leggi()
-    expect(dopo.versione).toBe(3)
+    expect(dopo.versione).toBe(4)
     expect(dopo.riferimenti![0]).toMatchObject({ valore: 11200, cambio: 1.1, fonte: 'a mano', prima: { valore: 11000, fonte: 'investing.com', seduta: SET } })
 
     const tornato = await scriviRiferimento(cartella, scritto.letto.impronta, { tipo: 'torna', id: 'sp500', data: SET }, orologio)

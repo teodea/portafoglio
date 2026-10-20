@@ -69,35 +69,41 @@ export function numero(n: number, decimali = 0, massimo = decimali): string {
 }
 
 /** Il segno di un numero come sarà scritto con quei decimali: 1, −1 o 0. */
-export function segno(n: number, decimali = 0): 1 | -1 | 0 {
+export function segno(n: number, decimali = 2): 1 | -1 | 0 {
   const r = arrotonda(n, decimali)
   return r > 0 ? 1 : r < 0 ? -1 : 0
 }
 
-/** 12345 → "12.345 €"; un negativo ha il segno meno. */
-export function euro(n: number, decimali = 0): string {
+/** 12345,6 → "12.345,60 €", con i centesimi come nel rendiconto; un negativo ha il segno meno. */
+export function euro(n: number, decimali = 2): string {
   return `${segno(n, decimali) < 0 ? MENO : ''}${numero(n, decimali)} €`
 }
 
-/** Un guadagno: sempre con il segno, "+12.345 €" o "−12.345 €"; lo zero senza segno. */
-export function guadagnoEuro(n: number, decimali = 0): string {
+/** Un guadagno: sempre con il segno, "+12.345,60 €" o "−12.345,60 €"; lo zero senza segno. */
+export function guadagnoEuro(n: number, decimali = 2): string {
   const s = segno(n, decimali)
   return `${s > 0 ? '+' : s < 0 ? MENO : ''}${numero(n, decimali)} €`
 }
 
-/** Una frazione come percentuale con il segno: 0,0342 → "+3,4%". */
+/** Una frazione come percentuale con il segno e due decimali: 0,03421 → "+3,42%". */
 export function percentuale(frazione: number): string {
-  const s = segno(frazione * 100, 1)
-  return `${s > 0 ? '+' : s < 0 ? MENO : ''}${numero(arrotonda(frazione * 100, 1), 1)}%`
+  const s = segno(frazione * 100, 2)
+  return `${s > 0 ? '+' : s < 0 ? MENO : ''}${numero(arrotonda(frazione * 100, 2), 2)}%`
 }
 
 /** Il segno di una percentuale come sarà scritta. */
 export function segnoPercentuale(frazione: number): 1 | -1 | 0 {
-  return segno(frazione * 100, 1)
+  return segno(frazione * 100, 2)
 }
 
-/** Un prezzo nella sua valuta: "12,34 €", "52,845 GBP". */
+/** Un prezzo nella sua valuta, con due decimali: "12,34 €", "52,85 GBP". */
 export function prezzo(n: number, valuta: string): string {
+  return `${numero(n, 2)} ${valuta === 'EUR' ? '€' : valuta}`
+}
+
+/** Un prezzo con tutti i suoi decimali, fino a quattro: "52,845 GBP", "0,0566 €". Per il dividendo per quota,
+ *  per le correzioni e per i conti che moltiplicano il prezzo, che così tornano al centesimo. */
+export function prezzoEsatto(n: number, valuta: string): string {
   return `${numero(n, 2, 4)} ${valuta === 'EUR' ? '€' : valuta}`
 }
 
@@ -123,7 +129,7 @@ export function cifra(c: Cifra): string {
     case 'quote':
       return quote(c.n)
     case 'prezzo':
-      return prezzo(c.n, c.valuta)
+      return c.esatto ? prezzoEsatto(c.n, c.valuta) : prezzo(c.n, c.valuta)
     case 'cambio':
       return cambio(c.n)
     case 'testo':

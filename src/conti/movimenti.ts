@@ -6,9 +6,9 @@
 import { valutaDelTitolo } from '../dati/aggiorna/mesi.ts'
 import { inOrdine, quoteAlGiorno, type NuovaOperazione, type TipoMovimento } from '../dati/movimenti.ts'
 import type { Dividendo, FileDati, Operazione, Titolo } from '../dati/tipi.ts'
-import { data, euro as euroTesto, numero, prezzo as prezzoTesto, quote as quoteTesto } from '../formato.ts'
+import { data, euro as euroTesto, numero, prezzo as prezzoTesto, prezzoEsatto as prezzoEsattoTesto, quote as quoteTesto } from '../formato.ts'
 import { fonteMovimento, spiegaOperazione, type CosaOperazione } from './scheda.ts'
-import { euro, guadagno, prezzo, quote, riga, type Numero, type RigaConto, type Spiegazione } from './spiegazione.ts'
+import { euro, guadagno, prezzoEsatto, quote, riga, type Numero, type RigaConto, type Spiegazione } from './spiegazione.ts'
 import { plusMinus, type VenditaSpiegata } from './titoli.ts'
 
 const QUASI_ZERO = 1e-9
@@ -88,7 +88,7 @@ export function venditeSpiegate(ops: Operazione[], nome: string): Map<string, Ve
           frase: `Il ${data(o.data)} sono state vendute ${quoteTesto(o.quantita)} quote su ${quoteTesto(quoteOra)} a ${prezzoTesto(o.prezzo, o.valuta)}, per un ricavo di ${euroTesto(o.totale, 2)}${o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già dedotta)` : ''}.`,
           conto: [
             riga('Ricavo della vendita', euro(o.totale)),
-            riga(`− prezzo medio di carico × quote vendute (${prezzoTesto(cm, 'EUR')} × ${quoteTesto(o.quantita)})`, euro(costoQuote)),
+            riga(`− prezzo medio di carico × quote vendute (${prezzoEsattoTesto(cm, 'EUR')} × ${quoteTesto(o.quantita)})`, euro(costoQuote)),
             riga(`${plusMinus(g)} realizzata`, guadagno(g)),
           ],
           note: [
@@ -148,10 +148,10 @@ function spiegaDividendo(nome: string, d: Dividendo, quoteQuelGiorno: number): S
   const conto: RigaConto[] = []
   if (quoteQuelGiorno > 0) {
     conto.push(riga('Quote in portafoglio', quote(quoteQuelGiorno)))
-    conto.push(riga('× lordo per quota', prezzo(d.lordo / quoteQuelGiorno, 'EUR')))
+    conto.push(riga('× lordo per quota', prezzoEsatto(d.lordo / quoteQuelGiorno, 'EUR')))
     conto.push(riga('= lordo', euro(d.lordo)))
   } else conto.push(riga('Lordo', euro(d.lordo)))
-  conto.push(riga(d.lordo > 0 ? `− imposte (${numero((d.imposte / d.lordo) * 100, 1)}%)` : '− imposte', euro(d.imposte)))
+  conto.push(riga(d.lordo > 0 ? `− imposte (${numero((d.imposte / d.lordo) * 100, 2)}%)` : '− imposte', euro(d.imposte)))
   conto.push(riga('Netto accreditato', euro(d.netto)))
   const note: string[] = []
   if (d.nota) note.push(d.nota)

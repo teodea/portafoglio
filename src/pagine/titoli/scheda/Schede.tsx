@@ -8,7 +8,7 @@ import { Num } from '../../../pannello/Pannello.tsx'
 import { classeSegno } from '../../../pannello/spiega.ts'
 import { Cella } from '../comuni.tsx'
 
-const colorePct = (n: number) => segno(n * 100, 1)
+const colorePct = (n: number) => segno(n * 100, 2)
 
 /** Una frase con i pezzi in grassetto (e del colore del segno, se è una plusvalenza o minusvalenza). */
 export function Frase({ pezzi }: { pezzi: Pezzo[] }) {

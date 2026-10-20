@@ -1,6 +1,6 @@
 // Le prove di registrare, correggere a mano e togliere un movimento, sul portafoglio inventato.
 import { describe, expect, it } from 'vitest'
-import { aVersione3 } from './aggiorna/versione3.ts'
+import { aVersioneAttuale } from './aggiorna/versione3.ts'
 import { controllaFile } from './controllo.ts'
 import { applicaModifica, controllaModifica, percheDellaCopia, quoteAlGiorno, type ModificaMovimento, type NuovaOperazione } from './movimenti.ts'
 import { comeTesto, portafoglioInventato } from './portafoglio-inventato.ts'
@@ -10,7 +10,7 @@ const MOND = 'ZZ0000000001-MIL'
 const TECN = 'ZZ0000000002-LON'
 const OBBL = 'ZZ0000000003-MIL'
 const QUANDO = '2026-10-19T18:00:00.000Z'
-const base = () => aVersione3(portafoglioInventato())
+const base = () => aVersioneAttuale(portafoglioInventato())
 
 const acquisto: NuovaOperazione = {
   tipo: 'acquisto',

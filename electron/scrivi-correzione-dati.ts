@@ -2,7 +2,7 @@
 // riferimento, con la scrittura sicura (scrivi.ts): rilettura e confronto, copia in "copie" con il perché,
 // file temporaneo, sostituzione. Se il file è ancora alla versione 2, passa alla versione 3 (la copia è fatta prima).
 // Solo Node (niente Electron).
-import { aVersione3 } from '../src/dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../src/dati/aggiorna/versione3.ts'
 import { applicaCorrezioneDato, controllaCorrezioneDato, percheDellaCopiaDato, type CorrezioneDato } from '../src/dati/correzione-dati.ts'
 import type { Orologio } from './cartella-dati.ts'
 import { scriviConCopia, type Scritto } from './scrivi.ts'
@@ -20,7 +20,7 @@ export async function scriviCorrezioneDato(
       improntaVista,
       (dati) => percheDellaCopiaDato(dati, c),
       (dati) => {
-        const v3 = aVersione3(dati)
+        const v3 = aVersioneAttuale(dati)
         const ok = controllaCorrezioneDato(v3, c)
         if (!ok.ok) {
           problema = ok.perche

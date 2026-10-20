@@ -8,14 +8,17 @@
 // su ogni prezzo (seduta, nota, prezzo di prima se è a mano) e i cambi BCE di fine mese.
 // Ticket 9: i valori dei sei riferimenti di borsa e l'inflazione NIC (elenchi "riferimenti" e "nic").
 // Ticket 7: i codici investing.com e Yahoo dei titoli (le riserve) e il controllo di investing.com sui prezzi.
+// Versione 4: i riferimenti sono i cinque indici di borsa in punti, senza dividendi, e il BTP 10 anni non c'è più.
+// I valori scaricati prima (ETF e indici con i dividendi) non valgono: alla prima scrittura si tolgono e si
+// riscaricano con Aggiorna fine mese (dati/aggiorna/versione3.ts); fino ad allora non si usano (riferimentiDelFile).
 
 export const FILE_DATI = 'portafoglio.json'
 export const CARTELLA_COPIE = 'copie'
 
 /** Le versioni del file che questa applicazione sa leggere. */
-export const VERSIONI_CONOSCIUTE = [1, 2, 3] as const
+export const VERSIONI_CONOSCIUTE = [1, 2, 3, 4] as const
 /** La versione che scrive questa applicazione. */
-export const VERSIONE_ATTUALE = 3
+export const VERSIONE_ATTUALE = 4
 
 export const BORSE = ['MIL', 'XET', 'FRA', 'LON', 'PAR'] as const
 export type Borsa = (typeof BORSE)[number]
@@ -150,14 +153,17 @@ export type CambioFineMese = {
 
 // ---------- ticket 9: riferimenti e inflazione ----------
 
-/** I sei riferimenti di borsa (il settimo è l'inflazione NIC). Cosa sono e da dove vengono: dati/aggiorna/riferimenti.ts. */
-export const RIFERIMENTI = ['btp10', 'ftsemib', 'eurostoxx50', 'nasdaq100', 'dowjones', 'sp500'] as const
+/** I cinque indici di borsa (con l'inflazione NIC fanno i riferimenti). Cosa sono e da dove vengono: dati/aggiorna/riferimenti.ts. */
+export const RIFERIMENTI = ['ftsemib', 'eurostoxx50', 'nasdaq100', 'dowjones', 'sp500'] as const
 export type IdRiferimento = (typeof RIFERIMENTI)[number]
 
+/** Fino alla versione 3 c'era anche il BTP 10 anni: un file vecchio che lo contiene resta leggibile. */
+export const RIFERIMENTI_VERSIONE_3 = ['btp10', ...RIFERIMENTI] as const
+
 /**
- * Il valore di un riferimento in un giorno, nella sua valuta. "data" è l'ultimo giorno del mese (la chiave
- * del mese, come nei prezzi) oppure la data di un movimento, che serve al confronto con gli stessi euro.
- * Per i riferimenti in dollari c'è il cambio BCE dello stesso giorno: in euro vale valore ÷ cambio.
+ * Il valore di un indice a fine mese, in punti, nella valuta dell'indice. "data" è l'ultimo giorno del mese
+ * (la chiave del mese, come nei prezzi). Per gli indici in dollari c'è anche il cambio BCE dello stesso giorno.
+ * Un file della versione 3 può avere anche valori alle date dei movimenti: non si usano più.
  */
 export type ValoreRiferimento = {
   riferimento: IdRiferimento

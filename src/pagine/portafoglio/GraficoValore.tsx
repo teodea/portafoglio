@@ -9,7 +9,7 @@ import { classeSegno, useSpiega } from '../../pannello/spiega.ts'
 import { corto, griglia } from './griglia.ts'
 
 const ALTO = 240
-const SINISTRA = 52
+const SINISTRA = 68
 const DESTRA = 12
 const SOPRA = 16
 const SOTTO = 28

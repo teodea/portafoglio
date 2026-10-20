@@ -19,7 +19,7 @@ export function MesePerMese({ conti, vista: scelta, scegliVista }: { conti: Cont
   const mesi = conti.mesi.slice(-12)
   const righe = conti.titoli.filter((t) => t.stato === 'aperto')
   const pct = (n: number) => percentuale(n)
-  const colorePct = (n: number) => segno(n * 100, 1)
+  const colorePct = (n: number) => segno(n * 100, 2)
 
   if (mesi.length === 0 || righe.length === 0) return <div className="vuoto">Non sono ancora presenti prezzi di fine mese per i titoli in portafoglio.</div>
 

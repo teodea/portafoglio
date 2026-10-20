@@ -184,6 +184,11 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
               ],
               note: [
                 `Dal primo acquisto (${data(primo)}) sono passati ${numero(anni, 1)} anni, ma i capitali sono entrati in date diverse: ogni importo pesa per il tempo in cui è rimasto investito.`,
+                ...(dallInizio.n !== null
+                  ? [
+                      `Dividendo semplicemente il rendimento dall'inizio (${pct(dallInizio.n)}) per i ${numero(anni, 1)} anni si otterrebbe ${pct(dallInizio.n / anni)} all'anno: un valore ${dallInizio.n / anni < r ? 'più basso' : 'più alto'}, perché tratta tutto il capitale come investito fin dal primo acquisto.`,
+                    ]
+                  : []),
                 'Gli acquisti sono negativi; vendite, dividendi e controvalore finale sono positivi.',
               ],
             },

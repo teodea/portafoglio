@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { FONTE } from '../src/dati/aggiorna/fonti.ts'
-import { aVersione3, percheDellaCopia as perche, scriviMese, type MeseDaSalvare } from '../src/dati/aggiorna/versione3.ts'
+import { aVersioneAttuale, percheDellaCopia as perche, scriviMese, type MeseDaSalvare } from '../src/dati/aggiorna/versione3.ts'
 import { comeTesto, portafoglioInventato } from '../src/dati/portafoglio-inventato.ts'
 import type { FileDati } from '../src/dati/tipi.ts'
 import { apriCartella } from './cartella-dati.ts'
@@ -31,7 +31,7 @@ const OTTOBRE: MeseDaSalvare = {
   ],
   cambi: [{ valuta: 'GBP', cambio: 0.8691, seduta: '2026-10-30', fonte: 'BCE' }],
 }
-const ottobre = (dati: FileDati) => scriviMese(aVersione3(dati), OTTOBRE, '2026-11-03T17:00:00.000Z')
+const ottobre = (dati: FileDati) => scriviMese(aVersioneAttuale(dati), OTTOBRE, '2026-11-03T17:00:00.000Z')
 
 beforeEach(async () => {
   cartella = await mkdtemp(join(tmpdir(), 'come-sto-andando-scrivi-'))
@@ -52,7 +52,7 @@ describe('la scrittura sicura', () => {
     expect(scritto.copia).toBe("portafoglio 2026-11-03 1900 prima dell'aggiornamento di ottobre.json")
     expect(await readFile(join(cartella, 'copie', scritto.copia), 'utf8')).toBe(prima)
     const dopo = JSON.parse(await readFile(file(), 'utf8')) as FileDati
-    expect(dopo.versione).toBe(3)
+    expect(dopo.versione).toBe(4)
     expect(dopo.prezzi?.filter((p) => p.data === '2026-10-31')).toHaveLength(2)
     // Niente file temporanei lasciati in giro.
     expect((await readdir(cartella)).sort()).toEqual(['copie', 'portafoglio.json'])

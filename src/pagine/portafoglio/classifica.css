@@ -1,5 +1,35 @@
-/* La classifica "Fai meglio dei riferimenti?" (ticket 10, DESIGN.md "Classifica a barre dei riferimenti"):
-   una riga per il portafoglio e una per ogni riferimento, ogni riga un bottone a tre colonne. */
+/* L'"Andamento dei mercati" (DESIGN.md "Grafico degli andamenti"): il grafico della variazione a ogni fine mese
+   e sotto la tabella, una riga per il portafoglio, una per ogni indice e una per l'inflazione, ogni riga un bottone. */
+
+/* I colori delle linee dei riferimenti: l'unico posto dove servono più colori. Niente blu (è il portafoglio),
+   niente verde e rosso (sono il segno), niente ambra (è "a mano"); l'inflazione in grigio e tratteggiata.
+   Ognuno ha il gemello scuro. */
+.pagina-portafoglio .classifica-rif {
+  --rif-ftsemib: #d9622b;
+  --rif-eurostoxx50: #9a3fc4;
+  --rif-nasdaq100: #0b8f9e;
+  --rif-dowjones: #8f6a2a;
+  --rif-sp500: #c73f78;
+  --rif-nic: #8b93a0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='chiaro']) .pagina-portafoglio .classifica-rif {
+    --rif-ftsemib: #f08a52;
+    --rif-eurostoxx50: #cf8cf0;
+    --rif-nasdaq100: #2fb8c4;
+    --rif-dowjones: #c9a066;
+    --rif-sp500: #ec79a6;
+    --rif-nic: #6c7584;
+  }
+}
+:root[data-tema='scuro'] .pagina-portafoglio .classifica-rif {
+  --rif-ftsemib: #f08a52;
+  --rif-eurostoxx50: #cf8cf0;
+  --rif-nasdaq100: #2fb8c4;
+  --rif-dowjones: #c9a066;
+  --rif-sp500: #ec79a6;
+  --rif-nic: #6c7584;
+}
 
 .pagina-portafoglio .classifica-rif {
   min-width: 0;
@@ -10,14 +40,58 @@
   color: var(--testo);
   font-weight: 650;
 }
-.pagina-portafoglio .barre {
+.pagina-portafoglio .grafico-rif {
+  padding-bottom: 0;
+}
+.pagina-portafoglio .grafico-rif .tela {
+  height: 260px;
+  cursor: default;
+}
+
+/* il trattino del colore, nella tabella e nel fumetto */
+.pagina-portafoglio .classifica-rif .tratto {
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 0;
+  border-top: 2.5px solid;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.pagina-portafoglio .classifica-rif .tratto.rotto {
+  border-top-style: dashed;
+}
+
+/* il fumetto: una riga per linea, dal migliore */
+.pagina-portafoglio .grafico-rif .fumetto {
+  min-width: 0;
+  gap: 1px;
+}
+.pagina-portafoglio .grafico-rif .fumetto b {
+  margin-bottom: 3px;
+}
+.pagina-portafoglio .grafico-rif .fumetto .voce {
+  display: flex;
+  align-items: center;
+}
+.pagina-portafoglio .grafico-rif .fumetto .voce .nome {
+  flex: 1;
+  margin-right: 10px;
+}
+.pagina-portafoglio .grafico-rif .fumetto .voce.tu {
+  font-weight: 650;
+}
+
+/* la tabella */
+.pagina-portafoglio .tabella-rif {
   list-style: none;
   margin: 0;
   padding: 8px 12px 10px;
 }
-.pagina-portafoglio .barre .num {
+.pagina-portafoglio .tabella-rif .num,
+.pagina-portafoglio .tabella-rif .intestazione {
   display: grid;
-  grid-template-columns: 130px minmax(0, 1fr) 64px;
+  grid-template-columns: minmax(0, 1fr) 112px 84px;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -25,51 +99,134 @@
   padding: 6px 6px;
   text-align: left;
 }
-.pagina-portafoglio .barre .nome {
+.pagina-portafoglio .tabella-rif .intestazione {
+  padding-top: 8px;
+  padding-bottom: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tenue);
+  border-bottom: 1px solid var(--filo);
+  margin-bottom: 2px;
+}
+.pagina-portafoglio .tabella-rif .intestazione span {
+  text-align: right;
+}
+.pagina-portafoglio .tabella-rif .nome {
   min-width: 0;
   line-height: 1.3;
 }
-.pagina-portafoglio .barre .fino {
+.pagina-portafoglio .tabella-rif .fino {
   display: inline-block;
+  margin-left: 4px;
   font-size: 12.5px;
   white-space: nowrap;
 }
-.pagina-portafoglio .barre .binario {
-  height: 10px;
-  background: var(--pannello-2);
-  border-radius: 5px;
-  overflow: hidden;
-}
-.pagina-portafoglio .barre .binario i {
+.pagina-portafoglio .tabella-rif .sotto {
   display: block;
-  height: 100%;
-  background: var(--filo-forte);
-  border-radius: 5px;
+  margin-left: 22px;
+  font-size: 12px;
+  font-weight: 400;
 }
-.pagina-portafoglio .barre .tu .binario i {
-  background: var(--azione);
-}
-.pagina-portafoglio .barre .tu .nome {
+.pagina-portafoglio .tabella-rif .tu .nome {
   font-weight: 650;
 }
-.pagina-portafoglio .barre .val {
+.pagina-portafoglio .tabella-rif .val {
   text-align: right;
   font-weight: 600;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
-.pagina-portafoglio .barre .val.su {
+.pagina-portafoglio .tabella-rif .val.su {
   color: var(--su);
 }
-.pagina-portafoglio .barre .val.giu {
+.pagina-portafoglio .tabella-rif .val.giu {
   color: var(--giu);
 }
-.pagina-portafoglio .barre .val.tenue {
+.pagina-portafoglio .tabella-rif .val.tenue {
   color: var(--tenue);
   font-weight: 400;
 }
+.pagina-portafoglio .tabella-rif .mancante {
+  grid-column: span 2;
+}
+/* nella finestra stretta il nome sta sulla sua riga e le due cifre sotto */
 @media (max-width: 520px) {
-  .pagina-portafoglio .barre .num {
-    grid-template-columns: 104px minmax(0, 1fr) 60px;
-    gap: 8px;
+  .pagina-portafoglio .tabella-rif .num,
+  .pagina-portafoglio .tabella-rif .intestazione {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
+  .pagina-portafoglio .tabella-rif .nome {
+    grid-column: 1 / -1;
+  }
+  .pagina-portafoglio .tabella-rif .intestazione span:first-child {
+    display: none;
+  }
+}
+
+/* ---------- il riquadro compatto: solo il grafico, alto quanto il riquadro della plusvalenza ---------- */
+.pagina-portafoglio .testa-destra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pagina-portafoglio .andamenti-compatto .grafico-rif {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+/* La tela prende l'altezza che resta; il disegno sta sopra, così non spinge il riquadro più in alto. */
+.pagina-portafoglio .andamenti-compatto .grafico-rif .tela,
+.pagina-portafoglio .andamenti-grande .grafico-rif .tela {
+  flex: 1;
+  height: auto;
+  min-height: 220px;
+}
+.pagina-portafoglio .andamenti-compatto .grafico-rif svg,
+.pagina-portafoglio .andamenti-grande .grafico-rif svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+@media (max-width: 1100px) {
+  .pagina-portafoglio .andamenti-compatto .grafico-rif .tela {
+    min-height: 260px;
+  }
+}
+
+/* ---------- la finestra grande ("Ingrandisci"): quasi a tutto schermo, sotto il pannello "Da dove viene" ---------- */
+.pagina-portafoglio .andamenti-velo {
+  position: fixed;
+  inset: 0;
+  background: var(--velo);
+  z-index: 8;
+}
+.pagina-portafoglio .andamenti-grande {
+  position: fixed;
+  inset: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--ombra-alta);
+  z-index: 9;
+}
+.pagina-portafoglio .andamenti-corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.pagina-portafoglio .andamenti-grande .grafico-rif {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  height: max(320px, 56vh);
+}
+@media (max-width: 700px) {
+  .pagina-portafoglio .andamenti-grande {
+    inset: 8px;
   }
 }

@@ -1,11 +1,10 @@
 // Il pannello "Da dove viene": si apre da destra al clic su un numero e lo spiega in parole,
 // con il conto riga per riga e la fonte (DESIGN.md, "componente firma"). Se il numero viene da un
-// prezzo di fine mese, sotto c'è la correzione a mano (ticket 8, CorreggiPrezzo.tsx); se è il confronto con un
-// riferimento, il conto movimento per movimento e il valore di fine mese con "Scarica di nuovo" (ticket 10).
+// prezzo di fine mese, sotto c'è la correzione a mano (ticket 8, CorreggiPrezzo.tsx); se è l'andamento di un
+// indice o dell'inflazione, il valore di fine mese con "Scarica di nuovo" e la correzione a mano (ticket 10).
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { spiegazioneDelMovimento } from '../conti/movimenti.ts'
 import { spiegazioneDelPrezzo } from '../conti/prezzo-a-mano.ts'
-import { spiegazioneDelConfronto } from '../conti/riferimenti.ts'
 import type { Numero, Spiegazione } from '../conti/spiegazione.ts'
 import { cifra, segnoCifra } from '../formato.ts'
 import { Icona } from '../icone.tsx'
@@ -44,16 +43,14 @@ export function ConPannello({ children }: { children: ReactNode }) {
   if (dati !== datiVisti) {
     setDatiVisti(dati)
     const rif = aperta?.correggi
-    // Chi sa rifare la sua spiegazione (pagina Dati, ticket 13) la rifà; poi il prezzo (ticket 8) e il confronto (ticket 10).
+    // Chi sa rifare la sua spiegazione (pagina Dati, andamenti) la rifà; poi il prezzo (ticket 8).
     const nuova = !dati
       ? null
       : aperta?.rifai
         ? aperta.rifai(dati)
         : rif
           ? spiegazioneDelPrezzo(dati, rif)
-          : aperta?.riferimento
-            ? spiegazioneDelConfronto(dati, aperta)
-            : null
+          : null
     if (nuova) {
       setAperta(nuova)
       setMostrata(nuova)

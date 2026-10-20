@@ -6,7 +6,7 @@
 import { confronta } from '../dati/aggiorna/controllo-prezzo.ts'
 import { eUfficiale, FONTE } from '../dati/aggiorna/fonti.ts'
 import { DESCRIZIONE } from '../dati/aggiorna/riferimenti.ts'
-import { aVersione3 } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../dati/aggiorna/versione3.ts'
 import type { Cella, Colonna, Foglio, FoglioLeggimi, FoglioTabella, LibroExcel, RigaLeggimi } from '../dati/excel.ts'
 import { RIFERIMENTI, type FileDati, type PrezzoFineMese } from '../dati/tipi.ts'
 import { data as dataTesto, MENO, mese as meseTesto, numero } from '../formato.ts'
@@ -84,7 +84,7 @@ function leggimi(dati: FileDati, oggi: string, conti: ReturnType<typeof contiDel
     r(['Valore mese per mese', 'Il controvalore in euro di ogni titolo a ogni fine mese: titoli per riga, mesi per colonna. In fondo il totale e il capitale investito.']),
     r([
       'Inflazione e riferimenti',
-      'Un mese per riga: l’inflazione NIC di ISTAT (con la sua base), i cambi BCE e i sei riferimenti con i dividendi reinvestiti, ognuno nella sua valuta. Una cella vuota indica un dato mancante.' +
+      'Un mese per riga: l’inflazione NIC di ISTAT (con la sua base), i cambi BCE e i cinque indici di borsa in punti, senza dividendi, ognuno nella sua valuta. Una cella vuota indica un dato mancante.' +
         (vuoto ? ' Per ora il foglio è vuoto: i dati arrivano con il primo aggiornamento.' : ''),
     ]),
     r([]),
@@ -316,7 +316,7 @@ function inflazioneERiferimenti(v3: FileDati): FoglioTabella {
 export function libroExcel(dati: FileDati, oggi: string): LibroExcel {
   const contiT = contiDeiTitoli(dati)
   const portafoglio = contiDelPortafoglio(dati, contiT)
-  const v3 = aVersione3(dati)
+  const v3 = aVersioneAttuale(dati)
   const nomi = new Map(contiT.titoli.map((c) => [c.id, c]))
   const fogli: Foglio[] = [
     leggimi(dati, oggi, portafoglio),

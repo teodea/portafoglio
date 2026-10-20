@@ -3,7 +3,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { aVersione3 } from '../src/dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../src/dati/aggiorna/versione3.ts'
 import type { NuovaOperazione } from '../src/dati/movimenti.ts'
 import { comeTesto, portafoglioInventato } from '../src/dati/portafoglio-inventato.ts'
 import { impronta } from './cartella-dati.ts'
@@ -54,7 +54,7 @@ describe('scrivere un movimento', () => {
     expect(t.esito).toBe('scritto')
     if (t.esito !== 'scritto') return
     expect(t.copia).toContain('prima di togliere la vendita di MOND del 12-10-2026')
-    expect(await readFile(file(), 'utf8')).toBe(comeTesto(aVersione3(portafoglioInventato())))
+    expect(await readFile(file(), 'utf8')).toBe(comeTesto(aVersioneAttuale(portafoglioInventato())))
     expect((await copie()).length).toBe(3)
   })
 

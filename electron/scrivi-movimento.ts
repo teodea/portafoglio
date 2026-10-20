@@ -2,7 +2,7 @@
 // con la scrittura sicura (scrivi.ts): rilettura e confronto, copia in "copie" con il perché,
 // file temporaneo, sostituzione. Se il file è ancora alla versione 2, passa alla versione 3 (la copia è fatta prima).
 // Solo Node (niente Electron).
-import { aVersione3 } from '../src/dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../src/dati/aggiorna/versione3.ts'
 import { applicaModifica, controllaModifica, percheDellaCopia, type ModificaMovimento } from '../src/dati/movimenti.ts'
 import type { Letto, Orologio } from './cartella-dati.ts'
 import { scriviConCopia } from './scrivi.ts'
@@ -26,7 +26,7 @@ export async function scriviMovimento(
       improntaVista,
       (dati) => percheDellaCopia(dati, m),
       (dati) => {
-        const v3 = aVersione3(dati)
+        const v3 = aVersioneAttuale(dati)
         const ok = controllaModifica(v3, m)
         if (!ok.ok) {
           problema = ok.perche

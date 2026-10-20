@@ -62,17 +62,17 @@ describe('investing.com per i riferimenti', () => {
     })
     // Una sola richiesta a investing.com (con la linea dell'S&P 500 con dividendi) e una alla BCE; ottobre non è finito e non si chiede.
     expect(chiesti).toHaveLength(2)
-    expect(chiesti[0]).toContain('/historical/951245?start-date=2024-02-09&end-date=2026-09-30')
+    expect(chiesti[0]).toContain('/historical/166?start-date=2024-02-09&end-date=2026-09-30')
     expect(chiesti[1]).toContain('D.USD.EUR.SP00.A?startPeriod=2024-02-09&endPeriod=2026-09-30')
   })
 
   it('un riferimento in euro non chiede il cambio; se investing.com non risponde lo dice', async () => {
     let bce = false
     const investing = async () => new Response(JSON.stringify({ data: [riga('2026-09-30', '146,10')] }))
-    const e = await valoriRiferimento('btp10', ['2026-09-30', '2026-08-31'], { investing, bce: async () => ((bce = true), new Response('')) }, '2026-10-19', 0)
+    const e = await valoriRiferimento('ftsemib', ['2026-09-30', '2026-08-31'], { investing, bce: async () => ((bce = true), new Response('')) }, '2026-10-19', 0)
     expect(e).toEqual({ ok: true, valori: [{ data: '2026-09-30', valore: 146.1, seduta: '2026-09-30' }], mancano: ['2026-08-31'] })
     expect(bce).toBe(false)
-    const giu = await valoriRiferimento('btp10', ['2026-09-30'], { investing: async () => new Response('', { status: 403 }), bce: fetch }, '2026-10-19', 0)
+    const giu = await valoriRiferimento('ftsemib', ['2026-09-30'], { investing: async () => new Response('', { status: 403 }), bce: fetch }, '2026-10-19', 0)
     expect(giu).toEqual({ ok: false, perche: 'investing.com non ha risposto (errore 403)' })
   })
 })

@@ -4,7 +4,7 @@ import { spiegazioneDelPrezzo } from '../conti/prezzo-a-mano.ts'
 import { contiDeiTitoli } from '../conti/titoli.ts'
 import { schedaDelTitolo } from '../conti/scheda.ts'
 import { FONTE } from './aggiorna/fonti.ts'
-import { aVersione3, scriviMese } from './aggiorna/versione3.ts'
+import { aVersioneAttuale, scriviMese } from './aggiorna/versione3.ts'
 import { controllaFile } from './controllo.ts'
 import { applicaCorrezione, controllaCorrezione, eCorrezione, percheDellaCopia, trovaPrezzo, type Correzione } from './correzione.ts'
 import { comeTesto, portafoglioInventato } from './portafoglio-inventato.ts'
@@ -19,7 +19,7 @@ const DOPO = '2026-10-20T09:00:00.000Z'
 /** Il portafoglio inventato com'è dopo un aggiornamento di ottobre dalle borse: versione 3, con seduta. */
 function conOttobre(): FileDati {
   return scriviMese(
-    aVersione3(portafoglioInventato()),
+    aVersioneAttuale(portafoglioInventato()),
     {
       mese: '2026-10',
       prezzi: [
@@ -92,7 +92,7 @@ describe('correggere a mano un prezzo', () => {
   })
 
   it('un prezzo scritto a mano nell’aggiornamento, poi corretto, torna a quello scritto a mano', () => {
-    const v3 = aVersione3(portafoglioInventato())
+    const v3 = aVersioneAttuale(portafoglioInventato())
     const aMano = scriviMese(
       v3,
       {
@@ -111,7 +111,7 @@ describe('correggere a mano un prezzo', () => {
   })
 
   it('dal file alla versione 2: il prezzo del file Excel tiene la sua nota nel prezzo di prima', () => {
-    const v3 = aVersione3(portafoglioInventato())
+    const v3 = aVersioneAttuale(portafoglioInventato())
     const p = trovaPrezzo(applicaCorrezione(v3, correggi(MOND, SETTEMBRE, 12.57), ORA), { titolo: MOND, data: SETTEMBRE })!
     expect(p.prima).toEqual({ prezzo: 12.75, fonte: 'dal tuo file Excel', nota: 'inventato' })
   })

@@ -5,7 +5,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { leggiNumero } from '../aggiorna/numeri.ts'
 import { meseDi, meseEAnno } from '../dati/aggiorna/calendario.ts'
-import { dateDaChiedere, DESCRIZIONE, FONTE_NIC, FONTE_RIFERIMENTO, mesiNicDaChiedere, quandoEsceNic } from '../dati/aggiorna/riferimenti.ts'
+import { dateDaChiedere, DESCRIZIONE, FONTE_NIC, FONTE_RIFERIMENTO, mesiNicDaChiedere, quandoEsceNic, riferimentiDelFile } from '../dati/aggiorna/riferimenti.ts'
 import type { EsitoCorrezione } from '../dati/correzione.ts'
 import {
   baseDelNic,
@@ -33,13 +33,12 @@ type Scarico =
   /** Arrivato: cosa dice la fonte, e cosa si scriverebbe (niente se è tutto uguale). */
   | { stato: 'arrivato'; testo: ReactNode; scrivi: Scaricati | null }
 
-/** 17.160,41 USD · 146,10 € · 104,6 */
+/** 7.651,54 punti · 51.371,98 punti · 104,6 */
 function scriviValore(id: RifValore['id'], n: number): string {
-  const v = valutaDel(id)
-  return v === null ? numero(n, 1, 2) : `${numero(n, 2)} ${v === 'EUR' ? '€' : v}`
+  return valutaDel(id) === null ? numero(n, 1, 2) : `${numero(n, 2)} punti`
 }
 
-/** "17.160,41 USD, cambio BCE 1,1355 = 15.112,65 €" */
+/** "7.651,54 punti, cambio BCE 1,1355 = 6.738,47 €" */
 function conCambio(v: { valore: number; cambio?: number }, id: RifValore['id']): string {
   const testo = scriviValore(id, v.valore)
   return valutaDel(id) === 'USD' && v.cambio ? `${testo}, cambio BCE ${scriviCambio(v.cambio)} = ${euro(v.valore / v.cambio, 2)}` : testo
@@ -115,7 +114,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
       seduta: x.seduta,
       ...(x.nota ? { nota: x.nota } : {}),
     }))
-    const nelFile = (d: string) => (dati.riferimenti ?? []).find((x) => x.riferimento === id && x.data === d)
+    const nelFile = (d: string) => riferimentiDelFile(dati).find((x) => x.riferimento === id && x.data === d)
     const cambiati = arrivati.filter((x) => {
       const c = nelFile(x.data)
       return !c || c.valore !== x.valore || c.cambio !== x.cambio
@@ -154,7 +153,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     const c = serveCambio ? leggiNumero(testoCambio) : undefined
     const vr = v as ValoreRiferimento | undefined
     let problema: string | null = null
-    if (n === null) problema = `Inserire un numero maggiore di zero, per esempio ${nic ? '104,6' : valuta === 'USD' ? '17.160,41' : '146,10'}.`
+    if (n === null) problema = `Inserire un numero maggiore di zero, per esempio ${nic ? '104,6' : '51.371,98'}.`
     else if (serveCambio && c === null) problema = 'Inserire anche il cambio BCE (dollari per 1 euro), per esempio 1,1355.'
     else if (v && n === v.valore && (c === undefined || c === vr?.cambio)) problema = 'Il valore è uguale a quello già presente.'
     if (problema || n === null) {
@@ -310,7 +309,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
                   chiedi()
                 }}
               />
-              {valuta === null ? `base ${(v as NicDelMese | undefined)?.base ?? baseDelNic(rif.data)} = 100` : valuta === 'EUR' ? '€' : valuta}
+              {valuta === null ? `base ${(v as NicDelMese | undefined)?.base ?? baseDelNic(rif.data)} = 100` : 'punti'}
             </span>
           </label>
           {serveCambio && (

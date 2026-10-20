@@ -6,7 +6,7 @@ import { useMemo, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } 
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { anniDeiMovimenti, elencoMovimenti, riquadriMovimenti, totaleDividendi, type RigaMovimento } from '../conti/movimenti.ts'
 import type { Numero } from '../conti/spiegazione.ts'
-import { cambio, data, euro, MENO, numero, prezzo, quote } from '../formato.ts'
+import { cambio, data, euro, MENO, numero, prezzo, prezzoEsatto, quote } from '../formato.ts'
 import { Icona } from '../icone.tsx'
 import { ChipAMano } from '../pannello/AMano.tsx'
 import { Num } from '../pannello/Pannello.tsx'
@@ -259,7 +259,7 @@ function TabellaMovimenti({ righe, appena }: { righe: RigaMovimento[]; appena: R
                       <span className="tenue">—</span>
                     ) : (
                       <>
-                        {prezzo(r.perQuota, 'EUR')}
+                        {prezzoEsatto(r.perQuota, 'EUR')}
                         <span className="sotto">lordo per quota</span>
                       </>
                     )
@@ -332,12 +332,12 @@ function TabellaDividendi({ righe, appena }: { righe: RigaMovimento[]; appena: R
                 {r.sotto && <span className="sotto">{r.sotto}</span>}
               </td>
               <td className="n">{r.quote === null ? <span className="tenue">—</span> : quote(r.quote)}</td>
-              <td className="n">{r.perQuota === null ? <span className="tenue">—</span> : prezzo(r.perQuota, 'EUR')}</td>
+              <td className="n">{r.perQuota === null ? <span className="tenue">—</span> : prezzoEsatto(r.perQuota, 'EUR')}</td>
               <td className="n">{euro(r.lordo ?? 0, 2)}</td>
               <td className="n">
                 {(r.imposte ?? 0) > 0 ? MENO : ''}
                 {euro(r.imposte ?? 0, 2)}
-                {r.impostePct !== null && <span className="sotto">{numero(r.impostePct * 100, 1)}%</span>}
+                {r.impostePct !== null && <span className="sotto">{numero(r.impostePct * 100, 2)}%</span>}
               </td>
               <td className="n">
                 <Num numero={r.soldi}>

@@ -1,5 +1,5 @@
 // La scheda "Inflazione, cambi e riferimenti" della pagina Dati (ticket 13, mappa 27): un mese per riga,
-// con l'inflazione NIC, i cambi BCE dei titoli in valuta e i sei riferimenti. Dove un dato non c'è si legge
+// con l'inflazione NIC, i cambi BCE dei titoli in valuta e i cinque indici di borsa. Dove un dato non c'è si legge
 // "manca". Il clic su un numero, o su "manca", apre la provenienza con la fonte, "Scarica di nuovo" e la
 // correzione a mano (CorreggiDato.tsx).
 import { datoInCifre, nomeColonna, righeDati, senzaRiferimenti, spiegaDato, valuteDeiTitoli, type CellaDato } from '../../conti/pagina-dati.ts'
@@ -76,7 +76,7 @@ export function InflazioneCambiRiferimenti({ dati }: { dati: FileDati }) {
               {RIFERIMENTI.map((id) => (
                 <th key={id} className="n">
                   {DESCRIZIONE[id].nome}
-                  <span className="sotto">{DESCRIZIONE[id].valuta === 'USD' ? 'in dollari' : 'in euro'}</span>
+                  <span className="sotto">{DESCRIZIONE[id].valuta === 'USD' ? 'punti, in dollari' : 'in punti'}</span>
                 </th>
               ))}
             </tr>
@@ -105,8 +105,8 @@ export function InflazioneCambiRiferimenti({ dati }: { dati: FileDati }) {
       </div>
       <p className="nota dati-nota">
         Inflazione: indice NIC di ISTAT, fino a dicembre 2025 in base 2015 = 100 e da gennaio 2026 in base 2025 = 100 (nei conti le due
-        basi si agganciano). Cambi: BCE, a fine mese. Riferimenti: valore di chiusura a fine mese da investing.com, con i dividendi
-        reinvestiti; quelli in dollari si portano in euro con il cambio BCE dello stesso giorno.
+        basi si agganciano). Cambi: BCE, a fine mese. Indici: valore di chiusura a fine mese da investing.com, in punti e senza
+        dividendi, come li pubblica la borsa; quelli di New York sono in dollari.
       </p>
     </>
   )

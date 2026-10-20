@@ -6,7 +6,7 @@ import { useMemo, useRef, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { mesiConPrezzi, ultimoNic } from '../conti/pagina-dati.ts'
 import { finoAl } from '../dati/aggiorna/riferimenti.ts'
-import { aVersione3 } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../dati/aggiorna/versione3.ts'
 import { quandoInParole } from '../dati/copie.ts'
 import { mese, percorsoBreve, quando } from '../formato.ts'
 import { ponte } from '../ponte.ts'
@@ -25,7 +25,7 @@ export function Dati() {
   const { esegui, occupato } = useStato()
   const { cartella, dati: grezzi, controllato, copie } = useFile()
   // Le pagine leggono il file come sarebbe alla versione 3: fonti con il loro nome fisso, cambi nel loro elenco.
-  const dati = useMemo(() => aVersione3(grezzi), [grezzi])
+  const dati = useMemo(() => aVersioneAttuale(grezzi), [grezzi])
   const [cerca, setCerca] = useSearchParams()
   const scelta = cerca.get('scheda')
   const scheda: Scheda = (SCHEDE as readonly string[]).includes(scelta ?? '') ? (scelta as Scheda) : 'prezzi'

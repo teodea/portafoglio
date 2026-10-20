@@ -285,7 +285,7 @@ describe('le cifre a sinistra del grafico', () => {
     expect(g[0]).toBeLessThanOrEqual(24_000)
     expect(g[4]).toBeGreaterThanOrEqual(440_000)
     expect(g[1] - g[0]).toBe(g[4] - g[3])
-    expect(g.map(corto)).toEqual(['0', '125k', '250k', '375k', '500k'])
+    expect(g.map(corto)).toEqual(['0', '125.000', '250.000', '375.000', '500.000'])
   })
 
   it('un solo valore non rompe la griglia', () => {

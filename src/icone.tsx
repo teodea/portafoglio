@@ -30,6 +30,7 @@ const TRATTI = {
     </>
   ),
   ok: <path d="M5 12l5 5 9-10" />,
+  ingrandisci: <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />,
   x: <path d="M6 6l12 12M18 6L6 18" />,
   indietro: <path d="M15 6l-6 6 6 6" />,
   piu: <path d="M12 5v14M5 12h14" />,

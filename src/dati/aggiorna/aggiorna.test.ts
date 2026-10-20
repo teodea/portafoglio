@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest'
 import { controllaFile } from '../controllo.ts'
 import { comeTesto, portafoglioInventato } from '../portafoglio-inventato.ts'
+import type { FileDati } from '../tipi.ts'
+import { riferimentiDelFile } from './riferimenti.ts'
 import { fineMese, meseDopo, meseFinito, ultimaSeduta } from './calendario.ts'
 import { FONTE, fonteDaVersione2 } from './fonti.ts'
 import {
@@ -20,7 +22,7 @@ import {
   type Aggiornamento,
 } from './lista.ts'
 import { mesiDaAggiornare, quoteAFineMese, titoliDelMese, ultimoMeseSalvato } from './mesi.ts'
-import { aVersione3, controllaMese, scriviMese, type MeseDaSalvare } from './versione3.ts'
+import { aVersioneAttuale, controllaMese, scriviMese, type MeseDaSalvare } from './versione3.ts'
 
 const MONDO = 'ZZ0000000001-MIL'
 const TECN = 'ZZ0000000002-LON'
@@ -66,10 +68,10 @@ describe('quali mesi e quali titoli', () => {
 
 describe('il passaggio alla versione 3', () => {
   const v2 = portafoglioInventato()
-  const v3 = aVersione3(v2)
+  const v3 = aVersioneAttuale(v2)
 
   it('versione, valuta dei titoli, cambi e fonti con un nome fisso; i numeri non cambiano', () => {
-    expect(v3.versione).toBe(3)
+    expect(v3.versione).toBe(4)
     expect(v3.titoli?.map((t) => t.valuta)).toEqual(['EUR', 'GBP', 'EUR'])
     expect(v3.cambi).toEqual([
       { valuta: 'GBP', data: '2026-08-31', cambio: 0.8652, fonte: 'dal tuo file Excel' },
@@ -83,7 +85,7 @@ describe('il passaggio alla versione 3', () => {
   it('non cambia il file di partenza, e una seconda volta non fa niente', () => {
     expect(v2.versione).toBe(2)
     expect(v2.prezzi?.[0].fonte).toBe('inventato')
-    expect(aVersione3(v3)).toBe(v3)
+    expect(aVersioneAttuale(v3)).toBe(v3)
   })
 
   it('le fonti del file Excel diventano nomi fissi', () => {
@@ -100,6 +102,34 @@ describe('il passaggio alla versione 3', () => {
   })
 })
 
+describe('il passaggio alla versione 4', () => {
+  // Un file scritto dalla versione di prima del programma: prezzi già alla versione 3, riferimenti con i dividendi.
+  const v3: FileDati = {
+    ...aVersioneAttuale(portafoglioInventato()),
+    versione: 3,
+    riferimenti: [
+      { riferimento: 'btp10' as never, data: '2026-09-30', valore: 146.1, valuta: 'EUR', fonte: 'investing.com', seduta: '2026-09-30' },
+      { riferimento: 'sp500', data: '2026-09-30', valore: 17160.41, valuta: 'USD', cambio: 1.1355, fonte: 'investing.com', seduta: '2026-09-30' },
+    ],
+    nic: [{ data: '2026-08-31', valore: 104.6, base: 2025, fonte: 'ISTAT' }],
+  }
+
+  it('un file della versione 3 con il BTP si legge ancora', () => {
+    expect(controllaFile(comeTesto(v3)).ok).toBe(true)
+  })
+
+  it('i valori vecchi dei riferimenti (con i dividendi, e il BTP) non si usano e alla scrittura si tolgono; il NIC resta', () => {
+    expect(riferimentiDelFile(v3)).toEqual([])
+    const v4 = aVersioneAttuale(v3)
+    expect(v4.versione).toBe(4)
+    expect(v4.riferimenti).toEqual([])
+    expect(v4.nic).toEqual(v3.nic)
+    expect(controllaFile(comeTesto(v4)).ok).toBe(true)
+    // Nella versione 4 il BTP non è più un riferimento valido.
+    expect(controllaFile(comeTesto({ ...v4, riferimenti: v3.riferimenti })).ok).toBe(false)
+  })
+})
+
 const OTTOBRE: MeseDaSalvare = {
   mese: '2026-10',
   prezzi: [
@@ -110,7 +140,7 @@ const OTTOBRE: MeseDaSalvare = {
 }
 
 describe('scrivere un mese', () => {
-  const v3 = aVersione3(portafoglioInventato())
+  const v3 = aVersioneAttuale(portafoglioInventato())
 
   it('aggiunge i prezzi e il cambio di ottobre, con la seduta e il cambio sul prezzo in sterline', () => {
     const dopo = scriviMese(v3, OTTOBRE, '2026-11-03T17:02:00.000Z')

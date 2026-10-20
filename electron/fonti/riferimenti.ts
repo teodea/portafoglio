@@ -1,4 +1,4 @@
-// I sei riferimenti di borsa: le chiusure giornaliere da investing.com (una richiesta per riferimento copre
+// I cinque indici di borsa, in punti: le chiusure giornaliere da investing.com (una richiesta per riferimento copre
 // tutta la storia che serve) e, per quelli in dollari, il cambio BCE dello stesso giorno.
 // Di ogni data chiesta si prende la chiusura: per una fine mese l'ultima seduta del mese, per la data di un
 // movimento la seduta di quel giorno o, se la borsa era chiusa, quella prima.

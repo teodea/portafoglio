@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { anteprimaVendita } from '../../conti/movimenti.ts'
 import { venditaInParole } from '../../conti/scheda.ts'
 import { controllaModifica, movimentoInParole, quoteAlGiorno, type EsitoMovimento, type NuovoMovimento, type TipoMovimento } from '../../dati/movimenti.ts'
-import { cambio, data, euro, guadagnoEuro, MENO, numero, prezzo, quote, segno } from '../../formato.ts'
+import { cambio, data, euro, guadagnoEuro, MENO, numero, prezzoEsatto, quote, segno } from '../../formato.ts'
 import { Icona } from '../../icone.tsx'
 import { ChipAMano } from '../../pannello/AMano.tsx'
 import { mostraAvviso } from '../../pannello/avviso.ts'
@@ -371,7 +371,7 @@ function Frase({ m, valuta: vt }: { m: NuovoMovimento; valuta: string }) {
       <p className="frase">
         Il <b>{data(m.data)}</b> {nome} ha pagato un dividendo: <b>{euro(m.lordo, 2)}</b> lordi, <b>{euro(m.imposte, 2)}</b> di imposte,{' '}
         <b>{euro(m.lordo - m.imposte, 2)}</b> netti accreditati.
-        {q > 0 && ` Con ${quote(q)} quote possedute, ${prezzo(m.lordo / q, 'EUR')} lordi per quota; imposte pari al ${numero((m.imposte / m.lordo) * 100, 1)}%.`}
+        {q > 0 && ` Con ${quote(q)} quote possedute, ${prezzoEsatto(m.lordo / q, 'EUR')} lordi per quota; imposte pari al ${numero((m.imposte / m.lordo) * 100, 2)}%.`}
       </p>
     )
   }
@@ -379,7 +379,7 @@ function Frase({ m, valuta: vt }: { m: NuovoMovimento; valuta: string }) {
   if (m.tipo === 'acquisto')
     return (
       <p className="frase">
-        Acquisto del <b>{data(m.data)}</b>: <b>{quote(m.quantita)} quote</b> di {nome} a <b>{prezzo(m.prezzo, vt)}</b> per quota{alCambio}. Costo d’acquisto:{' '}
+        Acquisto del <b>{data(m.data)}</b>: <b>{quote(m.quantita)} quote</b> di {nome} a <b>{prezzoEsatto(m.prezzo, vt)}</b> per quota{alCambio}. Costo d’acquisto:{' '}
         <b>{euro(m.totale, 2)}</b>, commissioni comprese ({euro(m.commissioni, 2)}).
       </p>
     )
@@ -388,7 +388,7 @@ function Frase({ m, valuta: vt }: { m: NuovoMovimento; valuta: string }) {
   return (
     <p className="frase">
       Vendita del <b>{data(m.data)}</b>: <b>{sv ? `${quote(m.quantita)} quote su ${quote(sv.quotePrima)}` : `${quote(m.quantita)} quote`}</b> di {nome} a{' '}
-      <b>{prezzo(m.prezzo, vt)}</b> per quota{alCambio}. Ricavo della vendita: <b>{euro(m.totale, 2)}</b>, al netto delle commissioni ({euro(m.commissioni, 2)}).
+      <b>{prezzoEsatto(m.prezzo, vt)}</b> per quota{alCambio}. Ricavo della vendita: <b>{euro(m.totale, 2)}</b>, al netto delle commissioni ({euro(m.commissioni, 2)}).
       {sv && (
         <>
           {' '}
@@ -409,7 +409,7 @@ function Riquadri({ m, valuta: v }: { m: NuovoMovimento; valuta: string }) {
         ]
       : [
           ['Quote', quote(m.quantita)],
-          ['Prezzo per quota', prezzo(m.prezzo, v)],
+          ['Prezzo per quota', prezzoEsatto(m.prezzo, v)],
           [m.tipo === 'acquisto' ? 'Costo d’acquisto' : 'Ricavo della vendita', euro(m.totale, 2)],
         ]
   return (

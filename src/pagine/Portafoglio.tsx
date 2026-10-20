@@ -1,15 +1,15 @@
 // La pagina Portafoglio, la prima che si apre (mappa, ticket 28, versione B "prima la risposta"):
 // 1. testata con "Prezzi al …";
-// 2. il riquadro della risposta "Plusvalenza" e accanto la classifica "Confronto con i riferimenti"
-//    (ticket 10), uno sotto l'altro nella finestra stretta;
+// 2. il riquadro della risposta "Plusvalenza" e accanto "Andamento dei mercati", il grafico della variazione mese
+//    per mese del portafoglio, degli indici in punti e dell'inflazione con la tabella sotto, uno sotto l'altro
+//    nella finestra stretta;
 // 3. il grafico "Andamento del controvalore", dall'inizio o negli ultimi 12 mesi;
 // 4. i 3 titoli migliori e i 3 peggiori.
 import { useMemo, useState } from 'react'
 import { contiDelPortafoglio, type MisuraTitoli } from '../conti/portafoglio.ts'
-import { confrontoConIRiferimenti } from '../conti/riferimenti.ts'
 import { data } from '../formato.ts'
 import { useFile } from '../stato.tsx'
-import { Classifica } from './portafoglio/Classifica.tsx'
+import { Andamenti } from './portafoglio/Andamenti.tsx'
 import './portafoglio/classifica.css'
 import { GraficoValore } from './portafoglio/GraficoValore.tsx'
 import { MeglioPeggio } from './portafoglio/MeglioPeggio.tsx'
@@ -27,7 +27,6 @@ export function Portafoglio() {
   const { dati } = useFile()
   const titoli = useConti()
   const conti = useMemo(() => contiDelPortafoglio(dati, titoli), [dati, titoli])
-  const confronto = useMemo(() => confrontoConIRiferimenti(dati, conti), [dati, conti])
   // Le scelte non si ricordano alla riapertura (DESIGN.md, "Bottoni della misura").
   const [periodo, setPeriodo] = useState<Periodo>('tutto')
   const [misura, setMisura] = useState<MisuraTitoli>('acquisto')
@@ -56,9 +55,9 @@ export function Portafoglio() {
     <section className="pagina-portafoglio">
       {testata}
 
-      <div className={`dueparti${confronto ? '' : ' solo'}`}>
+      <div className="dueparti">
         <Risposta conti={conti} />
-        {confronto && <Classifica confronto={confronto} />}
+        <Andamenti dati={dati} conti={conti} />
       </div>
 
       <div className="riquadro blocco">

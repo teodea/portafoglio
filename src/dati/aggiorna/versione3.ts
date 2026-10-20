@@ -1,4 +1,4 @@
-// Il passaggio del file alla versione 3 e la scrittura di un mese nuovo.
+// Il passaggio del file alla versione attuale (3, poi 4) e la scrittura di un mese nuovo.
 // Si usano nel processo principale, sul file appena riletto dal disco, subito prima della scrittura sicura.
 // Modulo puro: niente file. Non cambia mai l'oggetto ricevuto, ne restituisce uno nuovo.
 import { FONTE, FONTE_CAMBIO, fonteDaVersione2, type FonteDaScaricare } from './fonti.ts'
@@ -9,11 +9,22 @@ import { controllaRiferimenti, scriviRiferimenti, type RiferimentiDaSalvare } fr
 import { VERSIONE_ATTUALE, type CambioFineMese, type ControlloPrezzo, type FileDati, type PrezzoFineMese } from '../tipi.ts'
 
 /**
- * Da versione 1 o 2 a versione 3. Esempio: il prezzo con fonte "file (foglio Nasdaq 100)" diventa
- * fonte "dal tuo file Excel" con nota "file (foglio Nasdaq 100)"; i cambi scritti sui prezzi in sterline
- * vanno anche nell'elenco dei cambi; ogni titolo ha la sua valuta. I numeri non cambiano.
+ * Alla versione attuale, la 4.
+ * - Da versione 1 o 2 a 3: il prezzo con fonte "file (foglio Nasdaq 100)" diventa fonte "dal tuo file Excel"
+ *   con nota "file (foglio Nasdaq 100)"; i cambi scritti sui prezzi in sterline vanno anche nell'elenco dei
+ *   cambi; ogni titolo ha la sua valuta. I numeri non cambiano.
+ * - Da 3 a 4: i valori dei riferimenti scaricati prima (ETF e indici con i dividendi, BTP 10 anni) si tolgono,
+ *   perché i riferimenti adesso sono gli indici in punti: li riscarica il prossimo Aggiorna fine mese.
+ *   L'inflazione e i cambi restano.
  */
-export function aVersione3(dati: FileDati): FileDati {
+export function aVersioneAttuale(dati: FileDati): FileDati {
+  if (dati.versione >= VERSIONE_ATTUALE) return dati
+  const v3 = aVersione3(dati)
+  const { riferimenti, ...resto } = v3
+  return { ...resto, versione: VERSIONE_ATTUALE, ...(riferimenti ? { riferimenti: [] } : {}) }
+}
+
+function aVersione3(dati: FileDati): FileDati {
   if (dati.versione >= 3) return dati
   const prezzi = (dati.prezzi ?? []).map((p): PrezzoFineMese => {
     const fonte = fonteDaVersione2(p.fonte)
@@ -31,7 +42,7 @@ export function aVersione3(dati: FileDati): FileDati {
   cambi.sort((a, b) => a.valuta.localeCompare(b.valuta) || a.data.localeCompare(b.data))
   return {
     ...dati,
-    versione: VERSIONE_ATTUALE,
+    versione: 3,
     titoli: (dati.titoli ?? []).map((t) => ({ ...t, valuta: valutaDelTitolo(dati, t) })),
     prezzi,
     cambi,

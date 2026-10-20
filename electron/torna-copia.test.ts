@@ -106,7 +106,7 @@ describe('scrivere una correzione di NIC, cambi o riferimenti', () => {
     expect(s.copia).toMatch(/^portafoglio 2026-10-19 \d{4} prima di scrivere a mano il NIC di settembre 2026\.json$/)
     expect(await readFile(join(cartella, 'copie', s.copia), 'utf8')).toBe(prima)
     const dopo = JSON.parse(await leggiTesto()) as FileDati
-    expect(dopo.versione).toBe(3)
+    expect(dopo.versione).toBe(4)
     expect(dopo.nic).toEqual([{ data: '2026-09-30', valore: 104.6, base: 2025, fonte: 'a mano', quando: expect.stringMatching(/^2026-10-19T/) }])
   })
 

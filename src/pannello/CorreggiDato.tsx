@@ -7,7 +7,7 @@ import { useMemo, useRef, useState } from 'react'
 import { leggiNumero } from '../aggiorna/numeri.ts'
 import { datoInCifre, nomeColonna, valutaDelDato } from '../conti/pagina-dati.ts'
 import { meseDi } from '../dati/aggiorna/calendario.ts'
-import { aVersione3 } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../dati/aggiorna/versione3.ts'
 import {
   fonteDelDato,
   nomeDelDato,
@@ -76,7 +76,7 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
   const campo = useRef<HTMLInputElement>(null)
 
   const grezzi = apertura.stato === 'pronto' ? apertura.dati : null
-  const dati = useMemo(() => (grezzi ? aVersione3(grezzi) : null), [grezzi])
+  const dati = useMemo(() => (grezzi ? aVersioneAttuale(grezzi) : null), [grezzi])
   if (!dati) return null
 
   const x = trovaDato(dati, dato)

@@ -7,7 +7,7 @@ import { leggiNumero } from '../aggiorna/numeri.ts'
 import { fonteInParole } from '../conti/fonti.ts'
 import { eAMano } from '../conti/prezzo-a-mano.ts'
 import { nomeDelTitolo, trovaPrezzo, type Correzione, type EsitoCorrezione, type RifPrezzo } from '../dati/correzione.ts'
-import { data, mese, prezzo } from '../formato.ts'
+import { data, mese, prezzoEsatto } from '../formato.ts'
 import { Icona } from '../icone.tsx'
 import { ponte } from '../ponte.ts'
 import { useStato } from '../stato.tsx'
@@ -29,7 +29,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
   if (!dati || !p) return null
 
   const quale = `${nomeDelTitolo(dati, rif.titolo)} a fine ${mese(rif.data)}`
-  const scrivi = (n: number) => prezzo(n, p.valuta)
+  const scrivi = (n: number) => prezzoEsatto(n, p.valuta)
   const aMano = eAMano(p)
   const prima = aMano ? p.prima : undefined
 
@@ -114,7 +114,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
               <input
                 ref={campo}
                 inputMode="decimal"
-                placeholder={prezzo(p.prezzo, p.valuta).replace(/ \S+$/, '')}
+                placeholder={prezzoEsatto(p.prezzo, p.valuta).replace(/ \S+$/, '')}
                 value={testo}
                 aria-invalid={sbagliato !== null}
                 onChange={(e) => {

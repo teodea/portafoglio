@@ -17,9 +17,7 @@ export function griglia(min: number, max: number): number[] {
   return Array.from({ length: 5 }, (_, i) => min + i * grezzo)
 }
 
-/** "120k", "1,2M" per le cifre a sinistra. */
+/** Le cifre a sinistra, intere e con il punto delle migliaia: "375.000", "1.250.000" (niente "k" né "M"). */
 export function corto(v: number): string {
-  if (Math.abs(v) >= 1e6) return `${numero(v / 1e6, 0, 1)}M`
-  if (Math.abs(v) >= 1e3) return `${numero(v / 1e3, 0, 1)}k`
   return numero(v)
 }

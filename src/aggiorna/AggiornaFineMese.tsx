@@ -692,6 +692,7 @@ function BarraFerma({ agg, versione }: { agg: Aggiornamento; versione: number })
           ])}. `}
         Pronto per il salvataggio. Prima di salvare viene fatta una copia del file attuale nella cartella <b>copie</b>.
         {versione < 3 && ' Il file passa alla versione 3, in cui ogni prezzo riporta la propria provenienza.'}
+        {versione === 3 && ' Gli indici di borsa sono ora in punti, senza dividendi: i valori scaricati in precedenza si sostituiscono.'}
         {fraseBarraRiferimenti(agg.rif)}
       </span>
     )
@@ -806,6 +807,7 @@ function RiquadroSalvato({ s }: { s: Salvato }) {
               {s.rifai ? 'Gli altri mesi' : 'I prezzi già presenti'} sono invariati.
             </li>
           )}
+          {s.versione4 && <li>Gli indici di borsa sono ora in punti, senza dividendi, come li pubblica la borsa; il BTP 10 anni non è più tra i riferimenti.</li>}
           {s.frasiRiferimenti.map((f) => (
             <li key={f}>{f}</li>
           ))}

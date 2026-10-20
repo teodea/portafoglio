@@ -1,7 +1,7 @@
 // Le prove dei numeri della pagina Dati (ticket 13), sul portafoglio inventato.
 import { describe, expect, it } from 'vitest'
 import { FONTE } from '../dati/aggiorna/fonti.ts'
-import { aVersione3, scriviMese } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale, scriviMese } from '../dati/aggiorna/versione3.ts'
 import { applicaCorrezione } from '../dati/correzione.ts'
 import { applicaCorrezioneDato } from '../dati/correzione-dati.ts'
 import { portafoglioInventato } from '../dati/portafoglio-inventato.ts'
@@ -30,7 +30,7 @@ const OTTOBRE = '2026-10-31'
 /** Il portafoglio inventato dopo un aggiornamento di ottobre: MOND da Euronext Milano con il controllo diverso, TECN da investing.com. */
 function conOttobre(): FileDati {
   return scriviMese(
-    aVersione3(portafoglioInventato()),
+    aVersioneAttuale(portafoglioInventato()),
     {
       mese: '2026-10',
       prezzi: [
@@ -61,7 +61,7 @@ describe('la scheda Prezzi dei titoli', () => {
   })
 
   it('i mesi del file Excel dicono "file Excel iniziale", senza controllo; un prezzo corretto conta "a mano"', () => {
-    const dati = applicaCorrezione(aVersione3(portafoglioInventato()), { tipo: 'correggi', titolo: MOND, data: SETTEMBRE, prezzo: 12.57 }, '2026-10-19T18:00:00.000Z')
+    const dati = applicaCorrezione(aVersioneAttuale(portafoglioInventato()), { tipo: 'correggi', titolo: MOND, data: SETTEMBRE, prezzo: 12.57 }, '2026-10-19T18:00:00.000Z')
     const righe = righePrezzi(dati, SETTEMBRE)
     expect(righe[0]).toMatchObject({ nome: 'MOND', aMano: true, perche: null, controllo: null })
     expect(righe[1].fonte.nome).toBe('file Excel iniziale')
@@ -105,9 +105,9 @@ describe('la scheda Inflazione, cambi e riferimenti', () => {
     expect(settembre.nic.tipo === 'manca' && settembre.nic.perche).toMatch(/^ISTAT di solito pubblica il NIC di settembre verso metà ottobre\./)
     expect(settembre.cambi[0]).toMatchObject({ tipo: 'dato', numero: 0.8546, fonte: 'dal tuo file Excel' })
     const agosto = righe[1]
-    const nasdaq = agosto.riferimenti[3]
+    const nasdaq = agosto.riferimenti[2]
     expect(nasdaq).toMatchObject({ tipo: 'manca', dato: { tipo: 'riferimento', riferimento: 'nasdaq100' } })
-    expect(agosto.riferimenti.filter((c) => c.tipo === 'dato')).toHaveLength(5)
+    expect(agosto.riferimenti.filter((c) => c.tipo === 'dato')).toHaveLength(4)
     const gennaio2024 = righe.at(-1)!
     expect(gennaio2024.nic.tipo).toBe('dato')
     expect(gennaio2024.riferimenti.every((c) => c.tipo === 'non-serve')).toBe(true)
@@ -117,7 +117,7 @@ describe('la scheda Inflazione, cambi e riferimenti', () => {
   })
 
   it('senza riferimenti nel file: tutti "manca", con il perché', () => {
-    const dati = aVersione3(portafoglioInventato())
+    const dati = aVersioneAttuale(portafoglioInventato())
     expect(senzaRiferimenti(dati)).toBe(true)
     const r = righeDati(dati)[0]
     expect(r.riferimenti.every((c) => c.tipo === 'manca' && /prossimo Aggiorna fine mese/.test(c.perche))).toBe(true)
@@ -141,10 +141,10 @@ describe('la scheda Inflazione, cambi e riferimenti', () => {
     expect(s.correggiDato).toEqual({ tipo: 'nic', data: '2026-01-31' })
   })
 
-  it('il pannello di un riferimento in dollari: il conto in euro; quando manca, il perché', () => {
+  it('il pannello di un indice in dollari: i punti e l’equivalente in euro; quando manca, il perché', () => {
     const dati = conRiferimentiInventati(portafoglioInventato())
     const s = spiegaDato(dati, { tipo: 'riferimento', riferimento: 'sp500', data: '2026-07-31' })
-    expect(s.conto.map((r) => r.etichetta)).toEqual(['Valore in dollari', '÷ cambio BCE del dollaro', 'Valore in euro'])
+    expect(s.conto.map((r) => r.etichetta)).toEqual(['Punti, in dollari', '÷ cambio BCE del dollaro', 'Equivalente in euro'])
     expect(s.note[0]).toBe('Fonte: investing.com, chiusura del 31/07/2026.')
     const manca = spiegaDato(dati, { tipo: 'riferimento', riferimento: 'nasdaq100', data: '2026-08-31' })
     expect(cifra(manca.grande)).toBe('manca')

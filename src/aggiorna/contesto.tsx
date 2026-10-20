@@ -36,6 +36,8 @@ export type Salvato = {
   diversi: { titolo: string; prima: number; dopo: number; valuta: string }[]
   /** Il file è passato adesso dalla versione 2 alla 3. */
   versione3: boolean
+  /** Il file è passato adesso dalla versione 3 alla 4: gli indici in punti al posto dei riferimenti con i dividendi. */
+  versione4: boolean
   /** Riferimenti e inflazione: cosa è arrivato e cosa si riprende al prossimo aggiornamento. */
   frasiRiferimenti: string[]
   /** Il controllo di investing.com dei prezzi salvati. */
@@ -196,6 +198,7 @@ export function AggiornaProvider({ children }: { children: ReactNode }) {
         valuta: r.valuta,
       })),
       versione3: versionePrima < 3,
+      versione4: versionePrima === 3,
       frasiRiferimenti:
         a.rif && e.apertura.stato === 'pronto' ? frasiDopoIlSalvataggio(e.apertura.dati, a.mese, a.rif.primaVolta) : [],
       controlli: contaControlli(a.titoli.map((r) => ({ titolo: r.simbolo ?? r.isin, confronto: confrontoDellaRiga(r) }))),

@@ -1,13 +1,13 @@
 // Le prove della lettura dei PDF della banca, con campi INVENTATI (stessi nomi dei campi dei moduli Fineco).
 import { describe, expect, it } from 'vitest'
-import { aVersione3 } from './aggiorna/versione3.ts'
+import { aVersioneAttuale } from './aggiorna/versione3.ts'
 import { applicaModifica } from './movimenti.ts'
 import { borsaDelMercato, dataDelPdf, giaRegistrato, leggiCampi, numeroDelPdf, titoloDelPdf, unisciPdf, type CampiPdf, type Letto, type LettoOperazione } from './pdf-fineco.ts'
 import { campiAcquisto, campiDividendo } from './pdf-inventati.ts'
 import { portafoglioInventato } from './portafoglio-inventato.ts'
 
 const MOND = 'ZZ0000000001-MIL'
-const base = () => aVersione3(portafoglioInventato())
+const base = () => aVersioneAttuale(portafoglioInventato())
 
 function letto(nome: string, c: CampiPdf): Letto {
   const l = leggiCampi(nome, null, c)

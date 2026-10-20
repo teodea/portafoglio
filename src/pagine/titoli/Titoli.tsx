@@ -69,7 +69,7 @@ export function Titoli() {
           <span>Costo d’acquisto {euro(aperti.pagato.n ?? 0)}</span>
         </button>
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(aperti.guadagno.perche)}>
-          <small>{g < 0 ? 'Minusvalenza' : 'Plusvalenza'}</small>
+          <small>{g < 0 ? 'Minusvalenza' : 'Plusvalenza'} dei titoli in portafoglio</small>
           <b className={classeSegno(segno(g))}>{guadagnoEuro(g)}</b>
           <span className={pct === null ? '' : classeSegno(segnoPercentuale(pct))}>{pct === null ? '—' : `${percentuale(pct)} sul costo`}</span>
         </button>

@@ -5,7 +5,7 @@
 import type { AccessoFinto } from '../aggiorna/ponte-finto.ts'
 import { fineMese, meseDi } from '../dati/aggiorna/calendario.ts'
 import { dateNecessarie, DESCRIZIONE, FONTE_NIC, FONTE_RIFERIMENTO, mesiNicNecessari } from '../dati/aggiorna/riferimenti.ts'
-import { aVersione3 } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../dati/aggiorna/versione3.ts'
 import { controllaFile } from '../dati/controllo.ts'
 import { applicaScrittura, baseDelNic, controllaScrittura, percheDellaCopiaRiferimento, type PonteRiferimentoAMano } from '../dati/correzione-riferimento.ts'
 import { comeTesto } from '../dati/portafoglio-inventato.ts'
@@ -18,7 +18,7 @@ export function riferimentoAManoFinto(accesso: AccessoFinto): PonteRiferimentoAM
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
       if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
-      const v3 = aVersione3(esito.dati)
+      const v3 = aVersioneAttuale(esito.dati)
       const ok = controllaScrittura(v3, s)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }
       const perche = percheDellaCopiaRiferimento(s)
@@ -30,8 +30,8 @@ export function riferimentoAManoFinto(accesso: AccessoFinto): PonteRiferimentoAM
   }
 }
 
-const BASE = { btp10: 140, ftsemib: 180, eurostoxx50: 170, nasdaq100: 21000, dowjones: 95000, sp500: 11000 } as const
-const CRESCITA = { btp10: 0.02, ftsemib: 0.2, eurostoxx50: 0.12, nasdaq100: 0.18, dowjones: 0.09, sp500: 0.14 } as const
+const BASE = { ftsemib: 33000, eurostoxx50: 4900, nasdaq100: 18000, dowjones: 39000, sp500: 5100 } as const
+const CRESCITA = { ftsemib: 0.2, eurostoxx50: 0.12, nasdaq100: 0.18, dowjones: 0.09, sp500: 0.14 } as const
 
 /** Un valore INVENTATO che cresce del tasso all'anno, con un'onda. */
 function inventato(base: number, tasso: number, data: string): number {
@@ -63,5 +63,5 @@ export function conRiferimentiInventati(dati: FileDati): FileDati {
       const base = baseDelNic(data)
       return { data, valore: Math.round(inventato(base === 2025 ? 99 : 119, 0.018, data) * 10) / 10, base, fonte: FONTE_NIC.istat }
     })
-  return { ...dati, riferimenti, nic }
+  return { ...aVersioneAttuale(dati), riferimenti, nic }
 }

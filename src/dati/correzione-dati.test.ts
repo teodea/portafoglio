@@ -1,7 +1,7 @@
 // Le prove della correzione a mano di NIC, cambi e riferimenti (ticket 13), sul portafoglio inventato.
 import { describe, expect, it } from 'vitest'
 import { conRiferimentiInventati } from '../pagine/dati/ponte-finto-dati.ts'
-import { aVersione3 } from './aggiorna/versione3.ts'
+import { aVersioneAttuale } from './aggiorna/versione3.ts'
 import { scriviRiferimenti } from './aggiorna/riferimenti.ts'
 import { controllaFile } from './controllo.ts'
 import {
@@ -27,7 +27,7 @@ const NIC_SETTEMBRE: RifDato = { tipo: 'nic', data: SETTEMBRE }
 const GBP_SETTEMBRE: RifDato = { tipo: 'cambio', valuta: 'GBP', data: SETTEMBRE }
 const SP_AGOSTO: RifDato = { tipo: 'riferimento', riferimento: 'sp500', data: AGOSTO }
 const NASDAQ_AGOSTO: RifDato = { tipo: 'riferimento', riferimento: 'nasdaq100', data: AGOSTO }
-const BTP_AGOSTO: RifDato = { tipo: 'riferimento', riferimento: 'btp10', data: AGOSTO }
+const MIB_AGOSTO: RifDato = { tipo: 'riferimento', riferimento: 'ftsemib', data: AGOSTO }
 
 /** Il portafoglio inventato con NIC e riferimenti inventati: mancano il NIC di settembre e il Nasdaq-100 di agosto. */
 const conDati = (): FileDati => conRiferimentiInventati(portafoglioInventato())
@@ -88,7 +88,7 @@ describe('il NIC', () => {
 
 describe('il cambio', () => {
   it('corretto a mano cambia anche il cambio sui prezzi in sterline dello stesso fine mese; "torna" rimette tutto', () => {
-    const dati = aVersione3(portafoglioInventato())
+    const dati = aVersioneAttuale(portafoglioInventato())
     expect(trovaDato(dati, GBP_SETTEMBRE)).toMatchObject({ cambio: 0.8546, fonte: 'dal tuo file Excel' })
     const corretto = applica(dati, { azione: 'correggi', dato: GBP_SETTEMBRE, valore: 0.8561 })
     expect(trovaDato(corretto, GBP_SETTEMBRE)).toEqual({
@@ -106,7 +106,7 @@ describe('il cambio', () => {
   })
 
   it('non si scrive un cambio di una valuta che nessun titolo ha', () => {
-    const r = controllaCorrezioneDato(aVersione3(portafoglioInventato()), { azione: 'correggi', dato: { tipo: 'cambio', valuta: 'CHF', data: SETTEMBRE }, valore: 0.94 })
+    const r = controllaCorrezioneDato(aVersioneAttuale(portafoglioInventato()), { azione: 'correggi', dato: { tipo: 'cambio', valuta: 'CHF', data: SETTEMBRE }, valore: 0.94 })
     expect(r).toEqual({ ok: false, perche: 'nel file non c’è nessun titolo in CHF' })
   })
 })
@@ -140,7 +140,7 @@ describe('i riferimenti', () => {
   })
 
   it('uno in dollari senza nessun cambio di quel giorno ha bisogno del cambio BCE', () => {
-    const dati = aVersione3(portafoglioInventato())
+    const dati = aVersioneAttuale(portafoglioInventato())
     expect(controllaCorrezioneDato(dati, { azione: 'correggi', dato: SP_AGOSTO, valore: 14000 })).toEqual({
       ok: false,
       perche: 'per S&P 500 di agosto 2026 serve il cambio BCE del dollaro di quel giorno',
@@ -151,8 +151,8 @@ describe('i riferimenti', () => {
   })
 
   it('uno in euro non ha cambio', () => {
-    const scritto = applica(conDati(), { azione: 'correggi', dato: BTP_AGOSTO, valore: 151.2 })
-    expect(trovaDato(scritto, BTP_AGOSTO)).not.toHaveProperty('cambio')
+    const scritto = applica(conDati(), { azione: 'correggi', dato: MIB_AGOSTO, valore: 151.2 })
+    expect(trovaDato(scritto, MIB_AGOSTO)).not.toHaveProperty('cambio')
   })
 
   it('scaricato di nuovo da investing.com: fonte investing.com, con seduta e cambio', () => {

@@ -4,7 +4,7 @@ import { ipcMain } from 'electron'
 import { ALTRA_BORSA, type RichiestaPrezzo } from '../src/dati/aggiorna/fonti.ts'
 import { CANALI_AGGIORNA, type EsitoSalva } from '../src/dati/aggiorna/ponte-aggiorna.ts'
 import {
-  aVersione3,
+  aVersioneAttuale,
   controllaMese,
   meseGiaNelFile,
   percheDellaCopia,
@@ -71,7 +71,7 @@ export function registraAggiorna(c: ContestoAggiorna, spente: string[] = []) {
         // Se il mese c'era già nel file, è un "Rifai".
         (dati) => percheDellaCopia(mese.mese, meseGiaNelFile(dati, mese.mese)),
         (dati) => {
-          const v3 = aVersione3(dati)
+          const v3 = aVersioneAttuale(dati)
           const ok = controllaMese(v3, mese)
           if (!ok.ok) {
             problema = ok.perche

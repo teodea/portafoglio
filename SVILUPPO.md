@@ -1,6 +1,6 @@
 # Portafoglio titoli — per chi cura il programma
 
-Applicazione per Windows (Electron) per sapere come sta andando un portafoglio titoli, a confronto con indici di borsa, BTP a 10 anni e inflazione ISTAT.
+Applicazione per Windows (Electron) per sapere come sta andando un portafoglio titoli, accanto all'andamento degli indici di borsa e dell'inflazione ISTAT.
 
 **Per chi lo usa:** come si scarica, si apre e si usa è nella [pagina principale](README.md).
 

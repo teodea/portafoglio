@@ -8,16 +8,16 @@ import type { RifValore } from '../dati/correzione-riferimento.ts'
 
 /** Un numero da scrivere, con il suo tipo: la pagina sa come formattarlo. */
 export type Cifra =
-  /** 12.345 € */
+  /** 12.345,60 € */
   | { tipo: 'euro'; n: number; decimali?: number }
-  /** +12.345 € oppure −12.345 €, del colore del segno */
+  /** +12.345,60 € oppure −12.345,60 €, del colore del segno */
   | { tipo: 'guadagno'; n: number; decimali?: number }
-  /** frazione: 0,034 → +3,4%, del colore del segno */
+  /** frazione: 0,0342 → +3,42%, del colore del segno */
   | { tipo: 'percentuale'; n: number }
   /** 1.000 quote */
   | { tipo: 'quote'; n: number }
-  /** 12,34 € oppure 52,845 GBP */
-  | { tipo: 'prezzo'; n: number; valuta: string }
+  /** 12,34 € oppure 52,85 GBP; "esatto" con tutti i decimali (52,845 GBP), dove il conto lo moltiplica */
+  | { tipo: 'prezzo'; n: number; valuta: string; esatto?: true }
   /** 0,85461 (unità di valuta per 1 euro) */
   | { tipo: 'cambio'; n: number }
   | { tipo: 'testo'; testo: string }
@@ -64,6 +64,7 @@ export const guadagno = (n: number, decimali = 2): Cifra => ({ tipo: 'guadagno',
 export const percentuale = (n: number): Cifra => ({ tipo: 'percentuale', n })
 export const quote = (n: number): Cifra => ({ tipo: 'quote', n })
 export const prezzo = (n: number, valuta: string): Cifra => ({ tipo: 'prezzo', n, valuta })
+export const prezzoEsatto = (n: number, valuta: string): Cifra => ({ tipo: 'prezzo', n, valuta, esatto: true })
 export const cambio = (n: number): Cifra => ({ tipo: 'cambio', n })
 export const testo = (t: string): Cifra => ({ tipo: 'testo', testo: t })
 export const riga = (etichetta: string, cifra: Cifra): RigaConto => ({ etichetta, cifra })

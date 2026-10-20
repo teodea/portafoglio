@@ -99,7 +99,7 @@ export function Oggi({ conti }: { conti: ContiTitoli }) {
                   <Cella numero={t.medioAnnuo} scrivi={percentuale} />
                 </td>
                 <td className="n">
-                  <Cella numero={t.ultimoMese} scrivi={percentuale} segno={(n) => segno(n * 100, 1)} />
+                  <Cella numero={t.ultimoMese} scrivi={percentuale} segno={(n) => segno(n * 100, 2)} />
                 </td>
                 <td className="n">
                   <PrezzoConFonte conto={t} />

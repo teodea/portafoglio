@@ -13,7 +13,7 @@ import {
 } from './controllo-prezzo.ts'
 import { FONTE, ORDINE_FONTI } from './fonti.ts'
 import { conTitolo, creaAggiornamento, daSalvare, richiestaDi, statoDaCambio, statoDaEsito, type Aggiornamento } from './lista.ts'
-import { aVersione3, controllaMese, scriviMese } from './versione3.ts'
+import { aVersioneAttuale, controllaMese, scriviMese } from './versione3.ts'
 
 const MONDO = 'ZZ0000000001-MIL'
 const TECN = 'ZZ0000000002-LON'
@@ -113,7 +113,7 @@ describe('la lista di Aggiorna con le riserve e il controllo', () => {
     a = { ...a, cambi: a.cambi.map((c) => ({ ...c, stato: statoDaCambio({ ok: true, cambio: 0.8691, seduta: '2026-10-30', fonte: 'BCE' }) })) }
     const mese = daSalvare(a)
     expect(mese.prezzi.find((p) => p.titolo === MONDO)).toMatchObject({ controllo: { prezzo: 13.1, seduta: '2026-10-30' } })
-    const v3 = aVersione3(dati)
+    const v3 = aVersioneAttuale(dati)
     expect(controllaMese(v3, mese)).toEqual({ ok: true })
     const dopo = scriviMese(v3, mese, '2026-11-03T10:00:00.000Z')
     const scritto = dopo.prezzi!.find((p) => p.titolo === TECN && p.data === '2026-10-31')!
@@ -126,7 +126,7 @@ describe('la lista di Aggiorna con le riserve e il controllo', () => {
   })
 
   it('il pannello "Da dove viene" del valore dice il controllo e il perché della riserva', () => {
-    const v3 = aVersione3(dati)
+    const v3 = aVersioneAttuale(dati)
     const prezzi = (v3.prezzi ?? []).map((p) =>
       p.titolo === MONDO && p.data === '2026-09-30'
         ? {
@@ -151,7 +151,7 @@ describe('la lista di Aggiorna con le riserve e il controllo', () => {
 })
 
 describe('il file dei dati con i codici delle riserve', () => {
-  const dati = aVersione3(portafoglioInventato())
+  const dati = aVersioneAttuale(portafoglioInventato())
 
   it('i codici si leggono; un codice sbagliato si dice in parole', () => {
     expect(controllaFile(comeTesto(dati)).ok).toBe(true)

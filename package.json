@@ -1,7 +1,7 @@
 {
   "name": "come-sto-andando",
   "private": true,
-  "version": "0.2.2",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "node scripts/avvia.mjs",
@@ -37,6 +37,6 @@
     "vite": "^8.3.0",
     "vitest": "^5.0.5"
   },
-  "description": "Come sta andando il portafoglio titoli, a confronto con indici, BTP e inflazione.",
+  "description": "Come sta andando il portafoglio titoli, accanto agli indici di borsa e all'inflazione.",
   "main": "dist-electron/electron/main.js"
 }

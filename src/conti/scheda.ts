@@ -15,7 +15,7 @@ import {
   quote as quoteTesto,
 } from '../formato.ts'
 import { fonteInParole, NOME_FILE_EXCEL } from './fonti.ts'
-import { cambio, euro, prezzo, quote, riga, type Numero, type RigaConto } from './spiegazione.ts'
+import { cambio, euro, prezzo, prezzoEsatto, quote, riga, type Numero, type RigaConto } from './spiegazione.ts'
 import { plusMinus, type ContoTitolo, type MeseDelTitolo, type VenditaSpiegata } from './titoli.ts'
 
 const QUASI_ZERO = 1e-9
@@ -133,7 +133,7 @@ export function spiegaOperazione(nome: string, o: Operazione, v: VenditaSpiegata
   const inValuta = o.valuta !== 'EUR'
   const lordoValuta = o.quantita * o.prezzo
   const lordoEuro = inValuta ? (o.cambio ? lordoValuta / o.cambio : lordoValuta) : lordoValuta
-  const conto: RigaConto[] = [riga('Quote', quote(o.quantita)), riga('× prezzo', prezzo(o.prezzo, o.valuta))]
+  const conto: RigaConto[] = [riga('Quote', quote(o.quantita)), riga('× prezzo', prezzoEsatto(o.prezzo, o.valuta))]
   if (inValuta) {
     conto.push(riga(`= in ${nomeValuta(o.valuta)}`, prezzo(lordoValuta, o.valuta)))
     conto.push(riga('÷ cambio del giorno', cambio(o.cambio)))

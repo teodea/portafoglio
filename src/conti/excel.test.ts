@@ -2,7 +2,7 @@
 // i numeri sono quelli dei conti delle pagine, messi in righe come nell'esempio della bozza 27.
 import { describe, expect, it } from 'vitest'
 import { FONTE } from '../dati/aggiorna/fonti.ts'
-import { aVersione3, scriviMese } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale, scriviMese } from '../dati/aggiorna/versione3.ts'
 import { applicaCorrezione } from '../dati/correzione.ts'
 import { applicaCorrezioneDato } from '../dati/correzione-dati.ts'
 import { eLibroExcel, type Cella, type FoglioLeggimi, type FoglioTabella, type LibroExcel } from '../dati/excel.ts'
@@ -33,7 +33,7 @@ const riga = (f: FoglioTabella, prima: string) => f.righe.find((r) => r[0] === p
 /** Ottobre arrivato da internet: MOND da Euronext Milano con il controllo diverso, TECN da investing.com; poi MOND corretto a mano. */
 function conOttobre(): FileDati {
   const ottobre = scriviMese(
-    aVersione3(conRiferimentiInventati(portafoglioInventato())),
+    aVersioneAttuale(conRiferimentiInventati(portafoglioInventato())),
     {
       mese: '2026-10',
       prezzi: [
@@ -194,7 +194,7 @@ describe('Prezzi di fine mese', () => {
 
   it('il controllo diverso si dice con la differenza', () => {
     const dati = scriviMese(
-      aVersione3(portafoglioInventato()),
+      aVersioneAttuale(portafoglioInventato()),
       {
         mese: '2026-10',
         prezzi: [
@@ -232,7 +232,7 @@ describe('Valore mese per mese', () => {
 })
 
 describe('Inflazione e riferimenti', () => {
-  it('un mese per riga dal più vecchio, con NIC e base, cambi e i sei riferimenti; vuoto dove manca', () => {
+  it('un mese per riga dal più vecchio, con NIC e base, cambi e i cinque indici; vuoto dove manca', () => {
     const dati = conRiferimentiInventati(portafoglioInventato())
     const f = tabella(libroExcel(dati, OGGI), 'Inflazione e riferimenti')
     expect(f.colonne.map((c) => c.titolo)).toEqual([
@@ -240,7 +240,6 @@ describe('Inflazione e riferimenti', () => {
       'Inflazione NIC',
       'Base NIC',
       'Cambio GBP',
-      'BTP 10 anni (EUR)',
       'FTSE MIB (EUR)',
       'Euro Stoxx 50 (EUR)',
       'Nasdaq-100 (USD)',

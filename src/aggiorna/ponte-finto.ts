@@ -6,7 +6,7 @@
 import { fineMese } from '../dati/aggiorna/calendario.ts'
 import { FONTE, ORDINE_FONTI, type EsitoPrezzo } from '../dati/aggiorna/fonti.ts'
 import type { PonteAggiorna } from '../dati/aggiorna/ponte-aggiorna.ts'
-import { aVersione3, controllaMese, meseGiaNelFile, percheDellaCopia, scriviMese } from '../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale, controllaMese, meseGiaNelFile, percheDellaCopia, scriviMese } from '../dati/aggiorna/versione3.ts'
 import { controllaFile } from '../dati/controllo.ts'
 import { comeTesto } from '../dati/portafoglio-inventato.ts'
 import type { Apertura } from '../dati/ponte.ts'
@@ -81,7 +81,7 @@ export function aggiornaFinto(accesso: AccessoFinto): PonteAggiorna {
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
       if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
-      const v3 = aVersione3(esito.dati)
+      const v3 = aVersioneAttuale(esito.dati)
       const ok = controllaMese(v3, m)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }
       const perche = percheDellaCopia(m.mese, meseGiaNelFile(esito.dati, m.mese))

@@ -6,7 +6,7 @@ import { DESCRIZIONE, type EsitoNic, type EsitoRiferimento } from '../dati/aggio
 import type { PonteRiferimenti } from '../dati/aggiorna/ponte-riferimenti.ts'
 
 const pausa = (ms: number) => new Promise((fatto) => setTimeout(fatto, ms))
-const BASE = { btp10: 140, ftsemib: 180, eurostoxx50: 170, nasdaq100: 21000, dowjones: 95000, sp500: 11000 } as const
+const BASE = { ftsemib: 33000, eurostoxx50: 4900, nasdaq100: 18000, dowjones: 39000, sp500: 5100 } as const
 
 /** Un numero inventato che cresce piano nel tempo: giorni dal 2024 → valore. */
 function inventato(base: number, data: string): number {

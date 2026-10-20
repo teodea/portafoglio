@@ -5,7 +5,7 @@
 import type { AccessoFinto } from '../../aggiorna/ponte-finto.ts'
 import { fineMese, meseDopo } from '../../dati/aggiorna/calendario.ts'
 import { DESCRIZIONE } from '../../dati/aggiorna/riferimenti.ts'
-import { aVersione3 } from '../../dati/aggiorna/versione3.ts'
+import { aVersioneAttuale } from '../../dati/aggiorna/versione3.ts'
 import { applicaCodici, controllaCodici, PERCHE_CODICI, type PonteCodici } from '../../dati/codici-riserve.ts'
 import { controllaFile } from '../../dati/controllo.ts'
 import { applicaCorrezioneDato, controllaCorrezioneDato, percheDellaCopiaDato, type PonteCorrezioneDato } from '../../dati/correzione-dati.ts'
@@ -19,7 +19,7 @@ export function correzioneDatoFinta(accesso: AccessoFinto): PonteCorrezioneDato 
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
       if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
-      const v3 = aVersione3(esito.dati)
+      const v3 = aVersioneAttuale(esito.dati)
       const ok = controllaCorrezioneDato(v3, c)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }
       const perche = percheDellaCopiaDato(v3, c)
@@ -49,7 +49,7 @@ export function codiciFinti(accesso: AccessoFinto): PonteCodici {
   }
 }
 
-const BASE = { btp10: 140, ftsemib: 180, eurostoxx50: 170, nasdaq100: 21000, dowjones: 95000, sp500: 11000 } as const
+const BASE = { ftsemib: 33000, eurostoxx50: 4900, nasdaq100: 18000, dowjones: 39000, sp500: 5100 } as const
 
 /** Un numero inventato che cresce piano nel tempo. */
 function inventato(base: number, i: number): number {
@@ -84,5 +84,5 @@ export function conRiferimentiInventati(dati: FileDati): FileDati {
   }
   // Come nel file vero: per riferimento, poi per data.
   riferimenti.sort((a, b) => RIFERIMENTI.indexOf(a.riferimento) - RIFERIMENTI.indexOf(b.riferimento) || a.data.localeCompare(b.data))
-  return { ...aVersione3(dati), nic, riferimenti }
+  return { ...aVersioneAttuale(dati), nic, riferimenti }
 }

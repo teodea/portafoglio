@@ -7,7 +7,7 @@ import { euro, guadagnoEuro, mese, meseBreve, numero, segno } from '../../../for
 import { classeSegno, useSpiega } from '../../../pannello/spiega.ts'
 
 const ALTO = 240
-const SINISTRA = 52
+const SINISTRA = 68
 const DESTRA = 12
 const SOPRA = 16
 const SOTTO = 28
@@ -35,8 +35,9 @@ function griglia(valori: number[]): { min: number; max: number; linee: number[] 
   return { min, max, linee }
 }
 
+/** "48.000" con il punto delle migliaia (niente "k"); sotto i 10.000 anche i decimali del passo, "2.500,5". */
 function etichettaAsse(v: number, max: number): string {
-  if (max >= 10_000) return `${numero(v / 1000, 0, 1)}k`
+  if (max >= 10_000) return numero(v)
   return numero(v, 0, 2)
 }
 

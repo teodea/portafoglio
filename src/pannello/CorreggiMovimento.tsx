@@ -15,7 +15,7 @@ import {
   type EsitoMovimento,
   type ModificaMovimento,
 } from '../dati/movimenti.ts'
-import { cambio, data, euro, guadagnoEuro, prezzo, quote } from '../formato.ts'
+import { cambio, data, euro, guadagnoEuro, prezzoEsatto, quote } from '../formato.ts'
 import { Icona } from '../icone.tsx'
 import { dataNellaCasella, leggiData, leggiNumero, numeroNellaCasella, totaleDalConto } from '../pagine/movimenti/bozza.ts'
 import { ponte } from '../ponte.ts'
@@ -348,7 +348,7 @@ function scriviCampo(k: Campo, v: string | number, valuta: string): string {
   if (k === 'data') return data(String(v))
   const n = Number(v)
   if (k === 'quantita') return quote(n)
-  if (k === 'prezzo') return prezzo(n, valuta)
+  if (k === 'prezzo') return prezzoEsatto(n, valuta)
   if (k === 'cambio') return cambio(n)
   return euro(n, 2)
 }

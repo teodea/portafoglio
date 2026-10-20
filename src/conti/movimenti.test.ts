@@ -58,7 +58,7 @@ describe('l’elenco dei movimenti', () => {
     expect(r.soldi.n).toBe(6.66)
     const s = spiegazioneDelMovimento(d, r.id)!
     expect(s.movimento).toBe(r.id)
-    expect(s.conto.map((c) => c.etichetta)).toEqual(['Quote in portafoglio', '× lordo per quota', '= lordo', '− imposte (26,0%)', 'Netto accreditato'])
+    expect(s.conto.map((c) => c.etichetta)).toEqual(['Quote in portafoglio', '× lordo per quota', '= lordo', '− imposte (26,00%)', 'Netto accreditato'])
     const cedola = elencoMovimenti(d).find((x) => x.id === 'div-1')!
     expect(cedola.sotto).toBe('cedola dell’obbligazione')
     expect(spiegazioneDelMovimento(d, 'non-c-e')).toBeNull()

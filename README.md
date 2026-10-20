@@ -1,6 +1,6 @@
 # Portafoglio titoli
 
-Il programma per Windows che mostra **l'andamento del portafoglio titoli di famiglia**: controvalore, plusvalenza, rendimento annualizzato e confronto con gli indici di borsa, i BTP e l'inflazione.
+Il programma per Windows che mostra **l'andamento del portafoglio titoli di famiglia**: controvalore, plusvalenza, rendimento annualizzato e, accanto, l'andamento degli indici di borsa e dell'inflazione.
 
 ## ⬇️ Scaricare il programma
 
@@ -44,7 +44,7 @@ Il programma si chiude con la **X** in alto a destra: da chiuso non resta attivo
 
 Il menu ha quattro pagine (a sinistra; con la finestra stretta, in alto).
 
-**Portafoglio**: il quadro complessivo. In grande la plusvalenza di tutto il portafoglio, titoli venduti compresi, con il rendimento sul capitale investito e il rendimento annualizzato. Sotto: controvalore, capitale investito, rendimento del mese, rendimento da inizio anno e dividendi netti. Poi l'andamento del controvalore mese per mese, il **confronto con i riferimenti** (FTSE MIB, Euro Stoxx 50, S&P 500, Nasdaq-100, Dow Jones, BTP 10 anni, inflazione) e i titoli migliori e peggiori.
+**Portafoglio**: il quadro complessivo. In grande la plusvalenza di tutto il portafoglio, titoli venduti compresi, con il rendimento sul capitale investito e il rendimento annualizzato. Sotto: controvalore, capitale investito, rendimento del mese, rendimento da inizio anno e dividendi netti. Poi l'andamento del controvalore mese per mese, l'**andamento dei mercati** (il portafoglio con FTSE MIB, Euro Stoxx 50, Nasdaq-100, Dow Jones e S&P 500 in punti, senza dividendi, e l'inflazione) e i titoli migliori e peggiori.
 
 **Titoli**: un titolo per riga, con controvalore, costo, plus/minusvalenza, rendimento, rendimento annualizzato e prezzo di fine mese. I riquadri in alto contano **solo i titoli in portafoglio**; per questo la plusvalenza può differire da quella della pagina Portafoglio, che comprende anche i titoli venduti. Le schede: ‹data dei prezzi›, Mese per mese, Dividendi, Venduti. Selezionando un titolo si apre la sua **scheda**: grafico, mese per mese, operazioni, dividendi e provenienza dei numeri.
 

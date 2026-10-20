@@ -42,9 +42,9 @@ export function euroConSegno(n: number): string {
   return `${formato(2, 2, true).format(n)} €`
 }
 
-/** 1.234 → "+1,2%" */
+/** 1.234 → "+1,23%" */
 export function percentuale(n: number): string {
-  return `${formato(1, 1, true).format(n)}%`
+  return `${formato(2, 2, true).format(n)}%`
 }
 
 /** Il controllo di investing.com: +0,6%, con due decimali sotto lo 0,1% (+0,04%). */

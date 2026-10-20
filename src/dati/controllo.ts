@@ -4,7 +4,7 @@
 import { leggiJson, percorso } from './json.ts'
 import { FONTI_CAMBIO, FONTI_PREZZO } from './aggiorna/fonti.ts'
 import { FONTI_NIC, FONTI_RIFERIMENTO } from './aggiorna/riferimenti.ts'
-import { BORSE, RIFERIMENTI, VERSIONI_CONOSCIUTE, type FileDati } from './tipi.ts'
+import { BORSE, RIFERIMENTI, RIFERIMENTI_VERSIONE_3, VERSIONI_CONOSCIUTE, type FileDati } from './tipi.ts'
 
 export type RigaDelFile = { numero: number; testo: string }
 
@@ -256,6 +256,9 @@ const SCHEMA_RIFERIMENTO: Schema = {
   quando: { regola: 'testo', facoltativo: true },
 }
 
+// Fino alla versione 3 c'era anche il BTP 10 anni.
+const SCHEMA_RIFERIMENTO_V3: Schema = { ...SCHEMA_RIFERIMENTO, riferimento: { regola: { scelta: RIFERIMENTI_VERSIONE_3 } } }
+
 const SCHEMA_NIC: Schema = {
   data: { regola: 'data' },
   valore: { regola: 'numero-positivo' },
@@ -308,7 +311,7 @@ function controllaForma(radice: unknown): Trovato[] {
     ['dividendi', SCHEMA_DIVIDENDO, 'il dividendo'],
     ['prezzi', versione >= 3 ? SCHEMA_PREZZO_V3 : SCHEMA_PREZZO, 'il prezzo'],
     ['cambi', SCHEMA_CAMBIO, 'il cambio'],
-    ['riferimenti', SCHEMA_RIFERIMENTO, 'il valore'],
+    ['riferimenti', versione >= 4 ? SCHEMA_RIFERIMENTO : SCHEMA_RIFERIMENTO_V3, 'il valore'],
     ['nic', SCHEMA_NIC, 'il NIC'],
   ]
   for (const [chiave, schema, nomeUno] of elenchi) {

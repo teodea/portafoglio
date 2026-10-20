@@ -44,7 +44,7 @@ describe('scrivere una correzione a mano', () => {
     expect(await readFile(join(cartella, 'copie', scritto.copia), 'utf8')).toBe(prima)
 
     const dopo = await leggi()
-    expect(dopo.versione).toBe(3)
+    expect(dopo.versione).toBe(4)
     expect(dopo.prezzi!.find((p) => p.titolo === MOND && p.data === SETTEMBRE)).toMatchObject({
       prezzo: 12.57,
       fonte: 'a mano',
