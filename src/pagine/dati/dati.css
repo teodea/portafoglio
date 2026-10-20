@@ -1,0 +1,234 @@
+/* La pagina Dati (ticket 13, mappa 27). Le classi hanno il prefisso "dati-" per non toccare le altre pagine. */
+
+/* La fonte sotto il prezzo: un puntino verde per la borsa ufficiale, grigio per le altre (bozza 27). */
+.dati-fonte {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.dati-fonte .punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--filo-forte);
+  flex: none;
+}
+.dati-fonte.borsa .punto {
+  background: var(--su);
+}
+/* Una riserva (investing.com, Yahoo, un'altra borsa): cerchio vuoto, come in Aggiorna fine mese e nella bozza 27. */
+.dati-fonte.riserva .punto {
+  background: transparent;
+  border: 1.5px solid var(--tenue);
+}
+.dati-sotto {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tenue);
+  white-space: normal;
+  max-width: 34ch;
+}
+
+/* Il controllo di investing.com: "uguale" grigio, "diverso" in grassetto (non è una perdita: niente rosso). */
+.dati-uguale {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tenue);
+  font-size: 13px;
+}
+.num.dati-diverso {
+  font-weight: 650;
+  font-size: 13.5px;
+}
+
+.dati-scegli {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.dati-scegli select {
+  font: inherit;
+  font-size: 13px;
+  color: var(--testo);
+  background: var(--pannello);
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+
+/* "manca": tenue, cliccabile come un numero. */
+.num.dati-manca {
+  font-style: normal;
+}
+
+/* Le intestazioni hanno sotto l'unità ("in dollari", "GBP per 1 €"). */
+table.dati-mesi th .sotto {
+  font-weight: 400;
+}
+table.dati-mesi td:first-child {
+  color: var(--tenue);
+}
+
+.dati-nota {
+  padding: 12px 18px 14px;
+  margin: 0;
+  border-top: 1px solid var(--filo);
+}
+
+/* Scheda Copie */
+.dati-file {
+  font-size: 13px;
+}
+table.dati-copie td:nth-child(2) {
+  white-space: normal;
+  width: 100%;
+}
+.dati-file {
+  overflow-wrap: anywhere;
+}
+tr.dati-appena td {
+  background: var(--pannello-2);
+}
+.dati-esito {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 12px 18px;
+  font-size: 13.5px;
+}
+.dati-esito .ic {
+  margin-top: 2px;
+}
+.dati-pagina .riquadro .spiega {
+  margin: 12px 18px;
+}
+.dati-pagina .spiega p {
+  margin: 0;
+}
+
+/* Il pannello "Scarica in Excel" (ticket 14): il pannello di destra senza il numero grande, con l'elenco dei fogli. */
+.cassetto .grande:empty {
+  display: none;
+}
+.dati-excel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dati-excel p {
+  margin: 0;
+}
+.dati-excel .conto div span:last-child {
+  white-space: normal;
+}
+.dati-excel .conto div:last-child {
+  font-weight: inherit;
+  background: none;
+}
+.dati-excel .esito {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13.5px;
+}
+.dati-excel .esito .ic {
+  margin-top: 1px;
+}
+
+/* "Cerca i codici investing.com" (collaudo del 19/10, punto 7): sopra la tabella dei prezzi. */
+.dati-codici {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--filo);
+  font-size: 13.5px;
+}
+.dati-codici p {
+  margin: 0;
+}
+.dati-codici-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.dati-codici-testa p {
+  flex: 1 1 420px;
+}
+.dati-codici .esito {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.dati-codici .esito .ic {
+  margin-top: 1px;
+}
+.dati-codici-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+}
+.dati-codici-lista li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--filo);
+}
+.dati-codici-lista li:last-child {
+  border-bottom: 0;
+}
+.dati-codici-trovato {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.dati-codici-trovato .dati-sotto {
+  max-width: none;
+}
+.dati-codici-indirizzo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+.dati-codici-indirizzo input {
+  font: inherit;
+  font-size: 13.5px;
+  padding: 6px 8px;
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  background: var(--pannello);
+  color: var(--testo);
+}
+.dati-codici-usa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.dati-codici .conferma {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--filo-forte);
+  border-radius: 10px;
+  background: var(--pannello-2);
+}
+.dati-codici .conferma ul {
+  margin: 0;
+  padding-left: 18px;
+}

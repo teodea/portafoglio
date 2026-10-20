@@ -1,0 +1,75 @@
+/* La classifica "Fai meglio dei riferimenti?" (ticket 10, DESIGN.md "Classifica a barre dei riferimenti"):
+   una riga per il portafoglio e una per ogni riferimento, ogni riga un bottone a tre colonne. */
+
+.pagina-portafoglio .classifica-rif {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pagina-portafoglio .classifica-rif .attrezzi b {
+  color: var(--testo);
+  font-weight: 650;
+}
+.pagina-portafoglio .barre {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 10px;
+}
+.pagina-portafoglio .barre .num {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 6px 6px;
+  text-align: left;
+}
+.pagina-portafoglio .barre .nome {
+  min-width: 0;
+  line-height: 1.3;
+}
+.pagina-portafoglio .barre .fino {
+  display: inline-block;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.pagina-portafoglio .barre .binario {
+  height: 10px;
+  background: var(--pannello-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.pagina-portafoglio .barre .binario i {
+  display: block;
+  height: 100%;
+  background: var(--filo-forte);
+  border-radius: 5px;
+}
+.pagina-portafoglio .barre .tu .binario i {
+  background: var(--azione);
+}
+.pagina-portafoglio .barre .tu .nome {
+  font-weight: 650;
+}
+.pagina-portafoglio .barre .val {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pagina-portafoglio .barre .val.su {
+  color: var(--su);
+}
+.pagina-portafoglio .barre .val.giu {
+  color: var(--giu);
+}
+.pagina-portafoglio .barre .val.tenue {
+  color: var(--tenue);
+  font-weight: 400;
+}
+@media (max-width: 520px) {
+  .pagina-portafoglio .barre .num {
+    grid-template-columns: 104px minmax(0, 1fr) 60px;
+    gap: 8px;
+  }
+}

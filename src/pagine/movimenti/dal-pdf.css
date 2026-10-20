@@ -1,0 +1,98 @@
+/* Registra dal PDF (ticket 12): la zona del PDF, i riquadri accanto alla frase, il titolo nuovo. */
+.zona-pdf {
+  border: 1.5px dashed var(--filo-forte);
+  border-radius: var(--raggio);
+  padding: 26px 18px;
+  text-align: center;
+  color: var(--tenue);
+  background: var(--pannello-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.zona-pdf.sopra {
+  border-color: var(--azione);
+  background: var(--azione-tenue);
+  color: var(--azione);
+}
+.zona-pdf b {
+  color: var(--testo);
+  font-size: 15px;
+}
+.zona-pdf small {
+  font-size: 12.5px;
+}
+.zona-pdf .ic {
+  width: 28px;
+  height: 28px;
+}
+.letto-da {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.registra .pezzi {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.gia-registrato {
+  border: 1px solid var(--testo);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--pannello-2);
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+}
+.gia-registrato > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gia-registrato .ic {
+  color: var(--azione);
+  margin-top: 1px;
+  flex: none;
+}
+.titolo-nuovo {
+  border-top: 1px solid var(--filo);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.titolo-nuovo h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.titolo-nuovo .investing {
+  border: 1px solid var(--filo-forte);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--pannello-2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13.5px;
+}
+.titolo-nuovo .trovato {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.titolo-nuovo .trovato .sotto {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tenue);
+  margin-top: 2px;
+}
+.titolo-nuovo .campo input[aria-invalid='true'] {
+  border-color: var(--testo);
+}

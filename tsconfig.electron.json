@@ -1,0 +1,25 @@
+{
+  // Il processo principale di Electron e il preload, più i moduli puri di src/dati che usano anche le pagine.
+  // Si compila in dist-electron/ (main ESM, preload CommonJS perché il preload in sandbox non può essere un modulo ES).
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "rootDir": ".",
+    "outDir": "dist-electron",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["electron/**/*.ts", "electron/**/*.cts", "src/dati/**/*.ts"],
+  "exclude": ["**/*.test.ts"]
+}

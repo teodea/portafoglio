@@ -1,0 +1,42 @@
+# L'installatore per Windows (electron-builder). Lo costruisce la GitHub Action "Installatore"
+# (.github/workflows/installatore.yml) e lo mette in una Release di teodea/portafoglio;
+# sul PC si prova con "npm run installatore", che lo mette in installatore/ senza pubblicare niente.
+appId: io.github.teodea.come-sto-andando
+productName: Portafoglio titoli
+copyright: Uso di famiglia
+
+directories:
+  output: installatore
+
+# Nell'applicazione vanno solo le pagine costruite e il processo principale (più le dipendenze di "dependencies").
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - '!dist-electron/**/*.test.js'
+  - package.json
+
+win:
+  target: nsis
+  icon: public/pwa-512x512.png
+  # Non è firmata (deciso): al primo avvio Windows dice "app non riconosciuta", si risponde "Esegui comunque".
+
+nsis:
+  # Un clic, solo per l'utente di Windows che installa: niente permessi da amministratore.
+  oneClick: true
+  perMachine: false
+  installerLanguages: [it_IT]
+  language: '1040'
+  shortcutName: Portafoglio titoli
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: true
+  # Disinstallando, la cartella dei dati non si tocca mai (sta altrove); restano anche le impostazioni.
+  deleteAppDataOnUninstall: false
+  artifactName: Portafoglio-titoli-${version}.${ext}
+
+# Dove l'applicazione installata cerca le versioni nuove, e dove la Action le pubblica.
+publish:
+  provider: github
+  owner: teodea
+  repo: portafoglio
+  releaseType: release

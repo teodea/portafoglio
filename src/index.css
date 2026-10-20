@@ -1,0 +1,853 @@
+/* L'aspetto di DESIGN.md: "lo standard delle app di investimento, fatto con cura".
+   Ogni colore ha il suo gemello scuro; il tema segue quello di Windows,
+   data-tema="chiaro" o "scuro" sulla radice lo forza. */
+:root {
+  --fondo: #f6f7f9;
+  --pannello: #ffffff;
+  --pannello-2: #f9fafb;
+  --testo: #111827;
+  --tenue: #5b6472;
+  --filo: #e3e6eb;
+  --filo-forte: #cdd2d9;
+  --azione: #1f5fd6;
+  --azione-tenue: #eaf1fd;
+  --azione-testo: #ffffff;
+  --su: #127a38;
+  --su-tenue: #e8f5ec;
+  --giu: #c02626;
+  --giu-tenue: #fcecec;
+  --mano: #8a5a00;
+  --mano-tenue: #fff4db;
+  --ombra: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 12px rgba(17, 24, 39, 0.04);
+  --ombra-alta: 0 8px 30px rgba(17, 24, 39, 0.14);
+  --velo: rgba(17, 24, 39, 0.18);
+  --raggio: 12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='chiaro']) {
+    --fondo: #0e1116;
+    --pannello: #161a21;
+    --pannello-2: #1b2029;
+    --testo: #e8ebf0;
+    --tenue: #9ba4b1;
+    --filo: #262c36;
+    --filo-forte: #353c48;
+    --azione: #6e9dff;
+    --azione-tenue: #1c2740;
+    --azione-testo: #0e1116;
+    --su: #4cc97a;
+    --su-tenue: #15281d;
+    --giu: #f27474;
+    --giu-tenue: #2e1717;
+    --mano: #e8b65a;
+    --mano-tenue: #2b2312;
+    --ombra: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --ombra-alta: 0 8px 30px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-tema='scuro'] {
+  --fondo: #0e1116;
+  --pannello: #161a21;
+  --pannello-2: #1b2029;
+  --testo: #e8ebf0;
+  --tenue: #9ba4b1;
+  --filo: #262c36;
+  --filo-forte: #353c48;
+  --azione: #6e9dff;
+  --azione-tenue: #1c2740;
+  --azione-testo: #0e1116;
+  --su: #4cc97a;
+  --su-tenue: #15281d;
+  --giu: #f27474;
+  --giu-tenue: #2e1717;
+  --mano: #e8b65a;
+  --mano-tenue: #2b2312;
+  --ombra: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ombra-alta: 0 8px 30px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+body {
+  font-family: 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--testo);
+  background: var(--fondo);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: var(--azione-tenue);
+  color: var(--testo);
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+:focus-visible {
+  outline: 2px solid var(--azione);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.ic {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.ic.p {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- il guscio: barra a sinistra, contenuto a destra ---------- */
+.guscio {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  min-height: 100vh;
+}
+.barra {
+  background: var(--pannello);
+  border-right: 1px solid var(--filo);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.marchio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+  font-size: 15px;
+  padding: 2px 10px 22px;
+}
+.marchio i {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--azione);
+  display: grid;
+  place-items: center;
+  color: var(--azione-testo);
+}
+.voce {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--tenue);
+  text-decoration: none;
+  font-weight: 500;
+}
+.voce:hover {
+  background: var(--pannello-2);
+  color: var(--testo);
+}
+.voce[aria-current='page'] {
+  background: var(--azione-tenue);
+  color: var(--azione);
+  font-weight: 600;
+}
+.barra .piede {
+  margin-top: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.barra .piede .btn {
+  justify-content: center;
+}
+.cartella-barra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--tenue);
+  text-decoration: none;
+  padding: 2px 2px;
+  border-radius: 6px;
+  min-width: 0;
+}
+.cartella-barra span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cartella-barra:hover {
+  color: var(--testo);
+}
+
+main {
+  padding: 24px 32px 48px;
+  min-width: 0;
+  max-width: 1480px;
+  width: 100%;
+}
+
+/* ---------- testata, bottoni, testo ---------- */
+.testata {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+h1 {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+/* Un titolo riceve il focus solo dal programma, quando cambia la schermata: non serve l'anello. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+h2 {
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0 0 12px;
+}
+p {
+  margin: 0;
+}
+.tenue {
+  color: var(--tenue);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--filo-forte);
+  background: var(--pannello);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--pannello-2);
+}
+.btn.primario {
+  background: var(--azione);
+  border-color: var(--azione);
+  color: var(--azione-testo);
+}
+.btn.primario:hover {
+  filter: brightness(1.06);
+}
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+.btn.solo-icona {
+  padding: 6px;
+}
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--azione);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+.bottoni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- riquadri dei numeri ---------- */
+.numeri {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.numero {
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  padding: 14px 16px;
+  box-shadow: var(--ombra);
+  text-align: left;
+  min-width: 0;
+}
+.numero small {
+  display: block;
+  color: var(--tenue);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.numero b {
+  display: block;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.numero span {
+  display: block;
+  font-size: 13px;
+  color: var(--tenue);
+  overflow-wrap: anywhere;
+}
+.numero .azioni {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.numero .link {
+  font-size: 13px;
+}
+
+/* ---------- riquadri e messaggi ---------- */
+.riquadro {
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  box-shadow: var(--ombra);
+  overflow: hidden;
+}
+.vuoto {
+  padding: 28px 18px;
+  text-align: center;
+  color: var(--tenue);
+}
+.nota {
+  font-size: 13px;
+  color: var(--tenue);
+  padding: 12px 2px;
+}
+.striscia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--pannello);
+  border: 1px solid var(--filo-forte);
+  border-radius: var(--raggio);
+  box-shadow: var(--ombra);
+  padding: 10px 12px 10px 16px;
+  margin-bottom: 18px;
+}
+.striscia > span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.spiega {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--pannello-2);
+  border: 1px solid var(--filo);
+  font-size: 13.5px;
+}
+.spiega b {
+  font-weight: 650;
+}
+.prova-browser {
+  font-size: 12.5px;
+  color: var(--tenue);
+  border: 1px dashed var(--filo-forte);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 16px;
+}
+
+/* ---------- schermate intere: file rotto, cartella da scegliere ---------- */
+.schermata {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  place-items: center;
+}
+.schermata > .riquadro {
+  padding: 26px 28px;
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.schermata h1 {
+  margin-bottom: -4px;
+}
+.codice {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  background: var(--pannello-2);
+  font-family: Consolas, 'Cascadia Mono', monospace;
+  font-size: 13px;
+  white-space: pre;
+  overflow-x: auto;
+}
+.codice .qui {
+  font-weight: 700;
+}
+.codice .num-riga {
+  color: var(--tenue);
+  user-select: none;
+}
+.piccolo {
+  font-size: 13px;
+}
+/* Testo solo per chi usa un lettore dello schermo (per esempio il mese scelto con le frecce nei grafici). */
+.solo-lettore {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.avviso {
+  font-weight: 600;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tenue);
+  text-align: left;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--filo);
+  white-space: nowrap;
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--filo);
+}
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+th.n,
+td.n {
+  text-align: right;
+}
+.copie {
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ---------- guadagni e perdite: sempre con il segno, il colore non basta ---------- */
+.su {
+  color: var(--su);
+}
+.giu {
+  color: var(--giu);
+}
+
+/* ---------- riquadri dei numeri che si spiegano ---------- */
+.numero.capo b {
+  font-size: 28px;
+}
+button.numero {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+button.numero:hover {
+  border-color: var(--filo-forte);
+}
+.numero b.su,
+.numero span.su {
+  color: var(--su);
+}
+.numero b.giu,
+.numero span.giu {
+  color: var(--giu);
+}
+
+/* ---------- riquadro con schede, attrezzi e tabella ---------- */
+.schede {
+  display: flex;
+  gap: 22px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--filo);
+  overflow-x: auto;
+}
+.schede button {
+  border: 0;
+  background: none;
+  padding: 13px 0 11px;
+  color: var(--tenue);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.schede button:hover {
+  color: var(--testo);
+}
+.schede button[aria-selected='true'] {
+  color: var(--azione);
+  border-bottom-color: var(--azione);
+}
+.attrezzi {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--filo);
+  background: var(--pannello-2);
+  font-size: 13px;
+  color: var(--tenue);
+}
+.segmenti {
+  display: inline-flex;
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--pannello);
+}
+.segmenti button {
+  border: 0;
+  background: none;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+.segmenti button + button {
+  border-left: 1px solid var(--filo-forte);
+}
+.segmenti button:hover {
+  color: var(--testo);
+}
+.segmenti button[aria-pressed='true'] {
+  background: var(--azione-tenue);
+  color: var(--azione);
+}
+.scorre {
+  overflow-x: auto;
+}
+.scorre td {
+  white-space: nowrap;
+}
+/* Il nome del titolo va a capo: con i nomi lunghi (e nella finestra di un portatile, 1366 px) la tabella starebbe
+   più larga della finestra e l'ultima colonna resterebbe tagliata (collaudo del 19/10, punto 2). */
+.scorre td:has(> .tit) {
+  white-space: normal;
+  min-width: 170px;
+  max-width: 280px;
+}
+.scorre td .tit span {
+  overflow-wrap: anywhere;
+}
+th button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+th button:hover {
+  color: var(--testo);
+}
+tr.riga {
+  cursor: pointer;
+}
+tr.riga:hover td {
+  background: var(--pannello-2);
+}
+tr.totale td {
+  font-weight: 650;
+  background: var(--pannello-2);
+}
+td.forte {
+  font-weight: 650;
+}
+table.mesi th:first-child,
+table.mesi td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--pannello);
+  z-index: 1;
+}
+/* la prima colonna resta ferma: con i bordi separati il filo sotto le celle ferme resta al suo posto */
+table.mesi {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table.mesi tr.riga:hover td:first-child,
+table.mesi tr.totale td:first-child {
+  background: var(--pannello-2);
+}
+.tit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.tit a {
+  font-weight: 650;
+  color: inherit;
+  text-decoration: none;
+}
+.tit a:hover {
+  text-decoration: underline;
+}
+.tit span {
+  color: var(--tenue);
+  font-size: 13px;
+}
+.sotto {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+
+/* ---------- il numero che si spiega: un bottone che sembra testo ---------- */
+.num {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 5px;
+  font: inherit;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: inherit;
+}
+.num:hover {
+  background: var(--azione-tenue);
+}
+.num.su {
+  color: var(--su);
+}
+.num.giu {
+  color: var(--giu);
+}
+.num.tenue {
+  color: var(--tenue);
+}
+.pill {
+  display: inline-block;
+  min-width: 68px;
+  text-align: right;
+  padding: 2px 8px;
+  margin: 0;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.pill.su {
+  background: var(--su-tenue);
+}
+.pill.giu {
+  background: var(--giu-tenue);
+}
+.pill.su:hover,
+.pill.giu:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+/* ---------- Scheda del titolo ---------- */
+.indietro {
+  margin-bottom: 14px;
+}
+.capo-titolo {
+  margin-bottom: 18px;
+}
+.capo-titolo h1 span {
+  font-weight: 450;
+  color: var(--tenue);
+  font-size: 18px;
+  margin-left: 8px;
+}
+.etichette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.etichetta {
+  font-size: 12.5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--filo);
+  color: var(--tenue);
+  background: var(--pannello);
+}
+
+/* ---------- il pannello "Da dove viene" ---------- */
+.sotto-pannello {
+  display: contents;
+}
+.velo {
+  position: fixed;
+  inset: 0;
+  background: var(--velo);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+.velo.aperto {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cassetto {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 92vw);
+  background: var(--pannello);
+  border-left: 1px solid var(--filo);
+  box-shadow: var(--ombra-alta);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition:
+    transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 0.28s;
+  display: flex;
+  flex-direction: column;
+  z-index: 11;
+}
+.cassetto.aperto {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.cassetto header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--filo);
+}
+.cassetto header b {
+  font-size: 15px;
+  font-weight: 650;
+}
+.cassetto .corpo {
+  padding: 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+/* Quando il pannello è più lungo della finestra scorre: i pezzi non si schiacciano (il conto resterebbe tagliato). */
+.cassetto .corpo > * {
+  flex-shrink: 0;
+}
+.cassetto .grande {
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.cassetto .grande .dopo {
+  font-size: 16px;
+  font-weight: 450;
+  color: var(--tenue);
+  letter-spacing: 0;
+}
+.conto {
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.conto div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--filo);
+}
+.conto div span:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.conto div:last-child {
+  border-bottom: 0;
+  font-weight: 650;
+  background: var(--pannello-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cassetto,
+  .cassetto.aperto,
+  .velo {
+    transition: none;
+  }
+}
+
+/* ---------- finestra stretta ---------- */
+@media (max-width: 900px) {
+  /* La barra resta alta quanto le voci anche su una pagina corta: lo spazio in più va al contenuto. */
+  .guscio {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .barra {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 12px;
+  }
+  .marchio {
+    padding: 2px 10px;
+  }
+  .barra .piede {
+    margin: 0 0 0 auto;
+    padding: 0;
+    flex-direction: row;
+    align-items: center;
+  }
+  .cartella-barra {
+    display: none;
+  }
+  main {
+    padding: 16px;
+  }
+}

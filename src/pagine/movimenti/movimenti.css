@@ -1,0 +1,213 @@
+/* La pagina Movimenti e la schermata Registra (ticket 11, bozza 26). Nessuno stile nuovo:
+   riquadri, schede, tabella e pannello sono quelli di index.css; qui solo i pezzi propri di queste pagine. */
+
+.testata a.btn {
+  text-decoration: none;
+}
+
+/* ---------- la tabella dei movimenti ---------- */
+table.movimenti td {
+  white-space: nowrap;
+}
+tr.anno td {
+  background: var(--pannello-2);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--tenue);
+  padding: 6px 14px;
+}
+tr[data-nuovo] td {
+  background: var(--pannello-2);
+}
+.cosa {
+  display: flex;
+  flex-direction: column;
+}
+.etichetta.nuova {
+  border-color: var(--filo-forte);
+  color: var(--testo);
+  font-weight: 600;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* ---------- il messaggio in basso dopo una scrittura ---------- */
+.messaggio {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  box-shadow: var(--ombra-alta);
+  border-radius: 10px;
+  padding: 10px 10px 10px 16px;
+  font-size: 13.5px;
+  width: max-content;
+  max-width: min(620px, 92vw);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  /* Sotto il velo del pannello: con "Da dove viene" aperto non copre il pannello. */
+  z-index: 9;
+}
+.messaggio > .ic {
+  color: var(--su);
+  margin-top: 1px;
+}
+.messaggio > span {
+  flex: 1;
+}
+
+/* ---------- la schermata Registra ---------- */
+.registra {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.registra .colonna {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.registra .gruppo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.registra .gruppo > small {
+  font-size: 13px;
+  color: var(--tenue);
+}
+.registra .scelte {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.registra .frase-box {
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.registra .frase {
+  font-size: 17px;
+  line-height: 1.55;
+  margin: 0;
+}
+.registra .frase b {
+  font-weight: 650;
+}
+.registra .numeri {
+  margin: 0;
+}
+.registra .spiega p {
+  margin: 0;
+}
+.registra p {
+  margin: 0;
+}
+.registra .domanda {
+  font-weight: 600;
+}
+.registra .nota-scrittura {
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+.campi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+.campi .largo {
+  grid-column: 1 / -1;
+}
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.campo .testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.campo input,
+.campo select {
+  font: inherit;
+  font-size: 15px;
+  padding: 8px 10px;
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  background: var(--pannello);
+  color: var(--testo);
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.campo input.n {
+  text-align: right;
+}
+.campo input[aria-invalid='true'] {
+  border-color: var(--testo);
+}
+.campo .aiuto {
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+.campo .fisso {
+  font-size: 15px;
+  color: var(--testo);
+  padding: 8px 0;
+  font-weight: 600;
+}
+.dalpdf {
+  font-size: 12px;
+  color: var(--tenue);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dalpdf .punto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--filo-forte);
+}
+.avviso-conto {
+  border: 1px solid var(--filo-forte);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--pannello-2);
+  font-size: 13.5px;
+  display: flex;
+  gap: 10px;
+}
+.avviso-conto .ic {
+  color: var(--azione);
+  margin-top: 1px;
+}
+.manca {
+  font-size: 13px;
+  color: var(--testo);
+  background: var(--pannello-2);
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.piede-reg {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--filo);
+  padding-top: 16px;
+}
+@media (max-width: 640px) {
+  .campi {
+    grid-template-columns: 1fr;
+  }
+}

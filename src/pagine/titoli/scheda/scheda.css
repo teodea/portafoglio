@@ -1,0 +1,139 @@
+/* La Scheda del titolo: grafico, fonti nelle tabelle, vendita parziale, "Da dove vengono i numeri".
+   Gli stili comuni (riquadri, schede, tabelle, pannello) sono in index.css. */
+
+/* ---------- grafico a linea ---------- */
+.riquadro-grafico {
+  margin-bottom: 16px;
+}
+.grafico {
+  position: relative;
+  padding: 16px 18px 8px;
+}
+.grafico svg {
+  display: block;
+  cursor: pointer;
+  overflow: visible;
+}
+.grafico svg text {
+  font-variant-numeric: tabular-nums;
+}
+.fumetto {
+  position: absolute;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  pointer-events: none;
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  border-radius: 8px;
+  box-shadow: var(--ombra-alta);
+  padding: 8px 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.fumetto b {
+  font-weight: 650;
+}
+.fumetto .su {
+  color: var(--su);
+}
+.fumetto .giu {
+  color: var(--giu);
+}
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 12.5px;
+  color: var(--tenue);
+  padding: 0 18px 14px;
+}
+.legenda i {
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--azione);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.legenda i.pagato {
+  border-top: 2px dashed var(--tenue);
+}
+.legenda .tenue {
+  margin-left: auto;
+}
+
+/* ---------- fonte con il puntino ---------- */
+.fonte {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.fonte .punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--filo-forte);
+  flex: none;
+}
+.fonte.borsa .punto {
+  background: var(--su);
+}
+
+/* ---------- vendita parziale ---------- */
+.scheda-titolo .spiega {
+  margin: 10px 18px 16px;
+}
+.scheda-titolo .spiega p {
+  margin: 0;
+}
+.scheda-titolo .spiega p + p {
+  margin-top: 8px;
+}
+.esempio {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--testo);
+  border: 1px solid var(--filo-forte);
+  background: var(--pannello);
+  border-radius: 999px;
+  padding: 1px 9px;
+  margin-bottom: 8px;
+}
+/* La riga della vendita parziale: fondo di servizio e un filo forte a sinistra (il blu è solo per ciò che si preme). */
+tr.evidenziata td {
+  background: var(--pannello-2);
+}
+tr.evidenziata td:first-child {
+  box-shadow: inset 3px 0 0 var(--filo-forte);
+}
+
+/* ---------- da dove vengono i numeri ---------- */
+.nota-scheda {
+  font-size: 13px;
+  color: var(--tenue);
+  padding: 0 18px 16px;
+  margin: 0;
+}
+
+/* ---------- i quattro riquadri: tutti in fila, o due per riga quando la finestra è stretta ---------- */
+.scheda-titolo .numeri {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 1060px) {
+  .scheda-titolo .numeri {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 440px) {
+  .scheda-titolo .numeri {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Il chip "a mano" e il prezzo di prima barrato sono in src/pannello/correzione.css (ticket 8). */

@@ -1,0 +1,19 @@
+/* Nel pannello "Da dove viene" di un riferimento (ticket 10): il secondo conto, movimento per movimento, e il
+   valore di fine mese con "Scarica di nuovo" e la correzione (la parte comune è in correzione.css). */
+.cassetto h3.passi,
+.cassetto .valore-rif h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tenue);
+  margin: 4px 0 -8px;
+}
+.cassetto .valore-rif h3 {
+  margin: 0;
+}
+.cassetto .valore-rif p {
+  line-height: 1.5;
+}
+/* Il pannello di un riferimento è lungo e scorre: le scatole del conto non si devono schiacciare. */
+.cassetto .corpo > * {
+  flex-shrink: 0;
+}

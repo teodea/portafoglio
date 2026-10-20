@@ -1,0 +1,137 @@
+// Un portafoglio INVENTATO, per le prove e per guardare le pagine nel browser.
+// Nomi, codici e numeri sono di fantasia (i codici ISIN cominciano con ZZ, che non è un paese):
+// nel codice pubblico non ci sono mai i titoli o gli importi veri dell'utente.
+import type { FileDati } from './tipi.ts'
+
+export function portafoglioInventato(): FileDati {
+  return {
+    formato: 'portafoglio',
+    versione: 2,
+    creato: '2026-01-15T10:00:00.000Z',
+    titoli: [
+      {
+        id: 'ZZ0000000001-MIL',
+        isin: 'ZZ0000000001',
+        borsa: 'MIL',
+        nomeBorsa: 'Borsa Italiana',
+        nome: 'Fondo Inventato Azioni Mondo',
+        soprannome: 'Mondo inventato',
+        simbolo: 'MOND',
+        descrizioneBanca: 'INVENTATO MONDO ACC',
+        dossier: 'Dossier di prova',
+        codiceInvesting: 900001,
+        codiceYahoo: 'MOND.MI',
+      },
+      {
+        id: 'ZZ0000000002-LON',
+        isin: 'ZZ0000000002',
+        borsa: 'LON',
+        nomeBorsa: 'London Stock Exchange',
+        nome: 'Fondo Inventato Tecnologia',
+        soprannome: null,
+        simbolo: 'TECN',
+        descrizioneBanca: 'INVENTATO TECH',
+        dossier: 'Dossier di prova',
+        codiceInvesting: 900002,
+        codiceYahoo: 'TECN.L',
+      },
+      {
+        id: 'ZZ0000000003-MIL',
+        isin: 'ZZ0000000003',
+        borsa: 'MIL',
+        nomeBorsa: 'Borsa Italiana',
+        nome: 'Obbligazione Inventata 2027',
+        soprannome: null,
+        simbolo: null,
+        descrizioneBanca: 'OBBL INVENTATA 27',
+        dossier: 'Dossier di prova',
+        tipo: 'Obbligazione',
+      },
+    ],
+    operazioni: [
+      {
+        id: 'op-1',
+        titolo: 'ZZ0000000001-MIL',
+        tipo: 'acquisto',
+        data: '2024-02-12',
+        esecuzione: '2024-02-08',
+        quantita: 100,
+        prezzo: 10,
+        valuta: 'EUR',
+        cambio: 1,
+        commissioni: 5,
+        totale: 1005,
+        rifOrdine: null,
+        fonte: 'inventato',
+      },
+      {
+        id: 'op-2',
+        titolo: 'ZZ0000000002-LON',
+        tipo: 'acquisto',
+        data: '2024-06-03',
+        esecuzione: '2024-05-30',
+        quantita: 20,
+        prezzo: 40,
+        valuta: 'GBP',
+        cambio: 0.85,
+        commissioni: 10,
+        totale: 951.18,
+        rifOrdine: null,
+        fonte: 'inventato',
+      },
+      {
+        id: 'op-3',
+        titolo: 'ZZ0000000003-MIL',
+        tipo: 'acquisto',
+        data: '2024-03-01',
+        esecuzione: '2024-02-28',
+        quantita: 1000,
+        prezzo: 0.99,
+        valuta: 'EUR',
+        cambio: 1,
+        commissioni: 2.95,
+        totale: 992.95,
+        rifOrdine: null,
+        fonte: 'inventato',
+      },
+      {
+        id: 'op-4',
+        titolo: 'ZZ0000000003-MIL',
+        tipo: 'vendita',
+        data: '2025-09-15',
+        esecuzione: '2025-09-11',
+        quantita: 1000,
+        prezzo: 1.01,
+        valuta: 'EUR',
+        cambio: 1,
+        commissioni: 2.95,
+        totale: 1007.05,
+        rifOrdine: null,
+        fonte: 'inventato',
+      },
+    ],
+    dividendi: [
+      {
+        id: 'div-1',
+        titolo: 'ZZ0000000003-MIL',
+        data: '2025-03-01',
+        lordo: 20,
+        imposte: 2.5,
+        netto: 17.5,
+        fonte: 'inventato',
+        nota: 'cedola dell’obbligazione',
+      },
+    ],
+    prezzi: [
+      { titolo: 'ZZ0000000001-MIL', data: '2026-08-31', prezzo: 12.4, valuta: 'EUR', fonte: 'inventato' },
+      { titolo: 'ZZ0000000001-MIL', data: '2026-09-30', prezzo: 12.75, valuta: 'EUR', fonte: 'inventato' },
+      { titolo: 'ZZ0000000002-LON', data: '2026-08-31', prezzo: 51.2, valuta: 'GBP', cambio: 0.8652, fonte: 'inventato' },
+      { titolo: 'ZZ0000000002-LON', data: '2026-09-30', prezzo: 52.85, valuta: 'GBP', cambio: 0.8546, fonte: 'inventato' },
+    ],
+  }
+}
+
+/** Come lo scrive l'applicazione: due spazi di rientro e un a capo in fondo. */
+export function comeTesto(dati: FileDati): string {
+  return JSON.stringify(dati, null, 2) + '\n'
+}

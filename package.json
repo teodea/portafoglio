@@ -1,0 +1,42 @@
+{
+  "name": "come-sto-andando",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/avvia.mjs",
+    "start": "electron .",
+    "pagine": "vite",
+    "preview": "vite preview",
+    "build": "npm run typecheck && vite build && tsc -p tsconfig.electron.json",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.electron.json --noEmit && tsc -p tsconfig.node.json",
+    "test": "vitest run",
+    "lint": "oxlint",
+    "installatore": "npm run build && electron-builder --win --publish never",
+    "controlla-dati": "node scripts/controlla-dati.ts",
+    "postinstall": "install-electron"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "exceljs": "^4.4.0",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.5"
+  },
+  "description": "Come sta andando il portafoglio titoli, a confronto con indici, BTP e inflazione.",
+  "main": "dist-electron/electron/main.js"
+}

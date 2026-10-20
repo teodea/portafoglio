@@ -1,0 +1,343 @@
+/* La schermata Aggiorna fine mese, come nella bozza 27. Le classi stanno dentro .agg (o hanno "agg-")
+   per non toccare le altre pagine; i colori sono quelli di DESIGN.md (index.css). */
+a.btn {
+  text-decoration: none;
+  color: inherit;
+}
+a.btn.primario {
+  color: var(--azione-testo);
+}
+.barra .piede a.btn {
+  justify-content: center;
+}
+
+.agg .testata {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px 16px;
+}
+.agg-su {
+  color: var(--su);
+}
+.agg-giu {
+  color: var(--giu);
+}
+.agg .numero span.agg-su {
+  color: var(--su);
+}
+.agg .numero span.agg-giu {
+  color: var(--giu);
+}
+.agg-attrezzi {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--filo);
+  background: var(--pannello-2);
+  font-size: 13px;
+  color: var(--tenue);
+}
+.agg-scorre {
+  overflow-x: auto;
+}
+/* "Rifai": sei riquadri. Tre e tre, o tutti su una riga negli schermi larghi: mai il sesto da solo (collaudo del 19/10). */
+.agg .numeri:has(> :nth-child(6)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (min-width: 1480px) {
+  .agg .numeri:has(> :nth-child(6)) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+/* Il nome della borsa su una riga sola ("Borsa Italiana"). */
+.agg-tabella td.agg-borsa {
+  white-space: nowrap;
+}
+.agg-senza-codice {
+  white-space: nowrap;
+}
+.agg-tabella {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.agg-tabella th {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tenue);
+  text-align: left;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--filo);
+  white-space: nowrap;
+  background: var(--pannello);
+}
+.agg-tabella td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--filo);
+  vertical-align: middle;
+}
+.agg-tabella .n {
+  text-align: right;
+  white-space: nowrap;
+}
+.agg-tabella tbody tr:last-child td {
+  border-bottom: 0;
+}
+tr.agg-gruppo td {
+  background: var(--pannello-2);
+  font-weight: 650;
+  font-size: 13px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+tr.agg-manca td {
+  background: var(--pannello-2);
+}
+tr.agg-dettaglio td {
+  background: var(--pannello-2);
+  padding: 14px 18px 18px;
+}
+.agg-tit {
+  display: flex;
+  flex-direction: column;
+}
+.agg-tit b {
+  font-weight: 650;
+}
+.agg-tit span {
+  color: var(--tenue);
+  font-size: 13px;
+}
+.agg-num {
+  background: none;
+  border: 0;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.agg-num:hover,
+.agg-num[aria-expanded='true'] {
+  background: var(--azione-tenue);
+}
+.agg-fonte {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.agg-fonte .punto {
+  flex: none;
+}
+.agg-fonte .punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--filo-forte);
+}
+.agg-fonte.borsa .punto {
+  background: var(--su);
+}
+.agg-fonte.riserva .punto {
+  background: transparent;
+  border: 1.5px solid var(--tenue);
+}
+.agg-sotto {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tenue);
+  white-space: normal;
+}
+/* Nella finestra stretta la riga sotto non si stringe a una parola per riga: la tabella scorre di lato. */
+.agg-tabella .agg-sotto {
+  min-width: 150px;
+}
+/* Nelle colonne dei numeri la riga sotto è corta ("base 2025 = 100"): non allarga la colonna. */
+.agg-tabella .n .agg-sotto {
+  min-width: 0;
+}
+.agg-amano {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mano);
+  background: var(--mano-tenue);
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.agg-uguale {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tenue);
+  font-size: 13px;
+}
+.agg-ok {
+  color: var(--tenue);
+  display: inline-flex;
+}
+.agg-destra {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+.agg-gira {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--filo-forte);
+  border-top-color: var(--azione);
+  border-radius: 50%;
+  animation: agg-gira 0.8s linear infinite;
+  vertical-align: -1px;
+  margin-right: 4px;
+}
+@keyframes agg-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agg-gira {
+    animation: none;
+  }
+}
+
+/* il dettaglio di una riga */
+.agg-dettaglio-corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 18px 28px;
+  white-space: normal;
+  font-size: 13.5px;
+}
+.agg-dettaglio-corpo p {
+  margin: 0 0 10px;
+}
+.agg-tentativi {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  color: var(--tenue);
+}
+.agg-conto {
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--pannello);
+  max-width: 420px;
+}
+.agg-conto div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--filo);
+}
+.agg-conto div:last-child {
+  border-bottom: 0;
+  font-weight: 650;
+  background: var(--pannello-2);
+}
+.agg-amano-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.agg-amano-campo label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.agg-amano-campo input {
+  font: inherit;
+  font-size: 15px;
+  padding: 8px 10px;
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  background: var(--pannello);
+  color: var(--testo);
+  max-width: 220px;
+}
+.agg-amano-campo input[aria-invalid='true'] {
+  border-color: var(--testo);
+}
+.agg-errore {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* la barra ferma in basso */
+.agg-piede {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  box-shadow: var(--ombra-alta);
+  padding: 12px 14px 12px 18px;
+  font-size: 13.5px;
+}
+.agg-piede .bottoni {
+  flex-wrap: nowrap;
+}
+
+/* "<Mese> è salvato" */
+.agg-salvato {
+  padding: 20px 22px;
+}
+.agg-salvato h2 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.agg-salvato ul {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+.agg-salvato .bottoni {
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .agg-dettaglio-corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .agg-piede {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .agg-piede .bottoni {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+/* Il controllo di investing.com (ticket 7) */
+.agg-diverso {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.agg-controllo-diverso {
+  font-size: 13.5px;
+  background: var(--azione-tenue);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0 0 8px;
+}

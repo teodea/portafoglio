@@ -1,0 +1,169 @@
+/* La correzione a mano di un prezzo (ticket 8, DESIGN.md "Correzione a mano").
+   L'ambra serve solo a questo: il chip, la matita e niente altro. */
+
+.chip-mano {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--mano);
+  background: var(--mano-tenue);
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.sotto .chip-mano {
+  margin-top: 2px;
+}
+.matita-mano {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mano);
+  background: var(--mano-tenue);
+  border-radius: 999px;
+  padding: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.matita-mano .ic.p {
+  width: 12px;
+  height: 12px;
+}
+s.prima {
+  color: var(--tenue);
+  margin-right: 8px;
+}
+
+/* ---------- nel pannello "Da dove viene" ---------- */
+.correzione {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--filo);
+}
+.correzione p {
+  margin: 0;
+}
+.correzione .stato-mano {
+  font-size: 13.5px;
+}
+.correzione .stato-mano s {
+  color: var(--tenue);
+}
+.correzione label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--tenue);
+}
+.correzione .campo-valuta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tenue);
+  font-size: 14.5px;
+}
+.correzione input {
+  font: inherit;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  padding: 8px 10px;
+  border: 1px solid var(--filo-forte);
+  border-radius: 8px;
+  background: var(--pannello);
+  color: var(--testo);
+  width: 180px;
+  max-width: 100%;
+}
+.correzione input[aria-invalid='true'] {
+  border-color: var(--testo);
+}
+.correzione .sbagliato {
+  font-size: 13px;
+  font-weight: 600;
+}
+.correzione .conferma {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--pannello-2);
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+}
+.correzione .esito {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13.5px;
+}
+/* Il messaggio riceve il focus solo dal programma, dopo una scrittura: non serve l'anello. */
+.correzione .esito:focus {
+  outline: none;
+}
+.correzione .esito .ic {
+  margin-top: 1px;
+}
+
+/* Nei titoli che vanno meglio e peggio (pagina Portafoglio) il chip sta accanto alla percentuale. */
+.classifica li > .chip-mano {
+  margin-left: auto;
+}
+
+/* Nei riquadri dei numeri ogni span è una riga tenue: il chip resta un chip. */
+.numero span.chip-mano {
+  display: inline-flex;
+  font-size: 12px;
+  color: var(--mano);
+  margin-top: 4px;
+}
+
+/* ---------- la correzione di un movimento (ticket 11) ---------- */
+.correzione-movimento h3 {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 4px 0 0;
+}
+.correzione-movimento ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+}
+.correzione-movimento .stato-mano {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--pannello-2);
+  border: 1px solid var(--filo);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.correzione-movimento .stato-mano ul {
+  padding-left: 18px;
+}
+.campi-correzione {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+.campi-correzione .sbagliato,
+.campi-correzione .avviso-conto,
+.campi-correzione .bottoni {
+  grid-column: 1 / -1;
+}
+.campi-correzione .avviso-conto p {
+  margin: 0;
+}
+.correzione .campi-correzione input {
+  width: 100%;
+}
+.correzione .campi-correzione input.n {
+  text-align: right;
+}

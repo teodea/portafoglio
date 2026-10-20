@@ -1,0 +1,218 @@
+/* La pagina Portafoglio (DESIGN.md: Layout, "Riquadro della risposta", "Grafico a linea",
+   "Bottoni della misura"). Tutto dentro .pagina-portafoglio, per non toccare le altre pagine. */
+
+.pagina-portafoglio .blocco {
+  margin-bottom: 16px;
+}
+.pagina-portafoglio .testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--filo);
+}
+.pagina-portafoglio .testa h2 {
+  margin: 0;
+}
+
+/* ---------- la risposta e (dal ticket 10) la classifica dei riferimenti ---------- */
+.pagina-portafoglio .dueparti {
+  display: grid;
+  grid-template-columns: minmax(300px, 5fr) 7fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.pagina-portafoglio .dueparti.solo {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 1100px) {
+  .pagina-portafoglio .dueparti {
+    grid-template-columns: 1fr;
+  }
+}
+.pagina-portafoglio .risposta {
+  padding: 20px 22px;
+  container-type: inline-size;
+}
+.pagina-portafoglio .risposta h2 {
+  margin: 0 0 2px;
+}
+.pagina-portafoglio .risposta .capo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.pagina-portafoglio .enorme {
+  font-size: 40px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.pagina-portafoglio .sotto-enorme {
+  font-size: 14.5px;
+  color: var(--tenue);
+}
+.pagina-portafoglio .righe {
+  margin: 14px 0 0;
+  border-top: 1px solid var(--filo);
+}
+.pagina-portafoglio .righe > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--filo);
+}
+.pagina-portafoglio .righe > div:last-child {
+  border-bottom: 0;
+}
+.pagina-portafoglio .righe dt {
+  color: var(--tenue);
+}
+.pagina-portafoglio .righe dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+/* Larga (finché la classifica non le sta accanto): il numero a sinistra, l'elenco a destra. */
+@container (min-width: 760px) {
+  .pagina-portafoglio .risposta .dentro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 40px;
+    align-items: center;
+  }
+  .pagina-portafoglio .righe {
+    margin: 0;
+    border-top: 0;
+    padding-left: 32px;
+    border-left: 1px solid var(--filo);
+  }
+}
+
+/* ---------- il grafico ---------- */
+.pagina-portafoglio .grafico {
+  padding: 16px 18px 8px;
+}
+.pagina-portafoglio .grafico .tela {
+  position: relative;
+  height: 240px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pagina-portafoglio .grafico svg {
+  display: block;
+  overflow: visible;
+}
+.pagina-portafoglio .fumetto {
+  position: absolute;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  pointer-events: none;
+  background: var(--pannello);
+  border: 1px solid var(--filo);
+  border-radius: 8px;
+  box-shadow: var(--ombra-alta);
+  padding: 8px 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.pagina-portafoglio .fumetto b {
+  font-weight: 650;
+}
+.pagina-portafoglio .legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 12.5px;
+  color: var(--tenue);
+  padding: 8px 0 6px;
+}
+.pagina-portafoglio .legenda i {
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--azione);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.pagina-portafoglio .legenda i.investiti {
+  border-top: 2px dashed var(--tenue);
+}
+.pagina-portafoglio .legenda .tenue {
+  margin-left: auto;
+}
+
+/* ---------- i titoli che vanno meglio e peggio ---------- */
+.pagina-portafoglio .duecol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.pagina-portafoglio .duecol > div {
+  padding: 12px 18px 4px;
+  min-width: 0;
+}
+.pagina-portafoglio .duecol > div + div {
+  border-left: 1px solid var(--filo);
+}
+@media (max-width: 700px) {
+  .pagina-portafoglio .duecol {
+    grid-template-columns: 1fr;
+  }
+  .pagina-portafoglio .duecol > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--filo);
+  }
+}
+.pagina-portafoglio h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tenue);
+  margin: 0 0 4px;
+}
+.pagina-portafoglio .classifica {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pagina-portafoglio .classifica li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 6px;
+  margin: 0 -6px;
+  border-bottom: 1px solid var(--filo);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.pagina-portafoglio .classifica li:last-child {
+  border-bottom: 0;
+}
+.pagina-portafoglio .classifica li:hover {
+  background: var(--pannello-2);
+}
+.pagina-portafoglio .classifica .tit {
+  min-width: 0;
+}
+.pagina-portafoglio .meglio-peggio .piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--filo);
+  font-size: 13px;
+}
+.pagina-portafoglio .meglio-peggio .piede .link {
+  font-size: 14.5px;
+}
