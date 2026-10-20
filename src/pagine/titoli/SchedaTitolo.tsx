@@ -5,7 +5,7 @@
 import { useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { eAMano } from '../../conti/prezzo-a-mano.ts'
-import { ciSonoVenditeParziali, esempioVenditaParziale, schedaDelTitolo } from '../../conti/scheda.ts'
+import { schedaDelTitolo } from '../../conti/scheda.ts'
 import type { Numero } from '../../conti/spiegazione.ts'
 import { ANNI_MINIMI_MEDIO, type ContoTitolo } from '../../conti/titoli.ts'
 import { cambio, data, euro, guadagnoEuro, numero, percentuale, prezzo, quote, segno, segnoPercentuale } from '../../formato.ts'
@@ -31,7 +31,6 @@ export function SchedaTitolo() {
   const bottoni = useRef<(HTMLButtonElement | null)[]>([])
   const t = conti.titoli.find((x) => x.id === id)
   const scheda = useMemo(() => (t ? schedaDelTitolo(dati, t) : null), [dati, t])
-  const esempio = useMemo(() => (t && !ciSonoVenditeParziali(conti) ? esempioVenditaParziale(dati, t, conti.fine) : null), [dati, t, conti])
   if (!t || !scheda) return <Navigate to="/titoli" replace />
   const indietro = typeof state?.indietro === 'string' ? state.indietro : '/titoli'
 
@@ -125,7 +124,7 @@ export function SchedaTitolo() {
         </div>
         <div role="tabpanel" id="pannello-scheda-titolo" aria-labelledby={`scheda-titolo-${attiva}`}>
           {attiva === 'mesi' && <MesiDelTitolo conto={t} righe={scheda.mesi} />}
-          {attiva === 'operazioni' && <Operazioni scheda={scheda} esempio={esempio} />}
+          {attiva === 'operazioni' && <Operazioni scheda={scheda} />}
           {attiva === 'dividendi' && <DividendiDelTitolo conto={t} scheda={scheda} />}
           {attiva === 'fonti' && <DaDoveVengono paragrafi={scheda.paragrafi} />}
         </div>

@@ -1,7 +1,6 @@
 // Pezzi in comune tra le schede della pagina Titoli e la Scheda del titolo.
 import type { KeyboardEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { fonteInParole } from '../../conti/fonti.ts'
 import { eAMano } from '../../conti/prezzo-a-mano.ts'
 import type { Numero } from '../../conti/spiegazione.ts'
 import type { ContoTitolo } from '../../conti/titoli.ts'
@@ -60,16 +59,22 @@ export function Pill({ numero }: { numero: Numero }) {
   )
 }
 
-/** Il prezzo con sotto, per un titolo in valuta, il cambio e poi la fonte, oppure il chip "a mano". */
+/**
+ * Il prezzo con sotto, per un titolo in valuta, il cambio, e il chip "a mano" se serve.
+ * La fonte non si scrive più sotto (collaudo del 20/10): la dice il clic sul prezzo, e la pagina Dati.
+ */
 export function PrezzoConFonte({ conto }: { conto: ContoTitolo }) {
   const p = conto.ultimoPrezzo
   if (!p || conto.stato !== 'aperto') return <Cella numero={conto.prezzo} scrivi={() => '—'} />
-  const f = fonteInParole(p.fonte)
   return (
     <>
       <Num numero={conto.prezzo}>{prezzo(p.prezzo, p.valuta)}</Num>
       {p.valuta !== 'EUR' && p.cambio && <span className="sotto">cambio {cambio(p.cambio)}</span>}
-      <span className="sotto">{eAMano(p) ? <ChipAMano /> : f.nome}</span>
+      {eAMano(p) && (
+        <span className="sotto">
+          <ChipAMano />
+        </span>
+      )}
     </>
   )
 }

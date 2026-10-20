@@ -94,17 +94,6 @@
 .scheda-titolo .spiega p + p {
   margin-top: 8px;
 }
-.esempio {
-  display: inline-block;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--testo);
-  border: 1px solid var(--filo-forte);
-  background: var(--pannello);
-  border-radius: 999px;
-  padding: 1px 9px;
-  margin-bottom: 8px;
-}
 /* La riga della vendita parziale: fondo di servizio e un filo forte a sinistra (il blu è solo per ciò che si preme). */
 tr.evidenziata td {
   background: var(--pannello-2);

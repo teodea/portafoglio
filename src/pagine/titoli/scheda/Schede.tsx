@@ -105,33 +105,29 @@ export function MesiDelTitolo({ conto, righe }: { conto: ContoTitolo; righe: Rig
 
 // ---------- Operazioni ----------
 
-function SpiegaVendita({ vendita, esempio }: { vendita: VenditaSpiegata; esempio: boolean }) {
+function SpiegaVendita({ vendita }: { vendita: VenditaSpiegata }) {
   return (
     <div className="spiega vendita-spiegata">
-      {esempio && <div className="esempio">Esempio inventato: nei tuoi dati non c’è ancora una vendita parziale</div>}
       <p>
-        <Frase pezzi={venditaInParole(vendita, esempio)} />
+        <Frase pezzi={venditaInParole(vendita)} />
       </p>
-      {!esempio && (
-        <p className="tenue">
-          Clic sul guadagno incassato per il conto:{' '}
-          <Num numero={vendita.guadagnoIncassato} className={classeSegno(segno(vendita.guadagnoIncassato.n ?? 0, 2))}>
-            {vendita.guadagnoIncassato.n === null ? '—' : guadagnoEuro(vendita.guadagnoIncassato.n, 2)}
-          </Num>
-        </p>
-      )}
+      <p className="tenue">
+        Clic sul guadagno incassato per il conto:{' '}
+        <Num numero={vendita.guadagnoIncassato} className={classeSegno(segno(vendita.guadagnoIncassato.n ?? 0, 2))}>
+          {vendita.guadagnoIncassato.n === null ? '—' : guadagnoEuro(vendita.guadagnoIncassato.n, 2)}
+        </Num>
+      </p>
     </div>
   )
 }
 
-export function Operazioni({ scheda, esempio }: { scheda: SchedaDelTitolo; esempio: VenditaSpiegata | null }) {
+export function Operazioni({ scheda }: { scheda: SchedaDelTitolo }) {
   const parziali = scheda.operazioni.filter((r) => r.vendita?.parziale)
   return (
     <>
       {parziali.map((r) => (
-        <SpiegaVendita key={r.operazione.id} vendita={r.vendita!} esempio={false} />
+        <SpiegaVendita key={r.operazione.id} vendita={r.vendita!} />
       ))}
-      {parziali.length === 0 && esempio && <SpiegaVendita vendita={esempio} esempio />}
       {scheda.operazioni.length === 0 ? (
         <div className="vuoto">Nel file non ci sono operazioni per questo titolo.</div>
       ) : (

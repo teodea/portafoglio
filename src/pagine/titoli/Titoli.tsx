@@ -1,7 +1,7 @@
-// La pagina Titoli (mappa, ticket 25): tre riquadri, poi le schede Oggi, Mese per mese, Dividendi e Venduti.
+// La pagina Titoli (mappa, ticket 25): tre riquadri, poi le schede "Al <data dei prezzi>", Mese per mese, Dividendi e Venduti.
 // La scheda scelta sta nell'indirizzo (?scheda=…), così tornando dalla Scheda del titolo si ritrova.
-// I riquadri contano solo i titoli che hai oggi; il Portafoglio anche quelli venduti: sotto il guadagno lo si dice,
-// con il numero del Portafoglio accanto, così i due numeri non sembrano un errore (collaudo del 19/10, punto 1).
+// I riquadri contano solo i titoli che hai oggi, senza i venduti (collaudo del 20/10: la riga col numero del Portafoglio
+// confondeva e l'utente l'ha tolta, come la frase sui soldi nuovi: le spiega il clic sul numero).
 import { useRef, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { data, euro, guadagnoEuro, nomeMese, percentuale, segno, segnoPercentuale } from '../../formato.ts'
@@ -26,7 +26,7 @@ export function Titoli() {
   const { fine, aperti, ultimoMese } = conti
   const chiusi = conti.titoli.filter((t) => t.stato === 'chiuso').length
   const nomi: Record<Scheda, string> = {
-    oggi: 'Oggi',
+    oggi: fine ? `Al ${data(fine)}` : 'Oggi',
     mesi: 'Mese per mese',
     dividendi: 'Dividendi',
     venduti: `Venduti (${chiusi})`,
@@ -63,23 +63,21 @@ export function Titoli() {
       <div className="numeri">
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(aperti.valore.perche)}>
           <small>
-            Valore dei {aperti.quanti} {aperti.quanti === 1 ? 'titolo che hai' : 'titoli che hai'}
+            Valore dei {aperti.quanti} {aperti.quanti === 1 ? 'titolo' : 'titoli'}
           </small>
           <b>{euro(aperti.valore.n ?? 0)}</b>
-          <span>pagati {euro(aperti.pagato.n ?? 0)} per comprarli</span>
+          <span>pagati all’acquisto {euro(aperti.pagato.n ?? 0)}</span>
         </button>
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(aperti.guadagno.perche)}>
-          <small>Guadagno dei titoli che hai</small>
+          <small>Guadagno dei titoli</small>
           <b className={classeSegno(segno(g))}>{guadagnoEuro(g)}</b>
           <span className={pct === null ? '' : classeSegno(segnoPercentuale(pct))}>{pct === null ? '—' : `${percentuale(pct)} dall’acquisto`}</span>
-          {chiusi > 0 && <span>con i venduti, come nel Portafoglio: {guadagnoEuro(conti.guadagnoTotale)}</span>}
         </button>
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(ultimoMese.perche)}>
           <small>{fine ? `Il mese di ${nomeMese(fine)}` : 'L’ultimo mese'}</small>
           <b className={ultimoMese.n === null ? 'tenue' : classeSegno(segnoPercentuale(ultimoMese.n))}>
             {ultimoMese.n === null ? '—' : percentuale(ultimoMese.n)}
           </b>
-          <span>senza contare i soldi nuovi</span>
         </button>
       </div>
 

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { portafoglioInventato } from '../dati/portafoglio-inventato.ts'
 import type { Dividendo, FileDati, Operazione, PrezzoFineMese, Titolo } from '../dati/tipi.ts'
-import { ciSonoVenditeParziali, esempioVenditaParziale, fonteMovimento, schedaDelTitolo, venditaInParole, type Pezzo } from './scheda.ts'
+import { fonteMovimento, schedaDelTitolo, venditaInParole, type Pezzo } from './scheda.ts'
 import type { Numero } from './spiegazione.ts'
 import { contiDeiTitoli } from './titoli.ts'
 
@@ -93,7 +93,7 @@ describe('vendita parziale nella scheda', () => {
     operazioni: [op(A, 'acquisto', '2025-01-10', 100, 10), op(A, 'acquisto', '2025-03-10', 50, 13), op(A, 'vendita', '2025-06-10', 30, 15, 5)],
     prezzi: [p(A, '2025-01-31', 10.5), p(A, '2025-03-31', 12, 'Borsa Italiana'), p(A, '2025-05-31', 14), p(A, '2025-06-30', 16)],
   })
-  const { conti, s } = scheda(dati, 'AAAA')
+  const { s } = scheda(dati, 'AAAA')
 
   it('le operazioni vanno dalla più recente; la vendita è "Vendita parziale" con il guadagno incassato', () => {
     expect(s.operazioni.map((r) => r.cosa)).toEqual(['Vendita parziale', 'Acquisto', 'Acquisto'])
@@ -122,10 +122,6 @@ describe('vendita parziale nella scheda', () => {
     expect(pagato['2025-03-31']).toBeCloseTo(1650, 10)
     expect(pagato['2025-06-30']).toBeCloseTo(1650 - 30 * 11, 10)
     expect(s.punti.at(-1)!.valore).toBeCloseTo(120 * 16, 10)
-  })
-
-  it('con una vendita parziale vera non serve l’esempio', () => {
-    expect(ciSonoVenditeParziali(conti)).toBe(true)
   })
 
   it('mese per mese dal più recente, con la fonte in parole e il puntino della borsa', () => {
@@ -170,45 +166,6 @@ describe('titolo in valuta', () => {
     expect(frase).toContain('20 quote × 52,85 GBP')
     expect(frase).toContain('= 1.057,00 GBP, diviso il cambio BCE del 30/09/2026 (0,8546 GBP per 1 €)')
     expect(s.paragrafi.map((x) => x.nome)).toEqual(['Valore', 'Prezzo', 'Pagato', 'Costo medio', 'Dividendi', 'Guadagno', 'Medio annuo'])
-  })
-})
-
-describe('l’esempio di vendita parziale', () => {
-  const dati = portafoglioInventato()
-  const conti = contiDeiTitoli(dati)
-  const mond = conti.titoli.find((x) => x.nomeCorto === 'MOND')!
-
-  it('nei dati inventati non c’è una vendita parziale vera', () => {
-    expect(ciSonoVenditeParziali(conti)).toBe(false)
-  })
-
-  it('vende il 40% delle quote all’ultimo prezzo, con gli stessi conti, senza toccare i dati', () => {
-    const prima = JSON.stringify(dati)
-    const v = esempioVenditaParziale(dati, mond, conti.fine)!
-    expect(JSON.stringify(dati)).toBe(prima)
-    expect(v.parziale).toBe(true)
-    expect(v.operazione.quantita).toBe(40)
-    expect(v.operazione.data).toBe('2026-09-30')
-    // 40 × 12,75 € − 5 € di commissione (quella dell'acquisto) = 505 €; costo medio 10,05 € → 402 €.
-    expect(v.operazione.totale).toBeCloseTo(505, 10)
-    expect(v.costoMedio).toBeCloseTo(10.05, 10)
-    expect(v.guadagnoIncassato.n).toBeCloseTo(103, 10)
-    const frase = testo(venditaInParole(v, true))
-    expect(frase).toContain('Se il 30/09/2026 avessi venduto 40 quote su 100')
-    expect(frase).toContain('avresti incassato 505,00 €')
-    expect(frase).toContain('Le 60 quote rimaste terrebbero')
-  })
-
-  it('in valuta: prezzo in sterline, incasso in euro al cambio di fine mese', () => {
-    const tecn = conti.titoli.find((x) => x.nomeCorto === 'TECN')!
-    const v = esempioVenditaParziale(dati, tecn, conti.fine)!
-    expect(v.operazione.quantita).toBe(8)
-    expect(v.operazione.totale).toBeCloseTo((8 * 52.85) / 0.8546 - 10, 8)
-  })
-
-  it('non c’è per un titolo venduto', () => {
-    const obbl = conti.titoli.find((x) => x.stato === 'chiuso')!
-    expect(esempioVenditaParziale(dati, obbl, conti.fine)).toBeNull()
   })
 })
 

@@ -57,7 +57,7 @@ export function Oggi({ conti }: { conti: ContiTitoli }) {
   return (
     <>
       <div className="attrezzi">
-        <span>Clic su un titolo per aprirne la scheda; clic su un numero per sapere da dove viene.</span>
+        <span>Clic su un titolo per aprirne la scheda; clic su un numero per sapere la provenienza.</span>
       </div>
       <div className="scorre">
         <table>

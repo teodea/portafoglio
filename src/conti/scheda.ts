@@ -1,6 +1,6 @@
 // I numeri della Scheda del titolo che i conti dei titoli (titoli.ts) non hanno già:
 // il grafico mese per mese con la linea del pagato, le righe delle operazioni e dei dividendi
-// con il loro "Da dove viene", la vendita parziale spiegata in parole (vera o d'esempio)
+// con il loro "Da dove viene", la vendita parziale spiegata in parole
 // e i paragrafi di "Da dove vengono i numeri". Modulo puro: niente React, niente file.
 import type { CambioFineMese, Dividendo, FileDati, Operazione } from '../dati/tipi.ts'
 import {
@@ -16,7 +16,7 @@ import {
 } from '../formato.ts'
 import { fonteInParole } from './fonti.ts'
 import { cambio, euro, prezzo, quote, riga, type Numero, type RigaConto } from './spiegazione.ts'
-import { contiDeiTitoli, type ContiTitoli, type ContoTitolo, type MeseDelTitolo, type VenditaSpiegata } from './titoli.ts'
+import type { ContoTitolo, MeseDelTitolo, VenditaSpiegata } from './titoli.ts'
 
 const QUASI_ZERO = 1e-9
 const somma = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
@@ -247,18 +247,18 @@ function rigaMese(nome: string, m: MeseDelTitolo, cambi: CambioFineMese[]): Riga
 
 // ---------- la vendita parziale in parole ----------
 
-/** La vendita spiegata in frasi, come nella bozza approvata. Con esempio = true i verbi sono al condizionale. */
-export function venditaInParole(v: VenditaSpiegata, esempio = false): Pezzo[] {
+/** La vendita spiegata in frasi, come nella bozza approvata. */
+export function venditaInParole(v: VenditaSpiegata): Pezzo[] {
   const o = v.operazione
   const rimaste = v.quotePrima - o.quantita
   const g = v.guadagnoIncassato.n ?? 0
   const pezzi: Pezzo[] = [
-    esempio ? 'Se il ' : 'Il ',
+    'Il ',
     { b: data(o.data) },
-    esempio ? ' avessi venduto ' : ' hai venduto ',
+    ' hai venduto ',
     { b: `${quoteTesto(o.quantita)} quote su ${quoteTesto(v.quotePrima)}` },
     ` a ${prezzoTesto(o.prezzo, o.valuta)}${o.valuta !== 'EUR' ? ` (cambio ${cambioTesto(o.cambio)})` : ''}`,
-    esempio ? ', avresti incassato ' : ' e hai incassato ',
+    ' e hai incassato ',
     { b: euroTesto(o.totale, 2) },
     o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già tolta). ` : '. ',
     `Quelle ${quoteTesto(o.quantita)} quote ti erano costate in media ${prezzoTesto(v.costoMedio, 'EUR')} l’una, cioè ${euroTesto(v.costoQuote, 2)}. `,
@@ -267,46 +267,10 @@ export function venditaInParole(v: VenditaSpiegata, esempio = false): Pezzo[] {
   ]
   if (rimaste > QUASI_ZERO)
     pezzi.push(
-      `Le ${quoteTesto(rimaste)} quote rimaste ${esempio ? 'terrebbero' : 'tengono'} lo stesso costo medio di ${prezzoTesto(v.costoMedio, 'EUR')}; i soldi incassati ${esempio ? 'resterebbero' : 'restano'} nel guadagno del titolo.`,
+      `Le ${quoteTesto(rimaste)} quote rimaste tengono lo stesso costo medio di ${prezzoTesto(v.costoMedio, 'EUR')}; i soldi incassati restano nel guadagno del titolo.`,
     )
   else pezzi.push('Hai venduto tutte le quote: il titolo è tra i Venduti.')
   return pezzi
-}
-
-/** true se nel file c'è almeno una vendita parziale vera. */
-export function ciSonoVenditeParziali(conti: ContiTitoli): boolean {
-  return conti.titoli.some((t) => t.vendite.some((v) => v.parziale))
-}
-
-/**
- * Un esempio di vendita parziale sul titolo, finché nel file non ce n'è una vera: il 40% delle quote
- * vendute all'ultimo fine mese, al prezzo di quel giorno, con la commissione dell'ultimo acquisto.
- * Si conta con gli stessi conti dei titoli, su una copia dei dati con la vendita in più: niente si scrive.
- */
-export function esempioVenditaParziale(dati: FileDati, conto: ContoTitolo, fine: string | null): VenditaSpiegata | null {
-  const p = conto.ultimoPrezzo
-  if (conto.stato !== 'aperto' || !fine || !p || conto.quote < 2) return null
-  const quantita = Math.max(1, Math.floor(conto.quote * 0.4))
-  const ultimoAcquisto = (dati.operazioni ?? []).filter((o) => o.titolo === conto.id && o.tipo === 'acquisto').at(-1)
-  const commissioni = ultimoAcquisto?.commissioni ?? 0
-  const cambioV = p.valuta === 'EUR' ? 1 : (p.cambio ?? 1)
-  const finta: Operazione = {
-    id: 'esempio-vendita-parziale',
-    titolo: conto.id,
-    tipo: 'vendita',
-    data: fine,
-    esecuzione: fine,
-    quantita,
-    prezzo: p.prezzo,
-    valuta: p.valuta,
-    cambio: cambioV,
-    commissioni,
-    totale: (quantita * p.prezzo) / cambioV - commissioni,
-    rifOrdine: null,
-    fonte: 'esempio',
-  }
-  const c = contiDeiTitoli({ ...dati, operazioni: [...(dati.operazioni ?? []), finta] }).titoli.find((t) => t.id === conto.id)
-  return c?.vendite.find((v) => v.operazione.id === finta.id) ?? null
 }
 
 // ---------- "Da dove vengono i numeri" ----------
