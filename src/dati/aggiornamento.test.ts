@@ -19,8 +19,8 @@ describe("l'aggiornamento all'apertura", () => {
     const s = dopo({ tipo: 'trovata', versione: '0.2.0' })
     expect(s).toEqual({ stato: 'disponibile', versione: '0.2.0' })
     const parole = inParole(s)
-    expect(parole?.testo).toBe("C'è una versione nuova (0.2.0): la installo?")
-    expect(parole?.bottoni.map((b) => b.testo)).toEqual(['Non ora', 'Sì, installala'])
+    expect(parole?.testo).toBe('È disponibile una nuova versione (0.2.0): installarla?')
+    expect(parole?.bottoni.map((b) => b.testo)).toEqual(['Non ora', 'Installa'])
     expect(parole?.bottoni.find((b) => b.primario)?.installa).toBe(true)
   })
 
@@ -31,11 +31,11 @@ describe("l'aggiornamento all'apertura", () => {
   it('con il sì scarica e poi si installa alla chiusura', () => {
     const scarico = dopo({ tipo: 'trovata', versione: '0.2.0' }, { tipo: 'risposta', installa: true }, { tipo: 'avanzamento', percento: 41.6 })
     expect(scarico).toEqual({ stato: 'scarico', versione: '0.2.0', percento: 42 })
-    expect(inParole(scarico)?.testo).toBe("Scarico la versione 0.2.0… 42%. Si installa quando chiudi l'applicazione.")
+    expect(inParole(scarico)?.testo).toBe("Scaricamento della versione 0.2.0… 42%. L'installazione avverrà alla chiusura del programma.")
 
     const pronta = prossimoStato(scarico, { tipo: 'scaricata' })
     expect(pronta).toEqual({ stato: 'pronta', versione: '0.2.0' })
-    expect(inParole(pronta)?.testo).toBe("La versione 0.2.0 è pronta: si installa quando chiudi l'applicazione.")
+    expect(inParole(pronta)?.testo).toBe("La versione 0.2.0 è pronta: l'installazione avverrà alla chiusura del programma.")
     expect(inParole(pronta)?.bottoni).toEqual([])
   })
 

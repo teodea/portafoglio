@@ -83,7 +83,7 @@ describe('correggere a mano il valore di un riferimento', () => {
 
   it('rifiuta un numero che non va o uguale a quello che c’è', () => {
     expect(controllaScrittura(file(), correggi('btp10', 0)).ok).toBe(false)
-    expect(controllaScrittura(file(), correggi('btp10', 146.1))).toEqual({ ok: false, perche: 'il valore nuovo è uguale a quello che c’è già' })
+    expect(controllaScrittura(file(), correggi('btp10', 146.1))).toEqual({ ok: false, perche: 'il valore nuovo è uguale a quello presente' })
     expect(() => applicaScrittura(file(), correggi('btp10', -3), QUANDO)).toThrow()
   })
 })

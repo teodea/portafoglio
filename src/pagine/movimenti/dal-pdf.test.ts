@@ -57,7 +57,7 @@ describe('dal PDF alla bozza', () => {
     const b = bozza([pdf('c.pdf', campiDividendo({ Isin: 'ZZ0000000003', Valuta_regolamento: '01/03/2025', Operazione: 'CEDOLE' }))])
     expect(b.nota).toBe('Cedola dell’obbligazione')
   })
-  it('un PDF già registrato si riconosce (si rifiuta con "Apri quel movimento")', () => {
+  it('un PDF già registrato si riconosce (si rifiuta con "Apri il movimento")', () => {
     const b = bozza([pdf('acquisto.pdf')])
     const m = leggiBozzaPdf(base(), b).movimento!
     const { dati, id } = applicaModifica(base(), { azione: 'registra', movimento: m }, QUANDO)
@@ -70,9 +70,9 @@ describe('dal PDF alla bozza', () => {
   it('rifiuti in parole: non un PDF, una vendita di un titolo che non hai', () => {
     expect(bozzaDaiPdf(base(), [{ nome: 'foto.jpg', percorso: null, campi: {} }])).toMatchObject({ ok: false })
     const v = bozzaDaiPdf(base(), [pdf('v.pdf', campiAcquisto({ Isin: 'ZZ0000000009', Operazione: 'VENDITA TITOLI' }))])
-    expect(!v.ok && v.perche).toMatch(/non puoi venderlo/)
+    expect(!v.ok && v.perche).toMatch(/non se ne può registrare la vendita/)
     const r = bozzaDaiPdf(base(), [{ nome: 'rotto.pdf', percorso: null, perche: 'il file non si apre come PDF' }])
-    expect(!r.ok && r.perche).toMatch(/Non riesco a leggere rotto.pdf/)
+    expect(!r.ok && r.perche).toMatch(/Impossibile leggere rotto.pdf/)
   })
 })
 
@@ -89,7 +89,7 @@ describe('il titolo nuovo', () => {
     const b = bozza([nuovoPdf()])
     const l = leggiBozzaPdf(base(), b)
     expect(l.movimento).toMatchObject({ titolo: 'ZZ0000000009-XET', quantita: 73 })
-    expect(l.mancano).toEqual(['cos’è il titolo nuovo, in parole semplici'])
+    expect(l.mancano).toEqual(['la descrizione del titolo nuovo, in parole semplici'])
     expect(l.vista.titoloNuovo).toMatchObject({ id: 'ZZ0000000009-XET', nomeBorsa: 'Xetra', simbolo: 'NUOV', paroleSemplici: '', dossier: 'Dossier di prova' })
   })
   it('fuori mercato: la borsa si sceglie', () => {

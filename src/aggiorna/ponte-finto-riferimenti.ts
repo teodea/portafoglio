@@ -21,7 +21,7 @@ export function riferimentiFinti(): PonteRiferimenti {
       await pausa(300 + Math.random() * 500)
       const n = (tentativi.get(id) ?? 0) + 1
       tentativi.set(id, n)
-      if (id === 'nasdaq100' && n === 1) return { ok: false, perche: 'investing.com non ha risposto (prova nel browser: riprova)' }
+      if (id === 'nasdaq100' && n === 1) return { ok: false, perche: 'investing.com non ha risposto (prova nel browser)' }
       const dollari = DESCRIZIONE[id].valuta === 'USD'
       return {
         ok: true,

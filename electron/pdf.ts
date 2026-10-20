@@ -14,7 +14,7 @@ export function registraPdf() {
     const aperti: PdfAperto[] = []
     for (const p of percorsi.slice(0, 10)) {
       if (typeof p !== 'string' || !p) {
-        aperti.push({ nome: 'file', percorso: null, perche: 'non riesco a sapere dove sta il file' })
+        aperti.push({ nome: 'file', percorso: null, perche: 'la posizione del file non è disponibile' })
         continue
       }
       const a = await apriPdf(p)

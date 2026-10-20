@@ -1,10 +1,10 @@
-// Il riquadro della risposta, "Quanto stai guadagnando" (DESIGN.md, "Riquadro della risposta"):
-// il guadagno in grande, sotto la % dall'inizio e il medio annuo, poi l'elenco con valore, soldi
-// investiti, il mese, l'anno e i dividendi. Ogni cifra si clicca da sola e apre il suo "Da dove viene".
+// Il riquadro della risposta, "Plusvalenza" o "Minusvalenza" (DESIGN.md, "Riquadro della risposta"):
+// il risultato in grande, sotto la % sul capitale investito e l'annualizzato, poi l'elenco con controvalore,
+// capitale investito, il mese, l'anno e i dividendi. Ogni cifra si clicca da sola e apre il suo "Da dove viene".
 import type { ReactNode } from 'react'
 import type { ContiPortafoglio } from '../../conti/portafoglio.ts'
 import type { Numero } from '../../conti/spiegazione.ts'
-import { euro, guadagnoEuro, NomeMese, percentuale, segno, segnoPercentuale } from '../../formato.ts'
+import { euro, guadagnoEuro, nomeMese, percentuale, segno, segnoPercentuale } from '../../formato.ts'
 import { Num } from '../../pannello/Pannello.tsx'
 import { classeSegno } from '../../pannello/spiega.ts'
 
@@ -38,28 +38,28 @@ export function Risposta({ conti }: { conti: ContiPortafoglio }) {
     <div className="riquadro risposta">
       <div className="dentro">
         <div className="capo">
-          <h2>Quanto stai guadagnando</h2>
+          <h2>{g < 0 ? 'Minusvalenza' : 'Plusvalenza'}</h2>
           <Num numero={conti.guadagno} className={`enorme ${classeSegno(segno(g))}`}>
             {guadagnoEuro(g)}
           </Num>
           <p className="sotto-enorme">
-            <Pct numero={conti.dallInizio} /> dall’inizio · <Pct numero={conti.medioAnnuo} /> all’anno in media
+            <Pct numero={conti.dallInizio} /> sul capitale investito · <Pct numero={conti.medioAnnuo} /> annualizzato
           </p>
         </div>
         <dl className="righe">
-          <Riga etichetta="Valore dei titoli oggi">
+          <Riga etichetta="Controvalore">
             <Num numero={conti.valore}>{euro(conti.valore.n ?? 0)}</Num>
           </Riga>
-          <Riga etichetta="Soldi investiti">
+          <Riga etichetta="Capitale investito">
             <Num numero={conti.investiti}>{euro(conti.investiti.n ?? 0)}</Num>
           </Riga>
-          <Riga etichetta={conti.fine ? NomeMese(conti.fine) : 'L’ultimo mese'}>
+          <Riga etichetta={conti.fine ? `Rendimento di ${nomeMese(conti.fine)}` : 'Rendimento dell’ultimo mese'}>
             <Pct numero={conti.mese} />
           </Riga>
-          <Riga etichetta={`Anno ${conti.anno}`}>
+          <Riga etichetta="Rendimento da inizio anno">
             <Pct numero={conti.annoInCorso} />
           </Riga>
-          <Riga etichetta="Dividendi incassati">
+          <Riga etichetta="Dividendi netti">
             <Num numero={conti.dividendi}>{euro(conti.dividendi.n ?? 0)}</Num>
           </Riga>
         </dl>

@@ -1,7 +1,7 @@
 // "Cerca i codici investing.com" (collaudo del 19/10, punto 7), sopra la scheda Prezzi dei titoli della pagina Dati:
 // per i titoli che hai senza il codice investing.com, l'applicazione cerca la linea dall'ISIN sulla borsa del titolo
 // (la stessa ricerca del titolo nuovo, ticket 12) e la mostra con il prezzo di ieri accanto all'ultimo prezzo del file,
-// per riconoscerla. "Non è lui" passa alla linea dopo; se non la trova si può incollare l'indirizzo della pagina.
+// per riconoscerla. "Non è questo" passa alla linea dopo; se non la trova si può incollare l'indirizzo della pagina.
 // Un titolo di Francoforte che investing.com non ha su Francoforte si cerca su Xetra, come faceva lo strumento.
 // Si scrivono solo i codici spuntati, dopo la conferma e con la copia del file prima.
 import { useState } from 'react'
@@ -20,7 +20,7 @@ type Riga = {
   valuta: string
   /** null mentre si cerca. */
   trovati: CodiciTrovati | null
-  /** Quale linea di investing.com: "Non è lui" passa alla dopo. */
+  /** Quale linea di investing.com: "Non è questo" passa alla dopo. */
   indice: number
   /** Spuntato: il codice si scrive. */
   usa: boolean
@@ -66,7 +66,7 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
     const cerca = (borsa: Titolo['borsa']) =>
       ponte
         .cercaCodici({ isin: r.titolo.isin, borsa, simbolo: r.titolo.simbolo ?? '', valuta: r.valuta, ...(indirizzo ? { indirizzo } : {}) })
-        .catch((): CodiciTrovati => ({ investing: [], perche: 'la ricerca non è andata', yahoo: null }))
+        .catch((): CodiciTrovati => ({ investing: [], perche: 'la ricerca non è riuscita', yahoo: null }))
     let trovati = await cerca(r.titolo.borsa)
     let suXetra = false
     if (!indirizzo && trovati.investing.length === 0 && r.titolo.borsa === 'FRA') {
@@ -95,13 +95,13 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
     setConferma(null)
     const r = risposta as EsitoCodici | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho scritto niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. Il file non è stato modificato.` })
     if (r.esito === 'cambiato')
-      return setEsito({ ok: false, testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho scritto niente e ho ricaricato i dati. Rifai la ricerca.' })
+      return setEsito({ ok: false, testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato scritto nulla e i dati sono stati ricaricati. Ripetere la ricerca.' })
     setRighe(null)
     setEsito({
       ok: true,
-      testo: `Scritti i codici di ${codici.length === 1 ? '1 titolo' : `${codici.length} titoli`}: dal prossimo Aggiorna fine mese il controllo di investing.com si fa anche per ${codici.length === 1 ? 'lui' : 'loro'}. ${FRASE_COPIA}`,
+      testo: `Codici scritti per ${codici.length === 1 ? '1 titolo' : `${codici.length} titoli`}: dal prossimo aggiornamento di fine mese il controllo di investing.com si applica anche ${codici.length === 1 ? 'a questo titolo' : 'a questi titoli'}. ${FRASE_COPIA}`,
     })
   }
 
@@ -116,7 +116,7 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
     ) : null
 
   const daScrivere = (righe ?? []).map(codiciDi).filter((c): c is CodiciDelTitolo => c !== null)
-  const quanti = senza.length === 1 ? '1 titolo che hai non ha' : `${senza.length} titoli che hai non hanno`
+  const quanti = senza.length === 1 ? '1 titolo in portafoglio non ha' : `${senza.length} titoli in portafoglio non hanno`
 
   return (
     <div className="dati-codici" aria-live="polite">
@@ -130,8 +130,8 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
         senza.length > 0 && (
           <div className="dati-codici-testa">
             <p>
-              <b>{quanti} il codice investing.com.</b> Senza, il controllo di investing.com accanto al prezzo della borsa non si fa, e se la borsa
-              non risponde manca la riserva. L’applicazione li cerca dall’ISIN; tu guardi se sono giusti prima di scriverli.
+              <b>{quanti} il codice investing.com.</b> Senza codice non si esegue il controllo di investing.com sul prezzo della borsa e, se la
+              borsa non fornisce il prezzo, manca la fonte di riserva. I codici si cercano a partire dall’ISIN e vanno verificati prima di scriverli nel file.
             </p>
             <button type="button" className="btn" disabled={occupato} onClick={() => void cercaTutti()}>
               <Icona nome="aggiorna" piccola /> Cerca i codici investing.com
@@ -142,8 +142,8 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
         <>
           <p className="dati-codici-testa">
             {cercando
-              ? `Cerco su investing.com, un titolo alla volta: ${righe.filter((r) => r.trovati).length} di ${righe.length}…`
-              : 'Guarda se la linea trovata è quella giusta: il prezzo di ieri deve essere vicino all’ultimo prezzo del file. Si scrivono solo i codici spuntati.'}
+              ? `Ricerca su investing.com in corso, un titolo alla volta: ${righe.filter((r) => r.trovati).length} di ${righe.length}…`
+              : 'Verificare che la linea trovata sia quella corretta: il prezzo di ieri deve essere vicino all’ultimo prezzo nel file. Si scrivono solo i codici selezionati.'}
           </p>
           <ul className="dati-codici-lista">
             {righe.map((r) => {
@@ -163,7 +163,7 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
                   </div>
                   <div className="dati-codici-trovato">
                     {!r.trovati ? (
-                      <span className="tenue">{cercando ? 'in attesa…' : 'cerco…'}</span>
+                      <span className="tenue">{cercando ? 'in attesa…' : 'ricerca in corso…'}</span>
                     ) : linea ? (
                       <>
                         <b>{linea.nome || `Linea ${linea.codice}`}</b>
@@ -179,25 +179,25 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
                         </span>
                         {r.suXetra && (
                           <span className="dati-sotto">
-                            investing.com non ce l’ha su Francoforte: è la linea di Xetra. Il prezzo di riserva sarà scritto “Xetra (riserva, altra
-                            borsa)”.
+                            Il titolo non è quotato su Francoforte in investing.com: la linea è quella di Xetra. Il prezzo di riserva sarà indicato
+                            come “Xetra (riserva, altra borsa)”.
                           </span>
                         )}
                         {yahoo && <span className="dati-sotto">Yahoo: {yahoo}</span>}
                         {altre > 0 && (
                           <button type="button" className="link piccolo" disabled={cercando} onClick={() => cambia(r.titolo.id, { indice: r.indice + 1 })}>
-                            Non è lui
+                            Non è questo
                           </button>
                         )}
                       </>
                     ) : (
                       <>
                         <span className="dati-sotto">
-                          {r.indice > 0 ? 'Non ho altre linee di questo titolo.' : `Non trovato${r.trovati.perche ? `: ${r.trovati.perche}` : ''}.`}
-                          {yahoo ? ` Su Yahoo è ${yahoo}.` : ''}
+                          {r.indice > 0 ? 'Non risultano altre linee di questo titolo.' : `Non trovato${r.trovati.perche ? `: ${r.trovati.perche}` : ''}.`}
+                          {yahoo ? ` Codice Yahoo: ${yahoo}.` : ''}
                         </span>
                         <label className="dati-codici-indirizzo">
-                          Se lo trovi tu, incolla l’indirizzo della pagina di investing.com
+                          In alternativa, incollare l’indirizzo della pagina del titolo su investing.com
                           <input
                             value={r.indirizzo}
                             placeholder="https://it.investing.com/etfs/…"
@@ -230,7 +230,7 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
           </ul>
           {conferma ? (
             <div className="conferma" role="group" aria-label="Conferma">
-              <p>Scrivo nel file i codici di {conferma.length === 1 ? '1 titolo' : `${conferma.length} titoli`}:</p>
+              <p>Saranno scritti nel file i codici di {conferma.length === 1 ? '1 titolo' : `${conferma.length} titoli`}:</p>
               <ul>
                 {conferma.map((c) => {
                   const t = righe.find((r) => r.titolo.id === c.titolo)!.titolo
@@ -248,7 +248,7 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
                   )
                 })}
               </ul>
-              <p>Non cambio nient’altro. Prima di scrivere faccio una copia del file.</p>
+              <p>Nessun altro dato viene modificato. Prima della scrittura si salva una copia del file.</p>
               <div className="bottoni">
                 <button type="button" className="btn primario" autoFocus disabled={occupato} onClick={() => void scrivi(conferma)}>
                   Sì, scrivi i codici
@@ -261,10 +261,10 @@ export function CercaCodici({ dati }: { dati: FileDati }) {
           ) : (
             <div className="bottoni">
               <button type="button" className="btn primario" disabled={cercando || occupato || daScrivere.length === 0} onClick={() => setConferma(daScrivere)}>
-                Scrivi i codici spuntati ({daScrivere.length})
+                Scrivi i codici selezionati ({daScrivere.length})
               </button>
               <button type="button" className="btn" disabled={cercando} onClick={() => setRighe(null)}>
-                Lascia stare
+                Annulla
               </button>
             </div>
           )}

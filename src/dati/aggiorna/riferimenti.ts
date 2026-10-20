@@ -302,7 +302,7 @@ export function riferimentiInCorso(p: ParteRiferimenti | undefined): boolean {
 
 /** La frase della barra in basso quando riferimenti o inflazione sono ancora in arrivo. */
 export function fraseBarraRiferimenti(p: ParteRiferimenti | undefined): string {
-  return riferimentiInCorso(p) ? ' Riferimenti e inflazione ancora in arrivo possono aspettare: se salvi adesso, si riprendono al prossimo aggiornamento.' : ''
+  return riferimentiInCorso(p) ? ' Riferimenti e inflazione ancora in arrivo non sono necessari: salvando adesso, si acquisiscono al prossimo aggiornamento.' : ''
 }
 
 /** Quanti riferimenti hanno il valore di fine mese. */
@@ -404,15 +404,15 @@ const positivo = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && 
 export function controllaRiferimenti(m: Partial<RiferimentiDaSalvare>): { ok: true } | { ok: false; perche: string } {
   for (const v of m.riferimenti ?? []) {
     if (!(RIFERIMENTI as readonly string[]).includes(v.riferimento)) return { ok: false, perche: `il riferimento "${v.riferimento}" non esiste` }
-    if (!DATA.test(v.data) || !positivo(v.valore)) return { ok: false, perche: `il valore di ${DESCRIZIONE[v.riferimento].nome} del ${v.data} non va` }
+    if (!DATA.test(v.data) || !positivo(v.valore)) return { ok: false, perche: `il valore di ${DESCRIZIONE[v.riferimento].nome} del ${v.data} non è valido` }
     if (DESCRIZIONE[v.riferimento].valuta !== 'EUR' && !positivo(v.cambio))
       return { ok: false, perche: `manca il cambio del dollaro per ${DESCRIZIONE[v.riferimento].nome} del ${v.data}` }
-    if (!FONTI_RIFERIMENTO.includes(v.fonte)) return { ok: false, perche: `la fonte "${v.fonte}" di un riferimento non va` }
+    if (!FONTI_RIFERIMENTO.includes(v.fonte)) return { ok: false, perche: `la fonte "${v.fonte}" di un riferimento non è valida` }
   }
   for (const n of m.nic ?? []) {
     if (!DATA.test(n.data) || !positivo(n.valore) || (n.base !== 2015 && n.base !== 2025))
-      return { ok: false, perche: `il NIC del ${n.data} non va` }
-    if (!FONTI_NIC.includes(n.fonte)) return { ok: false, perche: `la fonte "${n.fonte}" del NIC non va` }
+      return { ok: false, perche: `il NIC del ${n.data} non è valido` }
+    if (!FONTI_NIC.includes(n.fonte)) return { ok: false, perche: `la fonte "${n.fonte}" del NIC non è valida` }
   }
   return { ok: true }
 }
@@ -467,7 +467,7 @@ export function storiaMancante(dati: FileDati, mese: string): { riferimenti: Par
   return { riferimenti, nic: mesiNicDaChiedere(dati, mese, false) }
 }
 
-/** Le frasi del riquadro "<Mese> è salvato" per riferimenti e inflazione, dal file appena scritto. */
+/** Le frasi del riquadro "Aggiornamento di <mese> salvato" per riferimenti e inflazione, dal file appena scritto. */
 export function frasiDopoIlSalvataggio(dati: FileDati, mese: string, primaVolta: boolean): string[] {
   const manca = storiaMancante(dati, mese)
   const frasi: string[] = []
@@ -478,16 +478,16 @@ export function frasiDopoIlSalvataggio(dati: FileDati, mese: string, primaVolta:
   if (!senzaMese.length) frasi.push(`I 6 riferimenti di borsa hanno il valore di fine ${nomeMese(mese)}.`)
   else
     frasi.push(
-      `${senzaMese.length === 1 ? 'Il riferimento' : 'I riferimenti'} ${elenco(senzaMese)} ${senzaMese.length === 1 ? 'manca' : 'mancano'}: si riprova al prossimo aggiornamento.`,
+      `${senzaMese.length === 1 ? 'Il riferimento' : 'I riferimenti'} ${elenco(senzaMese)} ${senzaMese.length === 1 ? 'è mancante' : 'sono mancanti'}: si richiede di nuovo al prossimo aggiornamento.`,
     )
-  if (dal && primaVolta && !senzaStoria.length) frasi.push(`La storia dei riferimenti da ${meseEAnno(dal)} è completa, con il valore alle date dei movimenti.`)
-  else if (senzaStoria.length) frasi.push(`Alla storia di ${elenco(senzaStoria)} manca ancora qualche data: si riprende al prossimo aggiornamento.`)
+  if (dal && primaVolta && !senzaStoria.length) frasi.push(`Lo storico dei riferimenti da ${meseEAnno(dal)} è completo, con il valore alle date dei movimenti.`)
+  else if (senzaStoria.length) frasi.push(`Allo storico di ${elenco(senzaStoria)} mancano ancora alcune date: si completano al prossimo aggiornamento.`)
   const nonAncora = manca.nic
-  if (!nonAncora.length) frasi.push(`L’inflazione arriva ${finoAl(mese)}.`)
+  if (!nonAncora.length) frasi.push(`L’inflazione è disponibile ${finoAl(mese)}.`)
   else if (nonAncora.length === 1 && nonAncora[0] === mese) {
     const prima = meseDopo(mese, -1)
-    frasi.push(`L’inflazione arriva ${finoAl(prima)}: ${nomeMese(mese)} esce ${quandoEsceNic(mese)} e si prende al prossimo aggiornamento.`)
-  } else frasi.push(`Mancano ancora ${nonAncora.length} mesi dell’inflazione: si riprendono al prossimo aggiornamento.`)
+    frasi.push(`L’inflazione è disponibile ${finoAl(prima)}: il dato di ${nomeMese(mese)} esce ${quandoEsceNic(mese)} e si acquisisce al prossimo aggiornamento.`)
+  } else frasi.push(`Mancano ancora ${nonAncora.length} mesi dell’inflazione: si acquisiscono al prossimo aggiornamento.`)
   return frasi
 }
 

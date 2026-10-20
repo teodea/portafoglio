@@ -73,13 +73,13 @@ export function titoloNuovo(dati: FileDati, d: DatiTitoloNuovo): Titolo | null {
   return t
 }
 
-/** Cosa manca nel riquadro, in parole: "cos’è in parole semplici", "la borsa di quotazione". */
+/** Cosa manca nel riquadro, in parole: "la descrizione in parole semplici", "la borsa di quotazione". */
 export function mancaNelTitoloNuovo(d: DatiTitoloNuovo): string[] {
   const m: string[] = []
   if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(d.isin.trim().toUpperCase())) m.push('l’ISIN del titolo nuovo')
   if (!d.borsa) m.push('la borsa di quotazione del titolo nuovo')
   if (!d.simbolo.trim()) m.push('il simbolo del titolo nuovo')
-  if (!d.parole.trim()) m.push('cos’è il titolo nuovo, in parole semplici')
+  if (!d.parole.trim()) m.push('la descrizione del titolo nuovo, in parole semplici')
   return m
 }
 
@@ -89,17 +89,17 @@ export type Controllato = { ok: true } | { ok: false; perche: string }
 export function controllaTitoloNuovo(dati: FileDati, t: unknown): Controllato {
   const no = (perche: string): Controllato => ({ ok: false, perche })
   const x = t as Titolo
-  if (typeof x !== 'object' || x === null) return no('il titolo nuovo non va')
-  if (typeof x.isin !== 'string' || !/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(x.isin)) return no('l’ISIN del titolo nuovo non va')
-  if (!eBorsa(x.borsa)) return no('scegli la borsa di quotazione del titolo nuovo')
-  if (x.id !== `${x.isin}-${x.borsa}`) return no('il codice del titolo nuovo non va')
+  if (typeof x !== 'object' || x === null) return no('i dati del titolo nuovo non sono validi')
+  if (typeof x.isin !== 'string' || !/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(x.isin)) return no('l’ISIN del titolo nuovo non è valido')
+  if (!eBorsa(x.borsa)) return no('scegliere la borsa di quotazione del titolo nuovo')
+  if (x.id !== `${x.isin}-${x.borsa}`) return no('il codice del titolo nuovo non è valido')
   if ((dati.titoli ?? []).some((y) => y.id === x.id)) return no(`il titolo ${x.simbolo ?? x.isin} su ${NOMI_BORSE[x.borsa]} c’è già nel file`)
-  if (typeof x.paroleSemplici !== 'string' || !x.paroleSemplici.trim()) return no('scrivi cos’è il titolo nuovo, in parole semplici')
+  if (typeof x.paroleSemplici !== 'string' || !x.paroleSemplici.trim()) return no('descrivere il titolo nuovo in parole semplici')
   for (const k of ['nomeBorsa', 'nome', 'descrizioneBanca', 'dossier', 'valuta'] as const)
-    if (typeof x[k] !== 'string' || !x[k]) return no('il titolo nuovo non va')
-  if (x.simbolo !== null && typeof x.simbolo !== 'string') return no('il simbolo del titolo nuovo non va')
-  if (x.codiceInvesting !== undefined && !(Number.isInteger(x.codiceInvesting) && x.codiceInvesting > 0)) return no('il codice investing.com non va')
-  if (x.codiceYahoo !== undefined && typeof x.codiceYahoo !== 'string') return no('il codice Yahoo non va')
+    if (typeof x[k] !== 'string' || !x[k]) return no('i dati del titolo nuovo non sono validi')
+  if (x.simbolo !== null && typeof x.simbolo !== 'string') return no('il simbolo del titolo nuovo non è valido')
+  if (x.codiceInvesting !== undefined && !(Number.isInteger(x.codiceInvesting) && x.codiceInvesting > 0)) return no('il codice investing.com non è valido')
+  if (x.codiceYahoo !== undefined && typeof x.codiceYahoo !== 'string') return no('il codice Yahoo non è valido')
   return { ok: true }
 }
 

@@ -31,8 +31,8 @@ export function ScaricaInExcel() {
 }
 
 const COSA: Record<(typeof NOMI_FOGLI)[number], string> = {
-  Leggimi: 'cosa c’è in ogni foglio, la data e i numeri del portafoglio',
-  Titoli: 'un titolo per riga, anche i venduti, con i numeri di fine mese',
+  Leggimi: 'il contenuto di ogni foglio, la data e i dati di sintesi del portafoglio',
+  Titoli: 'un titolo per riga, compresi i venduti, con i valori di fine mese',
   Operazioni: 'acquisti e vendite',
   Dividendi: 'lordo, imposte, netto',
   'Prezzi di fine mese': 'un prezzo per riga, con cambio, fonte e controllo',
@@ -63,8 +63,8 @@ export function PannelloExcel() {
   return (
     <div className="dati-excel">
       <p>
-        Un file Excel con tutti i tuoi dati, da aprire, filtrare o mandare a qualcuno. Si scarica soltanto: le modifiche fatte nel file
-        Excel non tornano nell’applicazione.
+        Un file Excel con tutti i dati, da consultare, filtrare o inviare. L’esportazione è in una sola direzione: le modifiche fatte nel
+        file Excel non tornano nell’applicazione.
       </p>
       <div className="conto">
         {NOMI_FOGLI.map((f) => (
@@ -77,19 +77,19 @@ export function PannelloExcel() {
         ))}
       </div>
       <p className="tenue">
-        Nome del file: <b>{fatto?.nome ?? nomeFileExcel(oggi)}</b>, nella cartella Download. Numeri come numeri (si possono sommare), non
-        come formule.
+        Nome del file: <b>{fatto?.nome ?? nomeFileExcel(oggi)}</b>, nella cartella Download. I numeri sono valori (sommabili), non
+        formule.
       </p>
       {fatto && (
         <p className="esito" role="status">
           <Icona nome="ok" piccola />
-          <span>Fatto: il file è nella cartella Download.</span>
+          <span>File salvato nella cartella Download.</span>
         </p>
       )}
       {errore && (
         <p className="esito" role="status">
           <Icona nome="info" piccola />
-          <span>Il file non è stato scritto: {errore.perche}. Riprova.</span>
+          <span>Si è verificato un errore: {errore.perche}. Il file non è stato salvato.</span>
         </p>
       )}
       <div className="bottoni">
@@ -104,7 +104,7 @@ export function PannelloExcel() {
           </>
         ) : (
           <button type="button" className="btn primario" disabled={inCorso} onClick={() => void scarica()}>
-            {inCorso ? 'Scarico…' : 'Scarica'}
+            {inCorso ? 'Scaricamento in corso…' : 'Scarica'}
           </button>
         )}
       </div>

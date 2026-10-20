@@ -17,7 +17,7 @@ export function riferimentoAManoFinto(accesso: AccessoFinto): PonteRiferimentoAM
       await new Promise((fatto) => setTimeout(fatto, 300))
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
-      if (!esito?.ok) return { esito: 'errore', perche: 'il file non si legge' }
+      if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
       const v3 = aVersione3(esito.dati)
       const ok = controllaScrittura(v3, s)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }

@@ -1,5 +1,5 @@
 // Il grafico a linea della Scheda del titolo (DESIGN.md, "Grafico a linea"): il valore a ogni fine mese
-// in blu pieno con la sfumatura sotto, il pagato in grigio tratteggiato. SVG disegnato a mano, alla
+// in blu pieno con la sfumatura sotto, il costo d'acquisto in grigio tratteggiato. SVG disegnato a mano, alla
 // larghezza vera del riquadro, così caratteri e spessori non si deformano.
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react'
 import type { PuntoGrafico } from '../../../conti/scheda.ts'
@@ -92,7 +92,7 @@ export function Grafico({ punti, nomePagato, descrizione }: { punti: PuntoGrafic
             height={ALTO}
             role="img"
             tabIndex={0}
-            aria-label={`${descrizione}. Frecce per scorrere i mesi, Invio per il conto.`}
+            aria-label={`${descrizione}. Frecce per scorrere i mesi, Invio per il dettaglio del calcolo.`}
             onKeyDown={tasti}
             onBlur={() => setSopra(null)}
             onMouseMove={(e) => setSopra(indice(e))}
@@ -143,7 +143,7 @@ export function Grafico({ punti, nomePagato, descrizione }: { punti: PuntoGrafic
       {p && sopra !== null && (
         <div className="fumetto" style={{ left: 18 + (x(sopra) + 14 + 180 > largo ? x(sopra) - 14 - 180 : x(sopra) + 14) }} aria-hidden="true">
           <b>{mese(p.mese)}</b>
-          <span>Valore {euro(p.valore)}</span>
+          <span>Controvalore {euro(p.valore)}</span>
           <span>
             {nomePagato} {euro(p.pagato)}
           </span>
@@ -151,7 +151,7 @@ export function Grafico({ punti, nomePagato, descrizione }: { punti: PuntoGrafic
         </div>
       )}
       <p className="solo-lettore" aria-live="polite">
-        {p ? `${mese(p.mese)}: valore ${euro(p.valore)}, ${nomePagato.toLowerCase()} ${euro(p.pagato)}, ${guadagnoEuro(p.valore - p.pagato)}.` : ''}
+        {p ? `${mese(p.mese)}: controvalore ${euro(p.valore)}, ${nomePagato.toLowerCase()} ${euro(p.pagato)}, ${p.valore - p.pagato < 0 ? 'minusvalenza' : 'plusvalenza'} ${guadagnoEuro(p.valore - p.pagato)}.` : ''}
       </p>
     </div>
   )

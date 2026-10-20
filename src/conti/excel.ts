@@ -14,7 +14,7 @@ import { fonteInParole } from './fonti.ts'
 import { righeDati, senzaRiferimenti, valuteDeiTitoli, type CellaDato } from './pagina-dati.ts'
 import { contiDelPortafoglio } from './portafoglio.ts'
 import { fonteMovimento } from './scheda.ts'
-import { contiDeiTitoli, type ContoTitolo } from './titoli.ts'
+import { contiDeiTitoli, plusMinus, type ContoTitolo } from './titoli.ts'
 
 export const NOMI_FOGLI = [
   'Leggimi',
@@ -46,15 +46,15 @@ function fonteScritta(p: PrezzoFineMese): string {
   return f.dettaglio ? `${f.nome}: ${f.dettaglio}` : f.nome
 }
 
-/** Il controllo di investing.com in parole: "uguale", "diverso di +0,6% (investing.com dice 50,33)", oppure perché non c'è. */
+/** Il controllo di investing.com in parole: "stesso prezzo", "differenza di +0,6%: investing.com 50,33", oppure perché non c'è. */
 function controlloScritto(p: PrezzoFineMese): string {
   const c = confronta(p.prezzo, p.controllo)
   if (!c) return ''
-  if (c.tipo === 'non-fatto') return `non fatto: ${c.perche}`
+  if (c.tipo === 'non-fatto') return `non eseguito: ${c.perche}`
   const altro = c.nota ? ` (${c.nota})` : ''
-  if (c.tipo === 'uguale') return `uguale${altro}`
+  if (c.tipo === 'uguale') return `stesso prezzo${altro}`
   const segno = c.differenza > 0 ? '+' : c.differenza < 0 ? MENO : ''
-  return `diverso di ${segno}${numero(c.differenza, 1)}%: investing.com dice ${numero(c.controllo, 2, 4)}${altro}`
+  return `differenza di ${segno}${numero(c.differenza, 1)}%: investing.com ${numero(c.controllo, 2, 4)}${altro}`
 }
 
 /** Perché la fonte non è la borsa ufficiale (o cosa dice la borsa), come sotto il prezzo nella pagina Dati. */
@@ -71,30 +71,30 @@ function leggimi(dati: FileDati, oggi: string, conti: ReturnType<typeof contiDel
   const fine = conti.fine
   const vuoto = senzaRiferimenti(dati)
   const righe: RigaLeggimi[] = [
-    r(['Portafoglio titoli: i tuoi dati'], { stile: 'titolo' }),
-    r([`Scaricato il ${dataTesto(oggi)}. ${fine ? `Prezzi fino al ${dataTesto(fine)}.` : 'Nel file non ci sono ancora prezzi di fine mese.'}`]),
-    r(['Questo file si scarica soltanto: se lo modifichi, le modifiche non tornano nell’applicazione.']),
-    r(['Numeri come numeri, non formule. Tutto in euro al cambio BCE di fine mese, prima delle tasse.']),
+    r(['Portafoglio titoli: esportazione dei dati'], { stile: 'titolo' }),
+    r([`Esportato il ${dataTesto(oggi)}. ${fine ? `Prezzi fino al ${dataTesto(fine)}.` : 'Nel file non ci sono ancora prezzi di fine mese.'}`]),
+    r(['Il file è solo un’esportazione: le modifiche fatte qui non tornano nell’applicazione.']),
+    r(['Valori numerici, senza formule. Importi in euro al cambio BCE di fine mese, al lordo delle imposte.']),
     r([]),
-    r(['Foglio', 'Cosa c’è'], { stile: 'grassetto' }),
-    r(['Titoli', 'Un titolo per riga, anche quelli venduti, con i numeri a fine mese calcolati dall’applicazione.']),
-    r(['Operazioni', 'Acquisti e vendite, dal più vecchio. Data = valuta di regolamento. Il totale è negativo per gli acquisti (soldi usciti) e positivo per le vendite.']),
-    r(['Dividendi', 'Lordo, imposte e netto incassato, dal più vecchio. Anche le cedole delle obbligazioni sono qui.']),
-    r(['Prezzi di fine mese', 'Un prezzo per riga: fine mese, titolo, prezzo nella sua valuta, cambio, quote, valore in euro, fonte, controllo di investing.com e se è scritto a mano.']),
-    r(['Valore mese per mese', 'Il valore in euro di ogni titolo a ogni fine mese: titoli per riga, mesi per colonna. In fondo il totale e i soldi investiti.']),
+    r(['Foglio', 'Contenuto'], { stile: 'grassetto' }),
+    r(['Titoli', 'Un titolo per riga, compresi quelli venduti, con i valori di fine mese calcolati dall’applicazione.']),
+    r(['Operazioni', 'Acquisti e vendite in ordine di data. La data è la data valuta. Il totale è negativo per gli acquisti (uscite) e positivo per le vendite (entrate).']),
+    r(['Dividendi', 'Lordo, imposte e netto accreditato, in ordine di data. Comprende le cedole delle obbligazioni.']),
+    r(['Prezzi di fine mese', 'Un prezzo per riga: fine mese, titolo, prezzo nella valuta del titolo, cambio, quote, controvalore in euro, fonte, controllo di investing.com e indicazione dei prezzi inseriti manualmente.']),
+    r(['Valore mese per mese', 'Il controvalore in euro di ogni titolo a ogni fine mese: titoli per riga, mesi per colonna. In fondo il totale e il capitale investito.']),
     r([
       'Inflazione e riferimenti',
-      'Un mese per riga: l’inflazione NIC di ISTAT (con la sua base), i cambi BCE e i sei riferimenti con i dividendi reinvestiti, ognuno nella sua valuta. Dove un dato manca la cella è vuota.' +
-        (vuoto ? ' Per ora è vuoto: arrivano col primo aggiornamento.' : ''),
+      'Un mese per riga: l’inflazione NIC di ISTAT (con la sua base), i cambi BCE e i sei riferimenti con i dividendi reinvestiti, ognuno nella sua valuta. Una cella vuota indica un dato mancante.' +
+        (vuoto ? ' Per ora il foglio è vuoto: i dati arrivano con il primo aggiornamento.' : ''),
     ]),
     r([]),
     r([fine ? `Il portafoglio a fine ${meseTesto(fine)}` : 'Il portafoglio a fine mese'], { stile: 'grassetto' }),
-    r(['Valore', conti.valore.n], { formato: 'euro' }),
-    r(['Soldi investiti', conti.investiti.n], { formato: 'euro' }),
-    r(['Guadagno', conti.guadagno.n], { formato: 'euro' }),
-    r(['Dall’inizio', conti.dallInizio.n], { formato: 'percentuale' }),
-    r(['Medio annuo', conti.medioAnnuo.n], { formato: 'percentuale' }),
-    r([conti.anno ? `Anno in corso (${conti.anno})` : 'Anno in corso', conti.annoInCorso.n], { formato: 'percentuale' }),
+    r(['Controvalore', conti.valore.n], { formato: 'euro' }),
+    r(['Capitale investito', conti.investiti.n], { formato: 'euro' }),
+    r([conti.guadagno.n !== null ? plusMinus(conti.guadagno.n) : 'Plusvalenza', conti.guadagno.n], { formato: 'euro' }),
+    r(['Rendimento dall’inizio', conti.dallInizio.n], { formato: 'percentuale' }),
+    r(['Rendimento annualizzato', conti.medioAnnuo.n], { formato: 'percentuale' }),
+    r([conti.anno ? `Rendimento da inizio anno (${conti.anno})` : 'Rendimento da inizio anno', conti.annoInCorso.n], { formato: 'percentuale' }),
     r(['Dividendi netti', conti.dividendi.n], { formato: 'euro' }),
   ]
   return { tipo: 'leggimi', nome: 'Leggimi', righe, larghezze: [26, 100] }
@@ -103,7 +103,7 @@ function leggimi(dati: FileDati, oggi: string, conti: ReturnType<typeof contiDel
 function titoli(conti: ContoTitolo[]): FoglioTabella {
   const colonne: Colonna[] = [
     { titolo: 'Simbolo' },
-    { titolo: 'Cosa è', larghezza: 34 },
+    { titolo: 'Descrizione', larghezza: 34 },
     { titolo: 'Nome', larghezza: 40 },
     { titolo: 'ISIN', larghezza: 15 },
     { titolo: 'Borsa' },
@@ -114,13 +114,13 @@ function titoli(conti: ContoTitolo[]): FoglioTabella {
     { titolo: 'Prezzo a fine mese', formato: 'prezzo' },
     { titolo: 'Cambio', formato: 'cambio' },
     { titolo: 'Fonte del prezzo', larghezza: 20 },
-    { titolo: 'Valore', formato: 'euro' },
-    { titolo: 'Pagato', formato: 'euro' },
-    { titolo: 'Incassato vendendo', formato: 'euro' },
+    { titolo: 'Controvalore', formato: 'euro' },
+    { titolo: 'Costo', formato: 'euro' },
+    { titolo: 'Ricavo delle vendite', formato: 'euro' },
     { titolo: 'Dividendi netti', formato: 'euro' },
-    { titolo: 'Guadagno', formato: 'euro' },
-    { titolo: 'Dall’acquisto', formato: 'percentuale' },
-    { titolo: 'Medio annuo', formato: 'percentuale' },
+    { titolo: 'Plus/minus', formato: 'euro' },
+    { titolo: 'Rendimento', formato: 'percentuale' },
+    { titolo: 'Annualizzato', formato: 'percentuale' },
   ]
   const righe = conti.map((c): Cella[] => {
     // Per un titolo venduto non c'è un prezzo a fine mese, come nell'esempio della bozza.
@@ -153,7 +153,7 @@ function titoli(conti: ContoTitolo[]): FoglioTabella {
 function operazioni(dati: FileDati, nomi: Map<string, ContoTitolo>): FoglioTabella {
   const colonne: Colonna[] = [
     { titolo: 'Data', formato: 'data' },
-    { titolo: 'Cosa' },
+    { titolo: 'Tipo' },
     { titolo: 'Simbolo' },
     { titolo: 'ISIN', larghezza: 15 },
     { titolo: 'Borsa' },
@@ -172,7 +172,7 @@ function operazioni(dati: FileDati, nomi: Map<string, ContoTitolo>): FoglioTabel
     .sort((a, b) => a.data.localeCompare(b.data) || (a.tipo === b.tipo ? 0 : a.tipo === 'acquisto' ? -1 : 1))
   const righe = ops.map((o): Cella[] => {
     const c = nomi.get(o.titolo)
-    const nota = [o.prima ? `corretta a mano${o.quando ? ` il ${dataTesto(o.quando.slice(0, 10))}` : ''}` : '', o.nota ?? ''].filter(Boolean).join('; ')
+    const nota = [o.prima ? `corretta manualmente${o.quando ? ` il ${dataTesto(o.quando.slice(0, 10))}` : ''}` : '', o.nota ?? ''].filter(Boolean).join('; ')
     return [
       { data: o.data },
       o.tipo,
@@ -199,14 +199,14 @@ function dividendi(dati: FileDati, nomi: Map<string, ContoTitolo>): FoglioTabell
     { titolo: 'ISIN', larghezza: 15 },
     { titolo: 'Lordo', formato: 'euro' },
     { titolo: 'Imposte', formato: 'euro' },
-    { titolo: 'Netto incassato', formato: 'euro' },
+    { titolo: 'Netto', formato: 'euro' },
     { titolo: 'Fonte', larghezza: 18 },
     { titolo: 'Nota', larghezza: 30 },
   ]
   const divs = (dati.dividendi ?? []).slice().sort((a, b) => a.data.localeCompare(b.data))
   const righe = divs.map((d): Cella[] => {
     const c = nomi.get(d.titolo)
-    const nota = [d.prima ? `corretto a mano${d.quando ? ` il ${dataTesto(d.quando.slice(0, 10))}` : ''}` : '', d.nota ?? ''].filter(Boolean).join('; ')
+    const nota = [d.prima ? `corretto manualmente${d.quando ? ` il ${dataTesto(d.quando.slice(0, 10))}` : ''}` : '', d.nota ?? ''].filter(Boolean).join('; ')
     return [{ data: d.data }, c?.nomeCorto ?? d.titolo, c?.titolo.isin ?? '', d.lordo, d.imposte, d.netto, fonteMovimento(d.fonte), nota]
   })
   return tabella('Dividendi', colonne, righe)
@@ -222,12 +222,12 @@ function prezzi(v3: FileDati, conti: ContoTitolo[]): FoglioTabella {
     { titolo: 'Valuta' },
     { titolo: 'Cambio', formato: 'cambio' },
     { titolo: 'Quote', formato: 'quote' },
-    { titolo: 'Valore in euro', formato: 'euro' },
+    { titolo: 'Controvalore', formato: 'euro' },
     { titolo: 'Fonte', larghezza: 22 },
     { titolo: 'Nota', larghezza: 30 },
     { titolo: 'Controllo investing.com', larghezza: 24 },
-    { titolo: 'Corretto a mano' },
-    { titolo: 'Prezzo di prima', formato: 'prezzo' },
+    { titolo: 'Manuale' },
+    { titolo: 'Prezzo precedente', formato: 'prezzo' },
   ]
   const perId = new Map(conti.map((c) => [c.id, c]))
   const righe = (v3.prezzi ?? [])
@@ -262,7 +262,7 @@ function valoreMesePerMese(conti: ContoTitolo[], portafoglio: ReturnType<typeof 
   const serie = portafoglio.serie
   const colonne: Colonna[] = [
     { titolo: 'Simbolo' },
-    { titolo: 'Cosa è', larghezza: 34 },
+    { titolo: 'Descrizione', larghezza: 34 },
     ...serie.map((s): Colonna => ({ titolo: meseTesto(s.mese), data: s.mese, formato: 'euroTondo', larghezza: 11 })),
   ]
   const righe: Cella[][] = conti.map((c) => {
@@ -270,7 +270,7 @@ function valoreMesePerMese(conti: ContoTitolo[], portafoglio: ReturnType<typeof 
     return [c.nomeCorto, c.paroleSemplici ?? '', ...serie.map((s) => perMese.get(s.mese) ?? null)]
   })
   righe.push(['Totale', '', ...serie.map((s) => s.valore.n)])
-  righe.push(['Soldi investiti', '', ...serie.map((s) => s.investiti)])
+  righe.push(['Capitale investito', '', ...serie.map((s) => s.investiti)])
   return tabella('Valore mese per mese', colonne, righe, [righe.length - 2, righe.length - 1])
 }
 
@@ -282,7 +282,7 @@ function inflazioneERiferimenti(v3: FileDati): FoglioTabella {
     { titolo: 'Base NIC', larghezza: 14 },
     ...valute.map((v): Colonna => ({ titolo: `Cambio ${v}`, formato: 'cambio', larghezza: 13 })),
     ...RIFERIMENTI.map((id): Colonna => ({ titolo: `${DESCRIZIONE[id].nome} (${DESCRIZIONE[id].valuta})`, formato: 'valore', larghezza: 16 })),
-    { titolo: 'Scritti a mano', larghezza: 24 },
+    { titolo: 'Inseriti manualmente', larghezza: 24 },
   ]
   const numeroDi = (c: CellaDato): number | null => (c.tipo === 'dato' ? c.numero : null)
   const nic = new Map((v3.nic ?? []).map((n) => [n.data, n]))

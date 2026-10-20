@@ -9,7 +9,7 @@ import type { Dividendo, FileDati, Operazione, Titolo } from '../dati/tipi.ts'
 import { data, euro as euroTesto, numero, prezzo as prezzoTesto, quote as quoteTesto } from '../formato.ts'
 import { fonteMovimento, spiegaOperazione, type CosaOperazione } from './scheda.ts'
 import { euro, guadagno, prezzo, quote, riga, type Numero, type RigaConto, type Spiegazione } from './spiegazione.ts'
-import type { VenditaSpiegata } from './titoli.ts'
+import { plusMinus, type VenditaSpiegata } from './titoli.ts'
 
 const QUASI_ZERO = 1e-9
 const somma = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
@@ -44,7 +44,7 @@ export type RigaMovimento = {
   soldi: Numero
   /** −1 per i soldi usciti dal conto, +1 per quelli entrati. */
   verso: 1 | -1
-  /** La fonte in parole: "PDF della banca", "dal tuo file Excel", "scritto a mano". */
+  /** La fonte in parole: "PDF della banca", "file Excel iniziale", "inserito manualmente". */
   fonte: string
   /** Corretto a mano: chip "a mano" in tutte le tabelle. */
   aMano: boolean
@@ -85,17 +85,17 @@ export function venditeSpiegate(ops: Operazione[], nome: string): Map<string, Ve
         perche: {
           titolo: `Vendita di ${nome} del ${data(o.data)}`,
           grande: guadagno(g),
-          frase: `Il ${data(o.data)} hai venduto ${quoteTesto(o.quantita)} quote su ${quoteTesto(quoteOra)} a ${prezzoTesto(o.prezzo, o.valuta)} e hai incassato ${euroTesto(o.totale, 2)}${o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già tolta)` : ''}.`,
+          frase: `Il ${data(o.data)} sono state vendute ${quoteTesto(o.quantita)} quote su ${quoteTesto(quoteOra)} a ${prezzoTesto(o.prezzo, o.valuta)}, per un ricavo di ${euroTesto(o.totale, 2)}${o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già dedotta)` : ''}.`,
           conto: [
-            riga('Incassato', euro(o.totale)),
-            riga(`− costo medio × quote vendute (${prezzoTesto(cm, 'EUR')} × ${quoteTesto(o.quantita)})`, euro(costoQuote)),
-            riga('Guadagno incassato', guadagno(g)),
+            riga('Ricavo della vendita', euro(o.totale)),
+            riga(`− prezzo medio di carico × quote vendute (${prezzoTesto(cm, 'EUR')} × ${quoteTesto(o.quantita)})`, euro(costoQuote)),
+            riga(`${plusMinus(g)} realizzata`, guadagno(g)),
           ],
           note: [
             parziale
-              ? `Le ${quoteTesto(quoteOra - o.quantita)} quote rimaste tengono lo stesso costo medio di ${prezzoTesto(cm, 'EUR')}.`
-              : 'Hai venduto tutte le quote: il titolo è tra i Venduti.',
-            'Il guadagno incassato è prima delle tasse sulla vendita.',
+              ? `Le ${quoteTesto(quoteOra - o.quantita)} quote rimaste mantengono il prezzo medio di carico di ${prezzoTesto(cm, 'EUR')}.`
+              : 'Vendute tutte le quote: il titolo è tra i Venduti.',
+            'Importo al lordo delle imposte sulla vendita.',
           ],
         },
       },
@@ -147,21 +147,21 @@ function cosaDellOperazione(o: Operazione, v: VenditaSpiegata | null): CosaOpera
 function spiegaDividendo(nome: string, d: Dividendo, quoteQuelGiorno: number): Spiegazione {
   const conto: RigaConto[] = []
   if (quoteQuelGiorno > 0) {
-    conto.push(riga('Quote che avevi', quote(quoteQuelGiorno)))
+    conto.push(riga('Quote in portafoglio', quote(quoteQuelGiorno)))
     conto.push(riga('× lordo per quota', prezzo(d.lordo / quoteQuelGiorno, 'EUR')))
     conto.push(riga('= lordo', euro(d.lordo)))
   } else conto.push(riga('Lordo', euro(d.lordo)))
   conto.push(riga(d.lordo > 0 ? `− imposte (${numero((d.imposte / d.lordo) * 100, 1)}%)` : '− imposte', euro(d.imposte)))
-  conto.push(riga('Netto arrivato sul conto', euro(d.netto)))
+  conto.push(riga('Netto accreditato', euro(d.netto)))
   const note: string[] = []
   if (d.nota) note.push(d.nota)
-  if (Math.abs(d.lordo - d.imposte - d.netto) >= 0.01) note.push('Il netto è quello scritto nel documento della banca.')
+  if (Math.abs(d.lordo - d.imposte - d.netto) >= 0.01) note.push('Il netto è quello indicato nel documento della banca.')
   note.push(`Fonte: ${fonteMovimento(d.fonte)}.`)
-  note.push('Il netto entra nel guadagno del titolo.')
+  note.push('Il netto entra nella plusvalenza del titolo.')
   return {
     titolo: `${eCedola(d) ? 'Cedola' : 'Dividendo'} di ${nome} del ${data(d.data)}`,
     grande: euro(d.netto),
-    frase: `Soldi entrati sul conto il ${data(d.data)}: il lordo meno le imposte trattenute.`,
+    frase: `Importo accreditato il ${data(d.data)}: lordo meno imposte trattenute.`,
     conto,
     note,
     movimento: d.id,
@@ -305,57 +305,57 @@ export function riquadriMovimenti(tutte: RigaMovimento[], anno: string | null): 
     investiti: {
       n: investiti,
       perche: {
-        titolo: anno ? `Soldi messi nel ${anno}` : 'Soldi investiti',
+        titolo: anno ? `Investimento netto del ${anno}` : 'Capitale investito',
         grande: anno ? guadagno(investiti) : euro(investiti),
         frase: anno
-          ? `Quanto hai comprato nel ${anno} meno quanto hai incassato vendendo nello stesso anno.`
-          : 'Quanto hai pagato per comprare i titoli, commissioni comprese, meno quanto hai incassato vendendoli.',
+          ? `Acquisti del ${anno} meno ricavo delle vendite dello stesso anno.`
+          : "Costo d'acquisto di tutti i titoli, commissioni comprese, meno il ricavo delle vendite.",
         conto: [
-          riga(`Pagato per ${anno ? 'gli acquisti' : 'tutti gli acquisti'}${nel} (${acq.length})`, euro(comprato)),
-          riga(`− incassato da ${anno ? 'le vendite' : 'tutte le vendite'}${nel} (${ven.length})`, euro(venduto)),
-          riga(anno ? `Soldi messi nel ${anno}` : 'Soldi investiti', anno ? guadagno(investiti) : euro(investiti)),
+          riga(`Costo ${anno ? 'degli acquisti' : 'di tutti gli acquisti'}${nel} (${acq.length})`, euro(comprato)),
+          riga(`− ricavo ${anno ? 'delle vendite' : 'di tutte le vendite'}${nel} (${ven.length})`, euro(venduto)),
+          riga(anno ? `Investimento netto del ${anno}` : 'Capitale investito', anno ? guadagno(investiti) : euro(investiti)),
         ],
         note: [
           anno
-            ? `Se è negativo, nel ${anno} hai tolto dal portafoglio più soldi di quanti ne hai messi.`
-            : 'Sono i tuoi soldi che restano dentro il portafoglio.',
-          'I dividendi non contano qui: sono guadagno.',
+            ? `Un valore negativo indica che nel ${anno} i prelievi dal portafoglio hanno superato i versamenti.`
+            : 'È il capitale proprio che resta nel portafoglio.',
+          'I dividendi non rientrano qui: fanno parte della plusvalenza.',
         ],
       },
     },
     comprato: {
       n: comprato,
       perche: {
-        titolo: `Comprato${nel}`,
+        titolo: `Acquisti${nel}`,
         grande: euro(comprato),
-        frase: `${quanti(acq.length, 'acquisto', 'acquisti')}${nel}, commissioni comprese: i soldi usciti dal conto.`,
-        conto: [...contoDellaSomma(acq, anno, nomeDi), riga('Comprato', euro(comprato))],
-        note: ['Il clic su un movimento della tabella mostra il suo conto.'],
+        frase: `${quanti(acq.length, 'acquisto', 'acquisti')}${nel}, commissioni comprese: importo addebitato.`,
+        conto: [...contoDellaSomma(acq, anno, nomeDi), riga('Totale acquisti', euro(comprato))],
+        note: ['Selezionare un movimento nella tabella per il suo calcolo.'],
       },
     },
     venduto: {
       n: venduto,
       perche: {
-        titolo: `Venduto${nel}`,
+        titolo: `Ricavo delle vendite${nel}`,
         grande: euro(venduto),
         frase:
           ven.length === 0
             ? `Nessuna vendita${nel}.`
-            : `${quanti(ven.length, 'vendita', 'vendite')}${nel}, commissioni tolte: i soldi arrivati sul conto. I rimborsi a scadenza delle obbligazioni contano come vendite.`,
-        conto: ven.length ? [...contoDellaSomma(ven, anno, nomeDi), riga('Venduto', euro(venduto))] : [],
+            : `${quanti(ven.length, 'vendita', 'vendite')}${nel}, commissioni dedotte: importo accreditato. I rimborsi a scadenza delle obbligazioni contano come vendite.`,
+        conto: ven.length ? [...contoDellaSomma(ven, anno, nomeDi), riga('Ricavo delle vendite', euro(venduto))] : [],
         note: [],
       },
     },
     dividendi: {
       n: netti,
       perche: {
-        titolo: `Dividendi incassati${nel}`,
+        titolo: `Dividendi netti${nel}`,
         grande: euro(netti),
         frase:
           div.length === 0
             ? `Nessun dividendo${nel}.`
-            : `${quanti(div.length, 'pagamento', 'pagamenti')}${nel}, netti: quello che è arrivato sul conto dopo le imposte. Le cedole delle obbligazioni sono contate qui.`,
-        conto: div.length ? [...contoDellaSomma(div, anno, nomeDi), riga('Netto incassato', euro(netti))] : [],
+            : `${quanti(div.length, 'pagamento', 'pagamenti')}${nel}: importo accreditato, al netto delle imposte. Comprende le cedole delle obbligazioni.`,
+        conto: div.length ? [...contoDellaSomma(div, anno, nomeDi), riga('Totale netto', euro(netti))] : [],
         note: [],
       },
     },

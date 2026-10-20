@@ -1,7 +1,7 @@
 // La Scheda del titolo (mappa, ticket 25): si apre con un clic su un titolo nella pagina Titoli.
-// Testata con nome, parole semplici ed etichette; i riquadri valore, pagato, guadagno, medio annuo;
-// il grafico del valore con la linea del pagato; le schede Mese per mese, Operazioni, Dividendi e
-// Da dove vengono i numeri. La scheda scelta sta nell'indirizzo (?scheda=…).
+// Testata con nome, parole semplici ed etichette; i riquadri controvalore, costo d'acquisto, plusvalenza,
+// rendimento annualizzato; il grafico del controvalore con la linea del costo; le schede Mese per mese,
+// Operazioni, Dividendi e Provenienza. La scheda scelta sta nell'indirizzo (?scheda=…).
 import { useMemo, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { eAMano } from '../../conti/prezzo-a-mano.ts'
@@ -48,7 +48,7 @@ export function SchedaTitolo() {
     mesi: 'Mese per mese',
     operazioni: `Operazioni (${scheda.operazioni.length})`,
     dividendi: `Dividendi (${scheda.dividendi.length})`,
-    fonti: 'Da dove vengono i numeri',
+    fonti: 'Provenienza',
   }
 
   return (
@@ -72,7 +72,7 @@ export function SchedaTitolo() {
             {t.stato === 'chiuso'
               ? `venduto${t.ultimaVendita ? ` il ${data(t.ultimaVendita)}` : ''}`
               : t.stato === 'nuovo'
-                ? `comprato${t.primoAcquisto ? ` il ${data(t.primoAcquisto)}` : ''}`
+                ? `acquistato${t.primoAcquisto ? ` il ${data(t.primoAcquisto)}` : ''}`
                 : `${quote(t.quote)} quote${t.primoAcquisto ? ` dal ${data(t.primoAcquisto)}` : ''}`}
           </span>
         </div>
@@ -84,25 +84,25 @@ export function SchedaTitolo() {
         <div className="riquadro riquadro-grafico">
           <Grafico
             punti={scheda.punti}
-            nomePagato={scheda.conVendite ? 'Costo delle quote' : 'Pagato'}
-            descrizione={`Valore di ${t.nomeCorto} a ogni fine mese e quanto hai pagato`}
+            nomePagato={scheda.conVendite ? 'Costo delle quote' : 'Costo d’acquisto'}
+            descrizione={`Controvalore di ${t.nomeCorto} a ogni fine mese e costo d’acquisto`}
           />
           <div className="legenda">
             <span>
               <i aria-hidden="true" />
-              Valore a fine mese
+              Controvalore a fine mese
             </span>
             <span>
               <i className="pagato" aria-hidden="true" />
-              {scheda.conVendite ? 'Costo delle quote che avevi (al costo medio)' : 'Pagato'}
+              {scheda.conVendite ? 'Costo delle quote possedute (al prezzo medio di carico)' : 'Costo d’acquisto'}
             </span>
-            <span className="tenue">Clic sul grafico per il conto di quel mese</span>
+            <span className="tenue">Selezionare un mese per il dettaglio del calcolo</span>
           </div>
         </div>
       )}
 
       <div className="riquadro">
-        <div className="schede" role="tablist" aria-label={`Come vedere ${t.nomeCorto}`}>
+        <div className="schede" role="tablist" aria-label={`Viste di ${t.nomeCorto}`}>
           {SCHEDE.map((s, i) => (
             <button
               key={s}
@@ -152,17 +152,17 @@ function Riquadri({ t }: { t: ContoTitolo }) {
   return (
     <div className="numeri">
       {t.stato === 'chiuso' ? (
-        <Riquadro numero={t.incassato} etichetta="Incassato vendendo" sotto={t.ultimaVendita ? `venduto il ${data(t.ultimaVendita)}` : 'venduto'}>
+        <Riquadro numero={t.incassato} etichetta="Ricavo delle vendite" sotto={t.ultimaVendita ? `venduto il ${data(t.ultimaVendita)}` : 'venduto'}>
           <b>{euro(t.incassato.n ?? 0)}</b>
         </Riquadro>
       ) : t.stato === 'nuovo' || t.valore.n === null || !p ? (
-        <Riquadro numero={t.valore} etichetta="Valore" sotto="arriva con il prossimo aggiornamento">
+        <Riquadro numero={t.valore} etichetta="Controvalore" sotto="disponibile dal prossimo aggiornamento">
           <b className="tenue">—</b>
         </Riquadro>
       ) : (
         <Riquadro
           numero={t.valore}
-          etichetta={`Valore al ${data(p.data)}`}
+          etichetta={`Controvalore al ${data(p.data)}`}
           sotto={
             <>
               {t.valoreInValuta !== null && p.cambio
@@ -182,19 +182,19 @@ function Riquadri({ t }: { t: ContoTitolo }) {
       )}
       <Riquadro
         numero={t.pagato}
-        etichetta="Pagato"
-        sotto={t.costoMedio.n !== null ? `costo medio ${euro(t.costoMedio.n, 2)} a quota` : 'commissioni comprese'}
+        etichetta="Costo d’acquisto"
+        sotto={t.costoMedio.n !== null ? `prezzo medio di carico ${euro(t.costoMedio.n, 2)}` : 'commissioni comprese'}
       >
         <b>{euro(t.pagato.n ?? 0)}</b>
       </Riquadro>
       <Riquadro
         numero={t.guadagno}
-        etichetta="Guadagno"
+        etichetta={g !== null && g < 0 ? 'Minusvalenza' : 'Plusvalenza'}
         sotto={
           pct === null ? (
-            'arriva con il prossimo aggiornamento'
+            'disponibile dal prossimo aggiornamento'
           ) : (
-            <span className={classeSegno(segnoPercentuale(pct))}>{percentuale(pct)} dall’acquisto</span>
+            <span className={classeSegno(segnoPercentuale(pct))}>{percentuale(pct)} sul costo</span>
           )
         }
       >
@@ -202,15 +202,15 @@ function Riquadri({ t }: { t: ContoTitolo }) {
       </Riquadro>
       <Riquadro
         numero={t.medioAnnuo}
-        etichetta="Medio annuo"
+        etichetta="Rendimento annualizzato"
         sotto={
           t.medioAnnuo.n !== null && t.anni !== null
             ? `in ${numero(t.anni, 1)} anni`
             : t.stato === 'chiuso'
-              ? 'per i venduti conta il guadagno'
+              ? 'non calcolato per i titoli venduti'
               : t.anni !== null && t.anni < ANNI_MINIMI_MEDIO
-                ? 'da meno di sei mesi: clic per sapere perché'
-                : 'clic per sapere perché'
+                ? 'posseduto da meno di sei mesi'
+                : 'non disponibile: selezionare per il motivo'
         }
       >
         <b className={t.medioAnnuo.n === null ? 'tenue' : undefined}>{t.medioAnnuo.n === null ? '—' : percentuale(t.medioAnnuo.n)}</b>

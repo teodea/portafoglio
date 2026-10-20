@@ -1,4 +1,4 @@
-// Il segno "a mano" (DESIGN.md, "Correzione a mano"): una sola etichetta gialla per ogni prezzo scritto a mano,
+// Il segno "manuale" (DESIGN.md, "Correzione a mano"): una sola etichetta gialla per ogni prezzo scritto a mano,
 // nell'aggiornamento o corretto dopo. Nelle tabelle mese per mese, dove non c'è spazio, solo la matita.
 import './correzione.css'
 
@@ -11,18 +11,18 @@ function Matita() {
   )
 }
 
-/** Il chip crema con testo ambra: "a mano" nelle tabelle strette, "corretto a mano" dove c'è spazio. */
+/** Il chip crema con testo ambra: "manuale" nelle tabelle strette, "corretto manualmente" dove c'è spazio. */
 export function ChipAMano({ lungo = false }: { lungo?: boolean }) {
   return (
     <span className="chip-mano">
       <Matita />
-      {lungo ? 'corretto a mano' : 'a mano'}
+      {lungo ? 'corretto manualmente' : 'manuale'}
     </span>
   )
 }
 
 /** Solo la matita ambra, accanto a un valore fatto con un prezzo (o un valore di riferimento) scritto a mano. */
-export function MatitaAMano({ titolo = 'Prezzo scritto a mano' }: { titolo?: string }) {
+export function MatitaAMano({ titolo = 'Prezzo inserito manualmente' }: { titolo?: string }) {
   return (
     <span className="matita-mano" title={titolo} role="img" aria-label={titolo.toLowerCase()}>
       <Matita />

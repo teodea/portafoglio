@@ -78,8 +78,8 @@ function scheda(dati: FileDati, simbolo: string) {
 }
 
 describe('la fonte di un movimento', () => {
-  it('il carico iniziale è "dal tuo file Excel", un PDF è "PDF della banca"', () => {
-    expect(fonteMovimento('file (foglio inventato, riga 4)')).toBe('dal tuo file Excel')
+  it('il carico iniziale è "file Excel iniziale", un PDF è "PDF della banca"', () => {
+    expect(fonteMovimento('file (foglio inventato, riga 4)')).toBe('file Excel iniziale')
     expect(fonteMovimento('Acquistotitoli-qualcosa.pdf')).toBe('PDF della banca')
     expect(fonteMovimento('')).toBe('—')
   })
@@ -111,8 +111,8 @@ describe('vendita parziale nella scheda', () => {
     expect(frase).toContain('30 quote su 150')
     expect(frase).toContain('445,00 €')
     expect(frase).toContain('11,00 €')
-    expect(frase).toContain('Guadagno incassato: +115,00 €')
-    expect(frase).toContain('Le 120 quote rimaste tengono lo stesso costo medio')
+    expect(frase).toContain('Plusvalenza realizzata: +115,00 €')
+    expect(frase).toContain('Le 120 quote rimaste mantengono il prezzo medio di carico')
   })
 
   it('la linea del pagato è il costo delle quote che avevi: dopo la vendita scende al costo medio', () => {
@@ -126,7 +126,7 @@ describe('vendita parziale nella scheda', () => {
 
   it('mese per mese dal più recente, con la fonte in parole e il puntino della borsa', () => {
     expect(s.mesi.map((r) => r.mese.mese)).toEqual(['2025-06-30', '2025-05-31', '2025-03-31', '2025-01-31'])
-    expect(s.mesi[0].fonte).toBe('dal tuo file Excel')
+    expect(s.mesi[0].fonte).toBe('file Excel iniziale')
     expect(s.mesi[2].borsa).toBe(true)
     expect(s.mesi[0].prezzo.n).toBe(16)
     expect(s.mesi[0].cambio).toBeNull()
@@ -161,11 +161,11 @@ describe('titolo in valuta', () => {
   })
 
   it('"Da dove vengono i numeri" scrive il valore in sterline e il cambio BCE', () => {
-    const valore = s.paragrafi.find((x) => x.nome === 'Valore')!
+    const valore = s.paragrafi.find((x) => x.nome === 'Controvalore')!
     const frase = testo(valore.pezzi)
     expect(frase).toContain('20 quote × 52,85 GBP')
     expect(frase).toContain('= 1.057,00 GBP, diviso il cambio BCE del 30/09/2026 (0,8546 GBP per 1 €)')
-    expect(s.paragrafi.map((x) => x.nome)).toEqual(['Valore', 'Prezzo', 'Pagato', 'Costo medio', 'Dividendi', 'Guadagno', 'Medio annuo'])
+    expect(s.paragrafi.map((x) => x.nome)).toEqual(['Controvalore', 'Prezzo', "Costo d'acquisto", 'Prezzo medio di carico', 'Dividendi', 'Plusvalenza', 'Rendimento annualizzato'])
   })
 })
 
@@ -190,14 +190,14 @@ describe('titolo venduto, rimborso e dividendi', () => {
     const d = s.dividendi[0]
     expect(d.netto.n).toBe(17.5)
     expect(d.netto.perche.titolo).toBe('Cedola di Obbligazione Inventata 2027 del 01/03/2025')
-    expect(d.netto.perche.conto.map((x) => x.etichetta)).toEqual(['Lordo', '− imposte', 'Netto incassato'])
+    expect(d.netto.perche.conto.map((x) => x.etichetta)).toEqual(['Lordo', '− imposte', 'Netto'])
     expect(ultimaRiga(d.netto)).toBe(17.5)
   })
 
   it('"Da dove vengono i numeri" di un titolo venduto: pagato, incassato, dividendi, guadagno', () => {
-    expect(s.paragrafi.map((x) => x.nome)).toEqual(['Pagato', 'Incassato', 'Dividendi', 'Guadagno', 'Medio annuo'])
-    const g = testo(s.paragrafi.find((x) => x.nome === 'Guadagno')!.pezzi)
-    expect(g).toContain('Incassato vendendo + dividendi netti − pagato = +31,60 €')
+    expect(s.paragrafi.map((x) => x.nome)).toEqual(["Costo d'acquisto", 'Ricavo delle vendite', 'Dividendi', 'Plusvalenza', 'Rendimento annualizzato'])
+    const g = testo(s.paragrafi.find((x) => x.nome === 'Plusvalenza')!.pezzi)
+    expect(g).toContain('Ricavo delle vendite + dividendi netti − costo d’acquisto = +31,60 €')
   })
 
   it('un movimento con soldi in più (rateo, ritenute) li mostra in una riga a parte', () => {
@@ -209,8 +209,8 @@ describe('titolo venduto, rimborso e dividendi', () => {
     })
     const { s: sb } = scheda(conRateo, 'BBBB')
     const conto = sb.operazioni[0].soldi.perche.conto
-    expect(conto.map((x) => x.etichetta)).toContain('+ altro (vedi sotto)')
-    expect(conto.find((x) => x.etichetta === '+ altro (vedi sotto)')!.cifra).toMatchObject({ n: 8 })
+    expect(conto.map((x) => x.etichetta)).toContain('+ altre voci (nelle note)')
+    expect(conto.find((x) => x.etichetta === '+ altre voci (nelle note)')!.cifra).toMatchObject({ n: 8 })
     expect(sb.operazioni[0].soldi.perche.note[0]).toBe('Totale con il rateo')
   })
 })
@@ -249,7 +249,7 @@ describe('mesi senza prezzo', () => {
     })
     const { s } = scheda(dati, 'AAAA')
     expect(s.dividendi.map((d) => d.dividendo.id)).toEqual(['d2', 'd1'])
-    expect(s.dividendi[0].fonte).toBe('dal tuo file Excel')
+    expect(s.dividendi[0].fonte).toBe('file Excel iniziale')
   })
 })
 
@@ -300,7 +300,7 @@ describe('file alla versione 3: prezzo a mano, riserva e cambio BCE', () => {
     expect(r.prima).toBe(23)
     // Il pannello lo corregge e mostra "a mano" con il prezzo di prima: la nota in parole non si ripete.
     expect(r.prezzo.perche.correggi).toEqual({ titolo: A, data: '2025-02-28' })
-    expect(r.prezzo.perche.note.join(' ')).not.toContain('Scritto a mano')
+    expect(r.prezzo.perche.note.join(' ')).not.toContain('Inserito manualmente')
     expect(r.cambio!.perche.note[0]).toBe('Fonte del cambio: BCE.')
     expect(s.mesi[1].aMano).toBe(false)
     expect(s.mesi[1].borsa).toBe(true)

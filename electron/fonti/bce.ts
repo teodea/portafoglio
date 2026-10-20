@@ -26,7 +26,7 @@ export function leggiBce(testo: string): { data: string; cambio: number }[] {
 /** Il cambio dell'ultimo giorno del mese che la BCE ha pubblicato (il 31/12 per esempio non pubblica). */
 export async function cambioBce(valuta: string, mese: string, scarica: Scarica = fetch, oggi = oggiLocale()): Promise<EsitoCambio> {
   if (!meseFinito(mese, oggi)) return { ok: false, perche: `${NomeMese(mese)} non è ancora finito` }
-  if (!/^[A-Z]{3}$/.test(valuta)) return { ok: false, perche: `la valuta "${valuta}" non va` }
+  if (!/^[A-Z]{3}$/.test(valuta)) return { ok: false, perche: `la valuta "${valuta}" non è valida` }
   const url = `${INDIRIZZO}D.${valuta}.EUR.SP00.A?startPeriod=${inizioMese(mese)}&endPeriod=${fineMese(mese)}&format=csvdata`
   let testo: string
   try {

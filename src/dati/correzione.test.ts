@@ -121,9 +121,9 @@ describe('correggere a mano un prezzo', () => {
     expect(controllaCorrezione(dati, correggi(MOND, '2026-07-31', 12))).toEqual({ ok: false, perche: 'nel file non c’è il prezzo di MOND a fine luglio 2026' })
     expect(controllaCorrezione(dati, correggi(MOND, SETTEMBRE, 0)).ok).toBe(false)
     expect(controllaCorrezione(dati, correggi(MOND, SETTEMBRE, Number.NaN)).ok).toBe(false)
-    expect(controllaCorrezione(dati, correggi(MOND, SETTEMBRE, 12.75))).toEqual({ ok: false, perche: 'il prezzo nuovo è uguale a quello che c’è già' })
+    expect(controllaCorrezione(dati, correggi(MOND, SETTEMBRE, 12.75))).toEqual({ ok: false, perche: 'il prezzo nuovo è uguale a quello presente' })
     expect(controllaCorrezione(dati, torna(MOND, SETTEMBRE)).ok).toBe(false)
-    expect(() => applicaCorrezione(dati, torna(MOND, SETTEMBRE), ORA)).toThrow('non ha un prezzo di prima')
+    expect(() => applicaCorrezione(dati, torna(MOND, SETTEMBRE), ORA)).toThrow('non ha un prezzo precedente')
   })
 
   it('il processo principale accetta solo richieste con la forma giusta', () => {

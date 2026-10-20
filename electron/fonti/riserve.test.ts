@@ -134,7 +134,7 @@ describe('investing.com, la riserva e il controllo', () => {
   it('in sterline senza Yahoo non si sa se sono pence: non si usa', async () => {
     await expect(
       chiusureInvesting(LONDRA, '2026-10', { investing: rispondi(storico), yahoo: rispondi('', 503) }, Date.now(), 0),
-    ).rejects.toThrow('senza Yahoo non so se il prezzo è in sterline o in pence')
+    ).rejects.toThrow('senza Yahoo non si sa se il prezzo è in sterline o in pence')
   })
 
   it('il sito che rifiuta la richiesta lo dice', async () => {

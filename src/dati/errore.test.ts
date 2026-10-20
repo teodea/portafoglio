@@ -14,6 +14,6 @@ describe('percheInParole', () => {
     expect(percheInParole('Errore: niente rete')).toBe('Errore: niente rete')
   })
   it('non resta mai vuoto', () => {
-    expect(percheInParole(new Error(''))).toBe('non so perché')
+    expect(percheInParole(new Error(''))).toBe('motivo sconosciuto')
   })
 })

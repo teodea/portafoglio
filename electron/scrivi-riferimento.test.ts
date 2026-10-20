@@ -61,7 +61,7 @@ describe('scrivere il valore di un riferimento', () => {
   it('una scrittura che non si può fare non tocca il file e dice perché', async () => {
     const prima = await readFile(file(), 'utf8')
     const scritto = await scriviRiferimento(cartella, impronta(prima), { tipo: 'torna', id: 'sp500', data: SET }, orologio)
-    expect(scritto).toEqual({ esito: 'errore', perche: 'S&P 500 a fine settembre 2026 non ha un valore di prima' })
+    expect(scritto).toEqual({ esito: 'errore', perche: 'S&P 500 a fine settembre 2026 non ha un valore precedente' })
     expect(await readFile(file(), 'utf8')).toBe(prima)
   })
 })

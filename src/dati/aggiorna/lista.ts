@@ -249,10 +249,10 @@ export function contaFonti(fonti: string[]): [string, number][] {
   return [...conta]
 }
 
-/** Come si chiama, nel riquadro "<Mese> è salvato", un prezzo tenuto com'era. */
+/** Il segno, tra le fonti del riquadro "Aggiornamento di <mese> salvato", di un prezzo tenuto com'era (lì si legge "mantenuto"). */
 export const TENUTO = 'tenuto com’era'
 
-/** Le fonti dei prezzi della lista, per il riquadro "<Mese> è salvato". */
+/** Le fonti dei prezzi della lista, per il riquadro "Aggiornamento di <mese> salvato". */
 export function fontiDellaLista(a: Aggiornamento): string[] {
   return a.titoli.map((r) =>
     r.aMano !== undefined ? FONTE.aMano : r.tieni && r.prima ? TENUTO : r.stato.tipo === 'arrivato' ? r.stato.esito.fonte : '',

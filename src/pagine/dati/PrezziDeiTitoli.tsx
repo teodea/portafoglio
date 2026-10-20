@@ -1,11 +1,11 @@
 // La scheda "Prezzi dei titoli" della pagina Dati (ticket 13, mappa 27): si sceglie il fine mese; una riga
 // per titolo con la borsa di quotazione, il prezzo con la fonte sotto, il controllo di investing.com e il
-// codice investing.com. In alto il conto delle fonti. Il clic sul prezzo apre "Da dove viene", con la
+// codice investing.com. In alto il conto delle fonti. Il clic sul prezzo apre la provenienza, con la
 // correzione a mano (ticket 8).
 import { contaFonti, fraseFonti, righePrezzi, spiegaPrezzo, type RigaPrezzo } from '../../conti/pagina-dati.ts'
 import { differenza } from '../../aggiorna/numeri.ts'
 import { senzaCodice } from '../../dati/aggiorna/controllo-prezzo.ts'
-import { fonteInParole } from '../../conti/fonti.ts'
+import { fonteInParole, NOME_FILE_EXCEL } from '../../conti/fonti.ts'
 import type { FileDati } from '../../dati/tipi.ts'
 import { cambio, mese, prezzo } from '../../formato.ts'
 import { Icona } from '../../icone.tsx'
@@ -17,10 +17,10 @@ const maiuscola = (t: string) => t[0].toUpperCase() + t.slice(1)
 function Controllo({ r, apri }: { r: RigaPrezzo; apri: () => void }) {
   const c = r.controllo
   if (!c)
-    return <span className="tenue piccolo">{r.fonte.nome === 'dal tuo file Excel' ? '— non fatto per i mesi del tuo file' : '—'}</span>
+    return <span className="tenue piccolo">{r.fonte.nome === NOME_FILE_EXCEL ? '— non previsto per i mesi importati da Excel' : '—'}</span>
   // Senza il codice il perché è lo stesso per tutti: lo dice una volta sola il riquadro "Cerca i codici investing.com".
-  if (senzaCodice(c)) return <span className="tenue piccolo">{r.codiceInvesting ? '— non fatto: allora mancava il codice' : '— manca il codice'}</span>
-  if (c.tipo === 'non-fatto') return <span className="dati-sotto">non fatto: {c.perche}</span>
+  if (senzaCodice(c)) return <span className="tenue piccolo">{r.codiceInvesting ? '— non eseguito: mancava il codice' : '— manca il codice'}</span>
+  if (c.tipo === 'non-fatto') return <span className="dati-sotto">non eseguito: {c.perche}</span>
   const nota = c.nota ? <span className="dati-sotto">{maiuscola(c.nota)}</span> : null
   if (c.tipo === 'uguale')
     return (
@@ -34,7 +34,7 @@ function Controllo({ r, apri }: { r: RigaPrezzo; apri: () => void }) {
   return (
     <span>
       <button type="button" className="num dati-diverso" aria-haspopup="dialog" onClick={apri}>
-        {prezzo(c.controllo, r.prezzo.valuta).replace(/ \S+$/, '')}: diverso di {differenza(c.differenza)}
+        {prezzo(c.controllo, r.prezzo.valuta).replace(/ \S+$/, '')}: differenza di {differenza(c.differenza)}
       </button>
       {nota}
     </span>
@@ -67,7 +67,7 @@ function Fonte({ r }: { r: RigaPrezzo }) {
 
 export function PrezziDeiTitoli({ dati, mesi, scelto, scegli }: { dati: FileDati; mesi: string[]; scelto: string; scegli: (data: string) => void }) {
   const spiega = useSpiega()
-  if (!mesi.length) return <div className="vuoto">Nel file non ci sono ancora prezzi di fine mese: arrivano con il primo Aggiorna fine mese.</div>
+  if (!mesi.length) return <div className="vuoto">Nessun prezzo di fine mese: i prezzi si scaricano con il primo Aggiorna fine mese.</div>
   const righe = righePrezzi(dati, scelto)
   const apri = (r: RigaPrezzo) => {
     const s = spiegaPrezzo(dati, { titolo: r.titolo, data: r.prezzo.data })
@@ -97,7 +97,7 @@ export function PrezziDeiTitoli({ dati, mesi, scelto, scegli }: { dati: FileDati
               <th>Titolo</th>
               <th>Borsa di quotazione</th>
               <th className="n">Prezzo</th>
-              <th>Da dove viene</th>
+              <th>Provenienza</th>
               <th>Controllo investing.com</th>
               <th>Codice investing.com</th>
             </tr>
@@ -131,8 +131,8 @@ export function PrezziDeiTitoli({ dati, mesi, scelto, scegli }: { dati: FileDati
         </table>
       </div>
       <p className="nota dati-nota">
-        Clic su un prezzo per vedere da dove viene e, se è sbagliato, correggerlo a mano. I mesi caricati dal tuo file Excel non hanno il
-        controllo di investing.com: si fa per i prezzi scaricati con Aggiorna fine mese.
+        Selezionare un prezzo per vederne la provenienza e, se errato, correggerlo manualmente. I mesi importati dal file Excel non hanno il
+        controllo di investing.com, che si esegue sui prezzi scaricati con Aggiorna fine mese.
       </p>
     </>
   )

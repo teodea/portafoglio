@@ -2,7 +2,7 @@
 // e il movimento che ne viene fuori, con quello che manca. Modulo puro.
 //
 // Il ticket 12 (Registra dal PDF) riempie la stessa bozza dai campi del PDF: origine "pdf", i nomi dei PDF,
-// e in "dalPdf" i testi letti dal PDF. Un campo uguale a quello del PDF si segna "dal PDF", uno cambiato "a mano"
+// e in "dalPdf" i testi letti dal PDF. Un campo uguale a quello del PDF si segna "dal PDF", uno cambiato "manuale"
 // (e il valore del PDF va nel movimento come "dalPdf", così resta segnato anche nel file).
 import { valutaDelTitolo } from '../../dati/aggiorna/mesi.ts'
 import { quoteAlGiorno, type NuovoMovimento, type TipoMovimento } from '../../dati/movimenti.ts'
@@ -15,7 +15,7 @@ export type Bozza = {
   /** Scritto a mano, o letto dal PDF della banca (ticket 12). */
   origine: 'mano' | 'pdf'
   testi: Record<CampoBozza, string>
-  /** Solo dal PDF: i testi letti dal PDF, per segnare "dal PDF" o "a mano". */
+  /** Solo dal PDF: i testi letti dal PDF, per segnare "dal PDF" o "manuale". */
   dalPdf?: Partial<Record<CampoBozza, string>>
   pdf?: string[]
   rifOrdine?: string | null
@@ -108,11 +108,11 @@ export function leggiBozza(dati: FileDati, b: Bozza): Letta {
   const mancano: string[] = []
   if (!t) mancano.push('il titolo')
   const data = leggiData(b.testi.data)
-  if (!data) mancano.push(b.testi.data.trim() ? 'una data vera, scritta come 12/10/2026' : 'la data')
+  if (!data) mancano.push(b.testi.data.trim() ? 'una data valida, nel formato 12/10/2026' : 'la data')
   const num = (k: CampoBozza, nome: string, zero = false) => {
     const n = leggiNumero(b.testi[k])
     if (n === null || (!zero && n === 0)) {
-      mancano.push(b.testi[k].trim() ? `${nome} scritto come numero (es. 12,75)` : nome)
+      mancano.push(b.testi[k].trim() ? `${nome} in forma numerica (es. 12,75)` : nome)
       return null
     }
     return n
@@ -123,7 +123,7 @@ export function leggiBozza(dati: FileDati, b: Bozza): Letta {
   if (b.tipo === 'dividendo') {
     const lordo = num('lordo', 'il lordo')
     const imposte = num('imposte', 'le imposte', true)
-    if (lordo !== null && imposte !== null && imposte > lordo) mancano.push('imposte non più grandi del lordo')
+    if (lordo !== null && imposte !== null && imposte > lordo) mancano.push('imposte non superiori al lordo')
     const movimento: NuovoMovimento | null =
       t && data && lordo !== null && imposte !== null && mancano.length === 0
         ? { tipo: 'dividendo', titolo: t.id, data, lordo, imposte, ...pdf, ...nota, ...dalPdf(b, ['data', 'lordo', 'imposte']) }
@@ -172,7 +172,7 @@ function dalPdf(b: Bozza, campi: CampoBozza[]): { dalPdf?: Record<string, string
   return Object.keys(r).length > 0 ? { dalPdf: r } : {}
 }
 
-/** Il campo è diverso da quello letto dal PDF? (Per l'etichetta "a mano" accanto al campo.) */
+/** Il campo è diverso da quello letto dal PDF? (Per l'etichetta "manuale" accanto al campo.) */
 export function campoCambiato(b: Bozza, k: CampoBozza): boolean {
   const letto = b.dalPdf?.[k]
   if (letto === undefined) return false

@@ -58,7 +58,7 @@ describe('l’elenco dei movimenti', () => {
     expect(r.soldi.n).toBe(6.66)
     const s = spiegazioneDelMovimento(d, r.id)!
     expect(s.movimento).toBe(r.id)
-    expect(s.conto.map((c) => c.etichetta)).toEqual(['Quote che avevi', '× lordo per quota', '= lordo', '− imposte (26,0%)', 'Netto arrivato sul conto'])
+    expect(s.conto.map((c) => c.etichetta)).toEqual(['Quote in portafoglio', '× lordo per quota', '= lordo', '− imposte (26,0%)', 'Netto accreditato'])
     const cedola = elencoMovimenti(d).find((x) => x.id === 'div-1')!
     expect(cedola.sotto).toBe('cedola dell’obbligazione')
     expect(spiegazioneDelMovimento(d, 'non-c-e')).toBeNull()
@@ -68,7 +68,7 @@ describe('l’elenco dei movimenti', () => {
     const d = applicaModifica(conVendita(), { azione: 'correggi', id: 'op-1', campi: { commissioni: 6, totale: 1006 } }, 'x').dati
     const righe = elencoMovimenti(d)
     expect(righe.find((r) => r.id === 'op-1')!.aMano).toBe(true)
-    expect(righe.find((r) => r.data === '2025-01-10')!).toMatchObject({ aMano: false, fonte: 'scritto a mano' })
+    expect(righe.find((r) => r.data === '2025-01-10')!).toMatchObject({ aMano: false, fonte: 'inserito manualmente' })
     expect(righe.find((r) => r.id === 'op-1')!.soldi.perche.movimento).toBe('op-1')
   })
 })
@@ -82,8 +82,8 @@ describe('i quattro riquadri', () => {
     expect(q.investiti.n).toBeCloseTo(1005 + 951.18 + 992.95 - 1007.05, 10)
     expect(q.dividendi.n).toBe(17.5)
     expect([q.acquisti, q.vendite, q.pagamenti]).toEqual([3, 1, 1])
-    expect(q.investiti.perche.titolo).toBe('Soldi investiti')
-    expect(q.comprato.perche.conto.map((r) => r.etichetta)).toEqual(['Nel 2024 (3)', 'Comprato'])
+    expect(q.investiti.perche.titolo).toBe('Capitale investito')
+    expect(q.comprato.perche.conto.map((r) => r.etichetta)).toEqual(['Nel 2024 (3)', 'Totale acquisti'])
   })
 
   it('un anno: i numeri di quell’anno', () => {
@@ -92,7 +92,7 @@ describe('i quattro riquadri', () => {
     expect(q.comprato.n).toBe(655)
     expect(q.venduto.n).toBe(1007.05)
     expect(q.investiti.n).toBeCloseTo(655 - 1007.05, 10)
-    expect(q.investiti.perche.titolo).toBe('Soldi messi nel 2025')
+    expect(q.investiti.perche.titolo).toBe('Investimento netto del 2025')
     expect(q.comprato.perche.conto[0].etichetta).toBe('Acquisto di MOND del 10/01/2025')
     expect(totaleDividendi(righe.filter((r) => r.anno === '2026'))).toEqual({ lordo: 9, imposte: 2.34, netto: 6.66 })
   })

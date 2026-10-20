@@ -11,7 +11,7 @@ import type { FileDati } from '../dati/tipi.ts'
 import { conRiferimentiInventati } from '../pagine/dati/ponte-finto-dati.ts'
 import { libroExcel, NOMI_FOGLI } from './excel.ts'
 import { contiDelPortafoglio } from './portafoglio.ts'
-import { contiDeiTitoli } from './titoli.ts'
+import { contiDeiTitoli, plusMinus } from './titoli.ts'
 
 const MOND = 'ZZ0000000001-MIL'
 const TECN = 'ZZ0000000002-LON'
@@ -81,16 +81,16 @@ describe('Leggimi', () => {
     const f = libroExcel(dati, OGGI).fogli[0] as FoglioLeggimi
     const conti = contiDelPortafoglio(dati)
     const testo = f.righe.map((r) => r.celle.join(' | '))
-    expect(testo[0]).toBe('Portafoglio titoli: i tuoi dati')
-    expect(testo[1]).toBe('Scaricato il 19/10/2026. Prezzi fino al 30/09/2026.')
+    expect(testo[0]).toBe('Portafoglio titoli: esportazione dei dati')
+    expect(testo[1]).toBe('Esportato il 19/10/2026. Prezzi fino al 30/09/2026.')
     const numero = (etichetta: string) => f.righe.find((r) => r.celle[0] === etichetta)?.celle[1]
-    expect(numero('Valore')).toBe(conti.valore.n)
-    expect(numero('Soldi investiti')).toBe(conti.investiti.n)
-    expect(numero('Guadagno')).toBe(conti.guadagno.n)
-    expect(numero('Medio annuo')).toBe(conti.medioAnnuo.n)
-    expect(numero('Anno in corso (2026)')).toBe(conti.annoInCorso.n)
+    expect(numero('Controvalore')).toBe(conti.valore.n)
+    expect(numero('Capitale investito')).toBe(conti.investiti.n)
+    expect(numero(plusMinus(conti.guadagno.n!))).toBe(conti.guadagno.n)
+    expect(numero('Rendimento annualizzato')).toBe(conti.medioAnnuo.n)
+    expect(numero('Rendimento da inizio anno (2026)')).toBe(conti.annoInCorso.n)
     expect(numero('Dividendi netti')).toBe(conti.dividendi.n)
-    expect(f.righe.find((r) => r.celle[0] === 'Medio annuo')?.formato).toBe('percentuale')
+    expect(f.righe.find((r) => r.celle[0] === 'Rendimento annualizzato')?.formato).toBe('percentuale')
     // Un rigo per foglio, con cosa c'è.
     for (const nome of NOMI_FOGLI.slice(1)) expect(f.righe.some((r) => r.celle[0] === nome)).toBe(true)
   })
@@ -99,15 +99,15 @@ describe('Leggimi', () => {
     const senza = libroExcel(portafoglioInventato(), OGGI).fogli[0] as FoglioLeggimi
     const con = libroExcel(conRiferimentiInventati(portafoglioInventato()), OGGI).fogli[0] as FoglioLeggimi
     const riga = (f: FoglioLeggimi) => String(f.righe.find((r) => r.celle[0] === 'Inflazione e riferimenti')?.celle[1])
-    expect(riga(senza)).toContain('arrivano col primo aggiornamento')
-    expect(riga(con)).not.toContain('arrivano col primo aggiornamento')
+    expect(riga(senza)).toContain('i dati arrivano con il primo aggiornamento')
+    expect(riga(con)).not.toContain('i dati arrivano con il primo aggiornamento')
   })
 
   it('un file vuoto si scarica lo stesso', () => {
     const vuoto: FileDati = { formato: 'portafoglio', versione: 2, creato: '2026-10-19T10:00:00.000Z', titoli: [], operazioni: [], dividendi: [], prezzi: [] }
     const l = libroExcel(vuoto, OGGI)
     expect(eLibroExcel(l)).toBe(true)
-    expect((l.fogli[0] as FoglioLeggimi).righe[1].celle[0]).toBe('Scaricato il 19/10/2026. Nel file non ci sono ancora prezzi di fine mese.')
+    expect((l.fogli[0] as FoglioLeggimi).righe[1].celle[0]).toBe('Esportato il 19/10/2026. Nel file non ci sono ancora prezzi di fine mese.')
   })
 })
 
@@ -118,9 +118,9 @@ describe('Titoli', () => {
     const conti = contiDeiTitoli(dati)
     expect(f.righe).toHaveLength(conti.titoli.length)
     expect(colonna(f, 'Simbolo')).toEqual(conti.titoli.map((c) => c.nomeCorto))
-    expect(colonna(f, 'Valore')).toEqual(conti.titoli.map((c) => c.valore.n))
-    expect(colonna(f, 'Guadagno')).toEqual(conti.titoli.map((c) => c.guadagno.n))
-    expect(colonna(f, 'Dall’acquisto')).toEqual(conti.titoli.map((c) => c.dallAcquisto.n))
+    expect(colonna(f, 'Controvalore')).toEqual(conti.titoli.map((c) => c.valore.n))
+    expect(colonna(f, 'Plus/minus')).toEqual(conti.titoli.map((c) => c.guadagno.n))
+    expect(colonna(f, 'Rendimento')).toEqual(conti.titoli.map((c) => c.dallAcquisto.n))
     expect(colonna(f, 'Venduto')).toEqual(conti.titoli.map((c) => (c.stato === 'chiuso' ? 'sì' : '')))
     const tecn = riga(f, 'TECN')
     expect(tecn[f.colonne.findIndex((c) => c.titolo === 'Valuta')]).toBe('GBP')
@@ -131,7 +131,7 @@ describe('Titoli', () => {
 
   it('la fonte del prezzo come sotto il prezzo nelle pagine', () => {
     const f = tabella(libroExcel(conOttobre(), OGGI), 'Titoli')
-    expect(riga(f, 'MOND')[f.colonne.findIndex((c) => c.titolo === 'Fonte del prezzo')]).toBe('a mano')
+    expect(riga(f, 'MOND')[f.colonne.findIndex((c) => c.titolo === 'Fonte del prezzo')]).toBe('manuale')
     expect(riga(f, 'TECN')[f.colonne.findIndex((c) => c.titolo === 'Fonte del prezzo')]).toBe('investing.com (riserva)')
   })
 })
@@ -143,7 +143,7 @@ describe('Operazioni e Dividendi', () => {
     expect(f.righe).toHaveLength(dati.operazioni!.length)
     const date = colonna(f, 'Data').map((c) => (c as { data: string }).data)
     expect(date).toEqual(date.slice().sort())
-    const cosa = colonna(f, 'Cosa')
+    const cosa = colonna(f, 'Tipo')
     const totali = colonna(f, 'Totale in euro') as number[]
     cosa.forEach((c, i) => expect(Math.sign(totali[i])).toBe(c === 'acquisto' ? -1 : 1))
     expect(colonna(f, 'Fonte').every((x) => typeof x === 'string' && x.length > 0)).toBe(true)
@@ -155,7 +155,7 @@ describe('Operazioni e Dividendi', () => {
     expect(f.righe).toHaveLength(dati.dividendi!.length)
     const lordo = colonna(f, 'Lordo') as number[]
     const imposte = colonna(f, 'Imposte') as number[]
-    const netto = colonna(f, 'Netto incassato') as number[]
+    const netto = colonna(f, 'Netto') as number[]
     netto.forEach((n, i) => expect(n).toBeCloseTo(lordo[i] - imposte[i], 6))
   })
 })
@@ -172,8 +172,8 @@ describe('Prezzi di fine mese', () => {
     const settembre = f.righe.find((r) => r[1] === 'MOND' && (r[0] as { data: string }).data === '2026-09-30')!
     const ultimo = mond.mesi.find((m) => m.mese === '2026-09-30')!
     expect(settembre[f.colonne.findIndex((c) => c.titolo === 'Quote')]).toBe(ultimo.quote)
-    expect(settembre[f.colonne.findIndex((c) => c.titolo === 'Valore in euro')]).toBe(ultimo.valore.n)
-    expect(settembre[f.colonne.findIndex((c) => c.titolo === 'Fonte')]).toBe('dal tuo file Excel')
+    expect(settembre[f.colonne.findIndex((c) => c.titolo === 'Controvalore')]).toBe(ultimo.valore.n)
+    expect(settembre[f.colonne.findIndex((c) => c.titolo === 'Fonte')]).toBe('file Excel iniziale')
   })
 
   it('la fonte, il perché, il controllo di investing.com e il prezzo a mano con quello di prima', () => {
@@ -182,13 +182,13 @@ describe('Prezzi di fine mese', () => {
     const cella = (r: Cella[], t: string) => r[f.colonne.findIndex((c) => c.titolo === t)]
     const mond = ottobre('MOND')
     expect(cella(mond, 'Prezzo')).toBe(13.12)
-    expect(cella(mond, 'Fonte')).toBe('a mano')
-    expect(cella(mond, 'Corretto a mano')).toBe('sì')
-    expect(cella(mond, 'Prezzo di prima')).toBe(13.1)
+    expect(cella(mond, 'Fonte')).toBe('manuale')
+    expect(cella(mond, 'Manuale')).toBe('sì')
+    expect(cella(mond, 'Prezzo precedente')).toBe(13.1)
     const tecn = ottobre('TECN')
     expect(cella(tecn, 'Fonte')).toBe('investing.com (riserva)')
     expect(cella(tecn, 'Nota')).toBe('London Stock Exchange non ha risposto')
-    expect(cella(tecn, 'Controllo investing.com')).toBe('non fatto: il prezzo viene già da investing.com')
+    expect(cella(tecn, 'Controllo investing.com')).toBe('non eseguito: il prezzo viene già da investing.com')
     expect(cella(tecn, 'Cambio')).toBe(0.8712)
   })
 
@@ -207,8 +207,8 @@ describe('Prezzi di fine mese', () => {
     )
     const f = tabella(libroExcel(dati, OGGI), 'Prezzi di fine mese')
     const controllo = (s: string) => f.righe.find((r) => r[1] === s && (r[0] as { data: string }).data === '2026-10-31')![f.colonne.findIndex((c) => c.titolo === 'Controllo investing.com')]
-    expect(controllo('MOND')).toBe('diverso di +0,6%: investing.com dice 13,18')
-    expect(controllo('TECN')).toBe('uguale')
+    expect(controllo('MOND')).toBe('differenza di +0,6%: investing.com 13,18')
+    expect(controllo('TECN')).toBe('stesso prezzo')
   })
 })
 
@@ -221,7 +221,7 @@ describe('Valore mese per mese', () => {
     expect(f.colonne.slice(2).every((c) => c.formato === 'euroTondo')).toBe(true)
     expect(f.righe).toHaveLength(conti.titoli.titoli.length + 2)
     expect(riga(f, 'Totale').slice(2)).toEqual(conti.serie.map((s) => s.valore.n))
-    expect(riga(f, 'Soldi investiti').slice(2)).toEqual(conti.serie.map((s) => s.investiti))
+    expect(riga(f, 'Capitale investito').slice(2)).toEqual(conti.serie.map((s) => s.investiti))
     expect(f.grassetto).toEqual([f.righe.length - 2, f.righe.length - 1])
     // La somma dei titoli fa il totale, mese per mese.
     conti.serie.forEach((s, j) => {
@@ -246,7 +246,7 @@ describe('Inflazione e riferimenti', () => {
       'Nasdaq-100 (USD)',
       'Dow Jones (USD)',
       'S&P 500 (USD)',
-      'Scritti a mano',
+      'Inseriti manualmente',
     ])
     const date = colonna(f, 'Fine mese').map((c) => (c as { data: string }).data)
     expect(date).toEqual(date.slice().sort())

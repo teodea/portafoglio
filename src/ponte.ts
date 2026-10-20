@@ -92,7 +92,7 @@ function creaPonteFinto(prova: string | null): Ponte {
       await aspetta()
       const com = contenuti.get(file)
       const c = ordinaCopie([file])[0]
-      if (com === undefined || !c || c.rotta) return { esito: 'errore', perche: 'non trovo quella copia' }
+      if (com === undefined || !c || c.rotta) return { esito: 'errore', perche: 'la copia scelta non è stata trovata' }
       const fatta = nuovaCopia(percheDelRitorno(c), testo ?? '')
       testo = com
       return { esito: 'fatto', apertura: await apri(), copia: fatta }

@@ -53,7 +53,7 @@ export function conFinestraNascosta<T>(
         } catch (e) {
           // Una pagina che si ferma a metà caricamento (ERR_ABORTED per un rimando) va bene lo stesso.
           if (!(e instanceof Error && /ERR_ABORTED/.test(e.message)))
-            throw new NonVa('la pagina non si apre: controlla la connessione a internet')
+            throw new NonVa('la pagina non si apre: controllare la connessione a internet')
         }
         return await lavoro(finestra.webContents)
       })()

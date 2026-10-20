@@ -26,7 +26,7 @@ export async function scaricaTesto(url: string, init: RequestInit = {}, scarica:
   } catch (e) {
     const nome = e instanceof Error ? e.name : ''
     if (nome === 'TimeoutError' || nome === 'AbortError') throw new NonVa('non ha risposto in tempo')
-    throw new NonVa('non ha risposto: controlla la connessione a internet')
+    throw new NonVa('non ha risposto: controllare la connessione a internet')
   }
   if (!risposta.ok) throw new NonVa(`non ha risposto (errore ${risposta.status})`)
   return await risposta.text()

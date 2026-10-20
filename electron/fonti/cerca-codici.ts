@@ -27,7 +27,7 @@ export function leggiRicerca(testo: string): Quota[] {
     const q = (JSON.parse(testo) as { quotes?: unknown }).quotes
     return Array.isArray(q) ? (q as Quota[]) : []
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
 }
 
@@ -148,7 +148,7 @@ export async function cercaCodici(r: RichiestaCodici, rete: ReteCodici, adesso =
           quote.find((q) => percorso(q) === indirizzo.percorso && cid(q) === indirizzo.cid)
         if (scelta) linee = [linea(scelta)]
         else if (indirizzo.cid) linee = [{ codice: indirizzo.cid, nome: '', simbolo: '', borsa: '', prezzo: null, seduta: null }]
-        else perche = 'nell’indirizzo incollato non trovo il codice della linea: apri la pagina del titolo sulla sua borsa e copia l’indirizzo da lì'
+        else perche = 'nell’indirizzo incollato manca il codice della linea: aprire la pagina del titolo sulla sua borsa e copiare l’indirizzo da lì'
       } else {
         linee = scegliLinee(quote, r).map(linea)
         if (linee.length === 0)

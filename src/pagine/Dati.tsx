@@ -1,5 +1,5 @@
 // La pagina Dati (ticket 13, mappa 27, bozza A "a schede"): in testata "Scarica in Excel"; quattro riquadri
-// (la cartella dei dati con "Cambia", il file "A posto", l'ultima copia, fino a che mese ci sono prezzi e
+// (la cartella dei dati con "Cambia", il file "Integro", l'ultima copia, fino a che mese ci sono prezzi e
 // inflazione); le schede Prezzi dei titoli, Inflazione cambi e riferimenti, Copie.
 // La scheda e il fine mese scelti stanno nell'indirizzo (?scheda=…&mese=…).
 import { useMemo, useRef, type KeyboardEvent } from 'react'
@@ -72,9 +72,9 @@ export function Dati() {
           </div>
         </div>
         <div className="numero">
-          <small>Il file</small>
-          <b>A posto</b>
-          <span>ultimo controllo {quando(controllato)}: si controlla all’apertura e dopo ogni salvataggio</span>
+          <small>File dei dati</small>
+          <b>Integro</b>
+          <span>ultimo controllo {quando(controllato)}; verificato all’apertura e a ogni salvataggio</span>
         </div>
         <div className="numero">
           <small>Ultima copia</small>
@@ -88,13 +88,13 @@ export function Dati() {
           ) : (
             <>
               <b>Nessuna</b>
-              <span>la prima si fa prima di scrivere nel file</span>
+              <span>creata automaticamente prima della prima modifica</span>
             </>
           )}
           {copie.length > 0 && (
             <div className="azioni">
               <button type="button" className="link" onClick={() => vai('copie')}>
-                Vedi le copie
+                Mostra le copie
               </button>
             </div>
           )}
@@ -102,13 +102,13 @@ export function Dati() {
         <div className="numero">
           <small>Prezzi di fine mese</small>
           <b>{mesi[0] ? `fino a ${mese(mesi[0]).split(' ')[0]}` : 'nessuno'}</b>
-          <span>{mesi[0] ? mese(mesi[0]) : 'arrivano con il primo aggiornamento'}</span>
-          <span>{nic ? `inflazione ${finoAl(nic)} ${nic.slice(0, 4)}` : 'inflazione: non ancora nel file'}</span>
+          <span>{mesi[0] ? mese(mesi[0]) : 'disponibili dopo il primo aggiornamento di fine mese'}</span>
+          <span>{nic ? `inflazione ${finoAl(nic)} ${nic.slice(0, 4)}` : 'inflazione non ancora disponibile'}</span>
         </div>
       </div>
 
       <div className="riquadro">
-        <div className="schede" role="tablist" aria-label="Cosa c’è nel file">
+        <div className="schede" role="tablist" aria-label="Contenuto del file dei dati">
           {SCHEDE.map((s, i) => (
             <button
               key={s}

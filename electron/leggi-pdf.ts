@@ -18,7 +18,7 @@ export async function apriPdf(percorso: string): Promise<PdfAperto> {
     return { nome, percorso, campi: await campiDelPdf(await readFile(percorso)) }
   } catch (e) {
     const codice = (e as NodeJS.ErrnoException).code
-    return { nome, percorso, perche: codice === 'ENOENT' ? 'il file non c’è più' : 'il file non si apre come PDF' }
+    return { nome, percorso, perche: codice === 'ENOENT' ? 'il file non esiste più' : 'il file non si apre come PDF' }
   }
 }
 

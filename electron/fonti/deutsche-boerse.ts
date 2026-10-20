@@ -108,7 +108,7 @@ export async function chiusureDeutscheBoerse(t: RichiestaPrezzo, mese: string, s
       await wc.executeJavaScript(rifiutaCookie, true)
       const esito = (await wc.executeJavaScript(cerca(sede, dataPagina(da), dataPagina(a)), true)) as string
       if (esito === 'senza-sede') return 'senza-sede' as const
-      if (esito !== 'ok') throw new NonVa('la pagina è cambiata e non si legge più')
+      if (esito !== 'ok') throw new NonVa('la pagina è cambiata e non è più leggibile')
       const tabella = await aspettaNellaPagina<{ intestazioni: string[]; righe: string[][] } | 'vuota'>(wc, leggiTabella(da, a), 30, 1000)
       if (tabella === null) throw new NonVa('la tabella dei prezzi non è arrivata')
       if (tabella === 'vuota') return []
@@ -121,5 +121,5 @@ export async function chiusureDeutscheBoerse(t: RichiestaPrezzo, mese: string, s
       return risultato
     }
   }
-  throw new NonVa(controllo ? 'ha chiesto un controllo di sicurezza: riprova più tardi' : 'non trova il titolo')
+  throw new NonVa(controllo ? 'ha chiesto un controllo di sicurezza: riprovare più tardi' : 'non trova il titolo')
 }

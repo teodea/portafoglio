@@ -209,27 +209,27 @@ const nonNegativo = (n: unknown) => typeof n === 'number' && Number.isFinite(n) 
 function campoOperazione(k: CampoOperazione, v: unknown, valuta: string): string | null {
   switch (k) {
     case 'data':
-      return dataValida(v) ? null : 'la data non va: scrivila come 12/10/2026'
+      return dataValida(v) ? null : 'la data non è valida: scriverla come 12/10/2026'
     case 'quantita':
-      return positivo(v) ? null : 'le quote devono essere più di zero'
+      return positivo(v) ? null : 'le quote devono essere maggiori di zero'
     case 'prezzo':
-      return positivo(v) ? null : 'il prezzo per quota deve essere più di zero'
+      return positivo(v) ? null : 'il prezzo per quota deve essere maggiore di zero'
     case 'cambio':
-      if (!positivo(v)) return 'il cambio deve essere più di zero'
+      if (!positivo(v)) return 'il cambio deve essere maggiore di zero'
       return valuta === 'EUR' && v !== 1 ? 'il titolo è in euro: il cambio è 1' : null
     case 'commissioni':
       return nonNegativo(v) ? null : 'le commissioni non possono essere negative'
     case 'totale':
-      return positivo(v) ? null : 'il totale deve essere più di zero'
+      return positivo(v) ? null : 'il totale deve essere maggiore di zero'
   }
 }
 
 function campoDividendo(k: CampoDividendo, v: unknown): string | null {
   switch (k) {
     case 'data':
-      return dataValida(v) ? null : 'la data non va: scrivila come 31/08/2026'
+      return dataValida(v) ? null : 'la data non è valida: scriverla come 31/08/2026'
     case 'lordo':
-      return positivo(v) ? null : 'il lordo deve essere più di zero'
+      return positivo(v) ? null : 'il lordo deve essere maggiore di zero'
     case 'imposte':
       return nonNegativo(v) ? null : 'le imposte non possono essere negative'
   }
@@ -241,7 +241,7 @@ function quoteGiuste(dopo: FileDati, titolo: string): Controllato {
   if (!s) return { ok: true }
   const nome = nomeDelTitolo(dopo, titolo)
   return no(
-    `il ${dataScritta(s.vendita.data)} ${s.quote > 0 ? `avevi solo ${numeroScritto(s.quote)} quote` : 'non avevi quote'} di ${nome}: non puoi venderne ${numeroScritto(s.vendita.quantita)}`,
+    `il ${dataScritta(s.vendita.data)} ${s.quote > 0 ? `c’erano solo ${numeroScritto(s.quote)} quote` : 'non c’erano quote'} di ${nome}: non se ne possono vendere ${numeroScritto(s.vendita.quantita)}`,
   )
 }
 
@@ -250,22 +250,22 @@ export function controllaModifica(dati: FileDati, m: ModificaMovimento): Control
   if (m.azione === 'registra' && m.titoloNuovo) {
     const ok = controllaTitoloNuovo(dati, m.titoloNuovo)
     if (!ok.ok) return ok
-    if (m.movimento.tipo !== 'acquisto' || m.movimento.titolo !== m.titoloNuovo.id) return no('un titolo nuovo entra solo con il suo acquisto')
+    if (m.movimento.tipo !== 'acquisto' || m.movimento.titolo !== m.titoloNuovo.id) return no('un titolo nuovo si aggiunge solo con il suo acquisto')
     return controllaModifica(conTitoloNuovo(dati, m.titoloNuovo), { azione: 'registra', movimento: m.movimento })
   }
   if (m.azione === 'registra') {
     const n = m.movimento
     const t = (dati.titoli ?? []).find((x) => x.id === n.titolo)
-    if (!t) return no('scegli il titolo')
+    if (!t) return no('scegliere il titolo')
     const doppio = giaDalPdf(dati, n)
-    if (doppio) return no(`${movimentoInParole(dati, doppio)} è già registrato: non lo registro due volte`)
+    if (doppio) return no(`${movimentoInParole(dati, doppio)} è già registrato: non si registra due volte`)
     if (n.tipo === 'dividendo') {
       for (const k of CAMPI_DIVIDENDO) {
         const p = campoDividendo(k, n[k])
         if (p) return no(p)
       }
       if (n.imposte > n.lordo) return no('le imposte non possono essere più del lordo')
-      if (quoteAlGiorno(dati, n.titolo, n.data) <= 0) return no(`il ${dataScritta(n.data)} non avevi quote di ${nomeDelTitolo(dati, n.titolo)}`)
+      if (quoteAlGiorno(dati, n.titolo, n.data) <= 0) return no(`il ${dataScritta(n.data)} non c’erano quote di ${nomeDelTitolo(dati, n.titolo)}`)
       return { ok: true }
     }
     const valuta = valutaDelTitolo(dati, t)
@@ -283,7 +283,7 @@ export function controllaModifica(dati: FileDati, m: ModificaMovimento): Control
   if (m.azione === 'togli') return trovato.tipo === 'operazione' ? quoteGiuste(applica(dati, m, '').dati, titolo) : { ok: true }
   if (m.azione === 'torna') {
     const prima = trovato.tipo === 'operazione' ? trovato.operazione.prima : trovato.dividendo.prima
-    if (!prima) return no(`${movimentoInParole(dati, trovato)} non è stato corretto a mano`)
+    if (!prima) return no(`${movimentoInParole(dati, trovato)} non è stato corretto manualmente`)
     return trovato.tipo === 'operazione' ? quoteGiuste(applica(dati, m, '').dati, titolo) : { ok: true }
   }
 
@@ -296,7 +296,7 @@ export function controllaModifica(dati: FileDati, m: ModificaMovimento): Control
       const p = campoOperazione(k as CampoOperazione, v, o.valuta)
       if (p) return no(p)
     }
-    if (!campi.some(([k, v]) => o[k as CampoOperazione] !== v)) return no('non hai cambiato niente')
+    if (!campi.some(([k, v]) => o[k as CampoOperazione] !== v)) return no('nessun valore modificato')
     return quoteGiuste(applica(dati, m, '').dati, titolo)
   }
   const d = trovato.dividendo
@@ -305,7 +305,7 @@ export function controllaModifica(dati: FileDati, m: ModificaMovimento): Control
     const p = campoDividendo(k as CampoDividendo, v)
     if (p) return no(p)
   }
-  if (!campi.some(([k, v]) => d[k as CampoDividendo] !== v)) return no('non hai cambiato niente')
+  if (!campi.some(([k, v]) => d[k as CampoDividendo] !== v)) return no('nessun valore modificato')
   const lordo = (m.campi as Partial<CampiDividendo>).lordo ?? d.lordo
   const imposte = (m.campi as Partial<CampiDividendo>).imposte ?? d.imposte
   if (imposte > lordo) return no('le imposte non possono essere più del lordo')

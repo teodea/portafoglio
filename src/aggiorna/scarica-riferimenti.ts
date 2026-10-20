@@ -13,7 +13,7 @@ type Cambia = (f: (a: Aggiornamento) => Aggiornamento, numero: number) => void
 const conRif = (f: (p: NonNullable<Aggiornamento['rif']>) => NonNullable<Aggiornamento['rif']>) => (a: Aggiornamento) =>
   a.rif ? { ...a, rif: f(a.rif) } : a
 
-const problema = { tipo: 'manca' as const, perche: 'qualcosa non è andato: riprova' }
+const problema = { tipo: 'manca' as const, perche: 'si è verificato un errore: riprovare' }
 
 /** attivo(numero): l'aggiornamento con quel numero è ancora quello in corso (non annullato né salvato). */
 export function useScaricaRiferimenti(cambia: Cambia, attivo: (numero: number) => boolean) {

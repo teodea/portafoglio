@@ -28,7 +28,7 @@ export function aggiornaFinto(accesso: AccessoFinto): PonteAggiorna {
       tentativi.set(r.isin, n)
       const testo = accesso.leggi()
       const dati = testo ? controllaFile(testo) : null
-      if (!dati?.ok) return { ok: false, perche: 'file non leggibile', tentativi: [] }
+      if (!dati?.ok) return { ok: false, perche: 'il file dei dati non è leggibile', tentativi: [] }
       const ultimo = (dati.dati.prezzi ?? [])
         .filter((p) => p.titolo.startsWith(r.isin) && p.data < mese + '-01')
         .sort((a, b) => b.data.localeCompare(a.data))[0]
@@ -36,7 +36,7 @@ export function aggiornaFinto(accesso: AccessoFinto): PonteAggiorna {
       if (r.valuta !== 'EUR' && n === 1)
         return {
           ok: false,
-          perche: `${fonte} non ha risposto (prova nel browser: riprova)`,
+          perche: `${fonte} non ha risposto (prova nel browser)`,
           tentativi: [{ fonte, perche: 'non ha risposto' }],
         }
       const base = ultimo?.prezzo ?? 10
@@ -80,7 +80,7 @@ export function aggiornaFinto(accesso: AccessoFinto): PonteAggiorna {
       await pausa(400)
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
-      if (!esito?.ok) return { esito: 'errore', perche: 'il file non si legge' }
+      if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
       const v3 = aVersione3(esito.dati)
       const ok = controllaMese(v3, m)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }

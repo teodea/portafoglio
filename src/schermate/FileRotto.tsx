@@ -1,5 +1,5 @@
-// La schermata intera "Il file dei dati non si legge" (ticket 27 della mappa, variante A).
-// Dice dov'è l'errore, non scrive niente da sola e propone di tornare all'ultima copia.
+// La schermata intera "Il file dei dati non è leggibile" (ticket 27 della mappa, variante A).
+// Dice dov'è l'errore, non scrive niente da sola e propone di ripristinare l'ultima copia.
 import { useState } from 'react'
 import { quandoInParole, type Copia } from '../dati/copie.ts'
 import type { Apertura } from '../dati/ponte.ts'
@@ -28,23 +28,22 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
   return (
     <div className="schermata">
       <div className="riquadro" role="alert" aria-labelledby="titolo-rotto">
-        <h1 id="titolo-rotto">Il file dei dati non si legge</h1>
+        <h1 id="titolo-rotto">Il file dei dati non è leggibile</h1>
         <p>
-          Ho aperto <b>portafoglio.json</b> nella cartella <b>{cartella.nome}</b>
+          Nel file <b>portafoglio.json</b> della cartella <b>{cartella.nome}</b>
           {problema.riga ? (
             <>
-              {' '}
-              e alla <b>riga {problema.riga}</b> {problema.scrittura ? '' : 'c’è un dato che non va: '}
+              , alla <b>riga {problema.riga}</b>, {problema.scrittura ? '' : 'è presente un dato non valido: '}
               {problema.spiegazione}.
             </>
           ) : (
             <>: {problema.spiegazione}.</>
           )}{' '}
-          {problema.scrittura && 'Succede quando il file è stato modificato a mano, per esempio con Blocco note.'}
-          {problema.altri > 0 && ` Dopo questo ci sono altri ${problema.altri} problemi.`}
+          {problema.scrittura && 'Accade quando il file viene modificato manualmente, per esempio con Blocco note.'}
+          {problema.altri > 0 && (problema.altri === 1 ? ' Segue un altro problema.' : ` Seguono altri ${problema.altri} problemi.`)}
         </p>
         {problema.estratto.length > 0 && (
-          <pre className="codice" aria-label={`Le righe intorno alla riga ${problema.riga}`}>
+          <pre className="codice" aria-label={`Righe intorno alla riga ${problema.riga}`}>
             {problema.estratto.map((r) => (
               <span key={r.numero} className={r.numero === problema.riga ? 'qui' : undefined}>
                 <span className="num-riga">{String(r.numero).padStart(5, ' ')}   </span>
@@ -55,27 +54,27 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
             ))}
           </pre>
         )}
-        <p className="tenue">Non ho scritto niente e non ho cancellato niente.</p>
+        <p className="tenue">Il file non è stato modificato né cancellato.</p>
         {avviso && <p className="avviso">{avviso}</p>}
         {riprovato && !avviso && (
           <p className="avviso" role="status">
-            Ho riprovato {quando(controllato)}: il file è ancora rotto.
+            Nuova lettura {quando(controllato)}: il file non è ancora leggibile.
           </p>
         )}
 
         {daConfermare ? (
           <div className="spiega" role="group" aria-label="Conferma">
             <p>
-              Torno alla copia del <b>{quandoInParole(daConfermare.quando)}</b>
-              {daConfermare.perche && `, fatta ${daConfermare.perche}`}? Perdi solo quello che hai fatto dopo. Il file
-              rotto non si cancella: lo metto nella cartella <b>copie</b> come <b>portafoglio rotto …json</b>.
+              Ripristinare la copia del <b>{quandoInParole(daConfermare.quando)}</b>
+              {daConfermare.perche && `, fatta ${daConfermare.perche}`}? Si perdono solo le modifiche successive. Il file
+              danneggiato non viene cancellato: viene spostato nella cartella <b>copie</b> come <b>portafoglio rotto …json</b>.
             </p>
             <div className="bottoni" style={{ marginTop: 12 }}>
               <button type="button" className="btn primario" disabled={occupato} onClick={() => torna(daConfermare)}>
-                Sì, torna a questa copia
+                Ripristina questa copia
               </button>
               <button type="button" className="btn" onClick={() => setDaConfermare(null)}>
-                No
+                Annulla
               </button>
             </div>
           </div>
@@ -83,14 +82,14 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
           <div className="bottoni">
             {ultima && (
               <button type="button" className="btn primario" disabled={occupato} onClick={() => setDaConfermare(ultima)}>
-                Torna all’ultima copia
+                Ripristina l’ultima copia
               </button>
             )}
             <button type="button" className="btn" onClick={() => void ponte.apriInEsplora('dati')}>
               Apri la cartella
             </button>
             <button type="button" className="btn" disabled={occupato} onClick={() => void riprova()}>
-              Ho corretto il file: riprova
+              Rileggi il file
             </button>
           </div>
         )}
@@ -99,12 +98,12 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
           <>
             <p className="tenue piccolo">
               L’ultima copia è del <b>{quandoInParole(ultima.quando)}</b>
-              {ultima.perche && `, fatta ${ultima.perche}`}. Perdi solo quello che hai fatto dopo.
+              {ultima.perche && `, fatta ${ultima.perche}`}. Ripristinandola si perdono solo le modifiche successive.
             </p>
             {buone.length > 1 && (
               <p>
                 <button type="button" className="link" onClick={() => setAltre(!altre)} aria-expanded={altre}>
-                  {altre ? 'Nascondi le altre copie' : 'Scegli un’altra copia'}
+                  {altre ? 'Nascondi le altre copie' : 'Mostra le altre copie'}
                 </button>
               </p>
             )}
@@ -113,8 +112,8 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
                 <table>
                   <thead>
                     <tr>
-                      <th>Quando</th>
-                      <th>Perché</th>
+                      <th>Data</th>
+                      <th>Motivo</th>
                       <th className="n"></th>
                     </tr>
                   </thead>
@@ -125,7 +124,7 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
                         <td className="tenue">{c.perche || '—'}</td>
                         <td className="n">
                           <button type="button" className="btn" disabled={occupato} onClick={() => setDaConfermare(c)}>
-                            Torna a questa
+                            Ripristina
                           </button>
                         </td>
                       </tr>
@@ -138,8 +137,8 @@ export function FileRotto({ apertura }: { apertura: Rotto }) {
         ) : (
           <>
             <p className="tenue piccolo">
-              Nella cartella <b>copie</b> non c’è ancora nessuna copia a cui tornare. Puoi correggere il file con Blocco
-              note e premere “Ho corretto il file: riprova”, oppure usare un’altra cartella dei dati.
+              Nella cartella <b>copie</b> non è ancora presente alcuna copia da ripristinare. È possibile correggere il file
+              con Blocco note e poi selezionare “Rileggi il file”, oppure scegliere un’altra cartella dei dati.
             </p>
             <p>
               <button type="button" className="link" disabled={occupato} onClick={() => void esegui(() => ponte.scegliCartella())}>

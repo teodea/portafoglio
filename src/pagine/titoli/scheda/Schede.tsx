@@ -1,4 +1,4 @@
-// Le quattro schede della Scheda del titolo: Mese per mese, Operazioni, Dividendi, Da dove vengono i numeri.
+// Le quattro schede della Scheda del titolo: Mese per mese, Operazioni, Dividendi, Provenienza.
 import type { Pezzo, Paragrafo, RigaMese, SchedaDelTitolo } from '../../../conti/scheda.ts'
 import type { ContoTitolo, VenditaSpiegata } from '../../../conti/titoli.ts'
 import { venditaInParole } from '../../../conti/scheda.ts'
@@ -10,7 +10,7 @@ import { Cella } from '../comuni.tsx'
 
 const colorePct = (n: number) => segno(n * 100, 1)
 
-/** Una frase con i pezzi in grassetto (e del colore del segno, se è un guadagno). */
+/** Una frase con i pezzi in grassetto (e del colore del segno, se è una plusvalenza o minusvalenza). */
 export function Frase({ pezzi }: { pezzi: Pezzo[] }) {
   return (
     <>
@@ -44,16 +44,16 @@ export function MesiDelTitolo({ conto, righe }: { conto: ContoTitolo; righe: Rig
     return (
       <div className="vuoto">
         {conto.stato === 'nuovo'
-          ? 'Lo hai comprato dopo l’ultimo fine mese con i prezzi: i mesi arrivano con il prossimo aggiornamento.'
-          : 'Nessun prezzo di fine mese: il titolo è stato venduto prima.'}
+          ? 'Acquistato dopo l’ultimo fine mese con i prezzi: i mesi compaiono con il prossimo aggiornamento.'
+          : 'Nessun prezzo di fine mese: il titolo è stato venduto prima della fine del mese.'}
       </div>
     )
   return (
     <>
       <div className="attrezzi">
         <span>
-          Ogni fine mese, dal più recente. {inValuta ? `Il prezzo è in ${conto.valuta}; il cambio è quello BCE di fine mese. ` : ''}Clic su un numero
-          per il conto; clic su un prezzo per correggerlo.
+          Fine mese dal più recente. {inValuta ? `Il prezzo è in ${conto.valuta}, al cambio BCE di fine mese. ` : ''}Selezionare un
+          valore per il dettaglio del calcolo; selezionare un prezzo per correggerlo.
         </span>
       </div>
       <div className="scorre">
@@ -63,9 +63,9 @@ export function MesiDelTitolo({ conto, righe }: { conto: ContoTitolo; righe: Rig
               <th>Fine mese</th>
               <th className="n">Prezzo ({inValuta ? conto.valuta : '€'})</th>
               {inValuta && <th className="n">Cambio</th>}
-              <th className="n">Valore</th>
-              <th className="n">Sul mese</th>
-              <th className="n">Dall’acquisto</th>
+              <th className="n">Controvalore</th>
+              <th className="n">Mensile</th>
+              <th className="n">Rendimento</th>
               <th>Fonte</th>
             </tr>
           </thead>
@@ -112,7 +112,8 @@ function SpiegaVendita({ vendita }: { vendita: VenditaSpiegata }) {
         <Frase pezzi={venditaInParole(vendita)} />
       </p>
       <p className="tenue">
-        Clic sul guadagno incassato per il conto:{' '}
+        {(vendita.guadagnoIncassato.n ?? 0) < 0 ? 'Minusvalenza' : 'Plusvalenza'} realizzata (selezionare per il dettaglio del
+        calcolo):{' '}
         <Num numero={vendita.guadagnoIncassato} className={classeSegno(segno(vendita.guadagnoIncassato.n ?? 0, 2))}>
           {vendita.guadagnoIncassato.n === null ? '—' : guadagnoEuro(vendita.guadagnoIncassato.n, 2)}
         </Num>
@@ -129,18 +130,18 @@ export function Operazioni({ scheda }: { scheda: SchedaDelTitolo }) {
         <SpiegaVendita key={r.operazione.id} vendita={r.vendita!} />
       ))}
       {scheda.operazioni.length === 0 ? (
-        <div className="vuoto">Nel file non ci sono operazioni per questo titolo.</div>
+        <div className="vuoto">Nessuna operazione registrata per questo titolo.</div>
       ) : (
         <div className="scorre">
           <table>
             <thead>
               <tr>
                 <th>Data</th>
-                <th>Cosa</th>
+                <th>Operazione</th>
                 <th className="n">Quote</th>
                 <th className="n">Prezzo</th>
                 <th className="n">Commissioni</th>
-                <th className="n">Soldi</th>
+                <th className="n">Importo</th>
                 <th>Fonte</th>
               </tr>
             </thead>
@@ -165,7 +166,7 @@ export function Operazioni({ scheda }: { scheda: SchedaDelTitolo }) {
                       </Num>
                       {r.vendita && (
                         <span className="sotto">
-                          guadagno{' '}
+                          {(r.vendita.guadagnoIncassato.n ?? 0) < 0 ? 'minusvalenza' : 'plusvalenza'}{' '}
                           <span className={classeSegno(segno(r.vendita.guadagnoIncassato.n ?? 0, 2))}>
                             {guadagnoEuro(r.vendita.guadagnoIncassato.n ?? 0, 2)}
                           </span>
@@ -195,13 +196,13 @@ export function Operazioni({ scheda }: { scheda: SchedaDelTitolo }) {
 
 export function DividendiDelTitolo({ conto, scheda }: { conto: ContoTitolo; scheda: SchedaDelTitolo }) {
   if (scheda.dividendi.length === 0)
-    return <div className="vuoto">{conto.nomeCorto} non ha pagato dividendi: se è ad accumulazione, li reinveste nel prezzo.</div>
+    return <div className="vuoto">{conto.nomeCorto} non ha distribuito dividendi: i titoli ad accumulazione reinvestono i proventi nel prezzo.</div>
   const lordo = scheda.dividendi.reduce((a, r) => a + r.dividendo.lordo, 0)
   const imposte = scheda.dividendi.reduce((a, r) => a + r.dividendo.imposte, 0)
   return (
     <>
       <div className="attrezzi">
-        <span>Il netto è quello che è arrivato sul conto: il lordo meno le imposte. Entra nel guadagno del titolo.</span>
+        <span>Il netto è l’importo accreditato: il lordo meno le imposte. È compreso nella plusvalenza del titolo.</span>
       </div>
       <div className="scorre">
         <table>
@@ -210,7 +211,7 @@ export function DividendiDelTitolo({ conto, scheda }: { conto: ContoTitolo; sche
               <th>Data</th>
               <th className="n">Lordo</th>
               <th className="n">Imposte</th>
-              <th className="n">Netto incassato</th>
+              <th className="n">Netto</th>
               <th>Fonte</th>
             </tr>
           </thead>
@@ -244,7 +245,7 @@ export function DividendiDelTitolo({ conto, scheda }: { conto: ContoTitolo; sche
               </tr>
             ))}
             <tr className="totale">
-              <td>In tutto</td>
+              <td>Totale</td>
               <td className="n">{euro(lordo, 2)}</td>
               <td className="n">
                 {imposte > 0 ? '−' : ''}
@@ -262,7 +263,7 @@ export function DividendiDelTitolo({ conto, scheda }: { conto: ContoTitolo; sche
   )
 }
 
-// ---------- Da dove vengono i numeri ----------
+// ---------- Provenienza ----------
 
 export function DaDoveVengono({ paragrafi }: { paragrafi: Paragrafo[] }) {
   return (
@@ -274,7 +275,7 @@ export function DaDoveVengono({ paragrafi }: { paragrafi: Paragrafo[] }) {
           </p>
         ))}
       </div>
-      <p className="nota-scheda">Clic su un numero qualsiasi della scheda per il conto riga per riga e la fonte.</p>
+      <p className="nota-scheda">Selezionare un valore qualsiasi della scheda per il calcolo riga per riga e la fonte.</p>
     </>
   )
 }

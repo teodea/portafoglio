@@ -88,7 +88,7 @@ async function apriDavvero(): Promise<Apertura> {
 async function scegliCartella(evento: IpcMainInvokeEvent): Promise<Apertura | null> {
   const finestra = BrowserWindow.fromWebContents(evento.sender)
   const opzioni: Electron.OpenDialogOptions = {
-    title: 'Scegli la cartella dei dati',
+    title: 'Scegliere la cartella dei dati',
     buttonLabel: 'Usa questa cartella',
     properties: ['openDirectory', 'createDirectory'],
     defaultPath: cartellaAttuale ?? app.getPath('documents'),

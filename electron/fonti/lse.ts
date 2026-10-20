@@ -17,7 +17,7 @@ export function leggiSchedaLse(testo: string): { isin: string; valuta: string } 
   } catch {
     // sotto
   }
-  throw new NonVa('ha risposto con dati che non si leggono')
+  throw new NonVa('ha risposto con dati non leggibili')
 }
 
 /** Legge la risposta del grafico: { data: [{ _DATE_END: "2026-10-30", CLOSE_PRC: "5413.5" }, …] }. */
@@ -26,9 +26,9 @@ export function leggiStoricoLse(testo: string, divisore: number): Chiusura[] {
   try {
     v = JSON.parse(testo) as { data?: unknown }
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
-  if (!Array.isArray(v.data)) throw new NonVa('ha risposto con dati che non si leggono')
+  if (!Array.isArray(v.data)) throw new NonVa('ha risposto con dati non leggibili')
   const chiusure: Chiusura[] = []
   for (const r of v.data as Record<string, unknown>[]) {
     const data = typeof r._DATE_END === 'string' ? r._DATE_END.slice(0, 10) : ''
@@ -47,9 +47,9 @@ export function divisoreLse(valutaLondra: string, valutaTitolo: string): number 
 }
 
 export async function chiusureLse(t: RichiestaPrezzo, scarica: Scarica = fetch): Promise<Chiusura[]> {
-  if (!t.simbolo) throw new NonVa('nel file manca il simbolo del titolo, che serve per chiedere il prezzo')
+  if (!t.simbolo) throw new NonVa('nel file manca il simbolo del titolo, necessario per richiedere il prezzo')
   const simbolo = t.simbolo.toUpperCase()
-  if (!/^[A-Z0-9.]{1,8}$/.test(simbolo)) throw new NonVa(`il simbolo "${t.simbolo}" non va`)
+  if (!/^[A-Z0-9.]{1,8}$/.test(simbolo)) throw new NonVa(`il simbolo "${t.simbolo}" non è valido`)
   const scheda = leggiSchedaLse(
     await scaricaTesto(
       SCHEDA + simbolo,

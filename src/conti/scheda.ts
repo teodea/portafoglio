@@ -14,9 +14,9 @@ import {
   prezzo as prezzoTesto,
   quote as quoteTesto,
 } from '../formato.ts'
-import { fonteInParole } from './fonti.ts'
+import { fonteInParole, NOME_FILE_EXCEL } from './fonti.ts'
 import { cambio, euro, prezzo, quote, riga, type Numero, type RigaConto } from './spiegazione.ts'
-import type { ContoTitolo, MeseDelTitolo, VenditaSpiegata } from './titoli.ts'
+import { plusMinus, type ContoTitolo, type MeseDelTitolo, type VenditaSpiegata } from './titoli.ts'
 
 const QUASI_ZERO = 1e-9
 const somma = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
@@ -28,13 +28,13 @@ function nomeValuta(v: string): string {
 /** Da dove viene un movimento: il PDF della banca o il file Excel del carico iniziale. */
 export function fonteMovimento(fonte: string): string {
   const f = fonte.trim()
-  if (/^file\b/i.test(f)) return 'dal tuo file Excel'
+  if (/^file\b/i.test(f)) return 'file Excel iniziale'
   if (/\.pdf$/i.test(f)) {
     // Un ordine eseguito in due pezzi ha due PDF, "a" e "b", uniti da " + ".
     const quanti = f.split(' + ').length
     return quanti > 1 ? `${quanti} PDF della banca` : 'PDF della banca'
   }
-  if (f === 'a mano') return 'scritto a mano'
+  if (f === 'a mano') return 'inserito manualmente'
   return f || '—'
 }
 
@@ -143,24 +143,24 @@ export function spiegaOperazione(nome: string, o: Operazione, v: VenditaSpiegata
   if (o.commissioni > 0) conto.push(riga(acquisto ? '+ commissioni' : '− commissioni', euro(o.commissioni)))
   const atteso = acquisto ? lordoEuro + o.commissioni : lordoEuro - o.commissioni
   const resto = o.totale - atteso
-  if (Math.abs(resto) >= 0.01) conto.push(riga(resto > 0 ? '+ altro (vedi sotto)' : '− altro (vedi sotto)', euro(Math.abs(resto))))
-  conto.push(riga(acquisto ? 'Pagato' : 'Incassato', euro(o.totale)))
+  if (Math.abs(resto) >= 0.01) conto.push(riga(resto > 0 ? '+ altre voci (nelle note)' : '− altre voci (nelle note)', euro(Math.abs(resto))))
+  conto.push(riga(acquisto ? "Costo d'acquisto" : 'Ricavo della vendita', euro(o.totale)))
   const note: string[] = []
   if (o.nota) note.push(o.nota)
-  else if (Math.abs(resto) >= 0.01) note.push('La differenza è nel documento della banca (per esempio rateo o ritenute).')
+  else if (Math.abs(resto) >= 0.01) note.push('La differenza risulta dal documento della banca (per esempio rateo o ritenute).')
   note.push(`Fonte: ${fonteMovimento(o.fonte)}.`)
-  if (v)
+  if (v) {
+    const g = v.guadagnoIncassato.n ?? 0
     note.push(
-      `Guadagno incassato: ${guadagnoEuro(v.guadagnoIncassato.n ?? 0, 2)} (incassato ${euroTesto(o.totale, 2)} − costo medio ${prezzoTesto(v.costoMedio, 'EUR')} × ${quoteTesto(o.quantita)} quote).`,
+      `${plusMinus(g)} realizzata: ${guadagnoEuro(g, 2)} (ricavo ${euroTesto(o.totale, 2)} − prezzo medio di carico ${prezzoTesto(v.costoMedio, 'EUR')} × ${quoteTesto(o.quantita)} quote).`,
     )
+  }
   return {
     n: o.totale,
     perche: {
       titolo: `${cosa} di ${nome} del ${data(o.data)}`,
       grande: euro(o.totale),
-      frase: acquisto
-        ? 'Quello che è uscito dal conto per questo acquisto, commissioni comprese.'
-        : 'Quello che è arrivato sul conto da questa vendita, commissioni già tolte.',
+      frase: acquisto ? 'Importo addebitato per questo acquisto, commissioni comprese.' : 'Importo accreditato per questa vendita, commissioni già dedotte.',
       conto,
       note,
       movimento: o.id,
@@ -174,9 +174,9 @@ function spiegaDividendo(nome: string, d: Dividendo): Numero {
     perche: {
       titolo: `${d.nota && /cedola/i.test(d.nota) ? 'Cedola' : 'Dividendo'} di ${nome} del ${data(d.data)}`,
       grande: euro(d.netto),
-      frase: 'Quello che è arrivato sul conto: il lordo meno le imposte.',
-      conto: [riga('Lordo', euro(d.lordo)), riga('− imposte', euro(d.imposte)), riga('Netto incassato', euro(d.netto))],
-      note: [...(d.nota ? [d.nota] : []), `Fonte: ${fonteMovimento(d.fonte)}.`, 'Il netto entra nel guadagno del titolo.'],
+      frase: 'Importo accreditato: lordo meno imposte.',
+      conto: [riga('Lordo', euro(d.lordo)), riga('− imposte', euro(d.imposte)), riga('Netto', euro(d.netto))],
+      note: [...(d.nota ? [d.nota] : []), `Fonte: ${fonteMovimento(d.fonte)}.`, 'Il netto entra nella plusvalenza del titolo.'],
       movimento: d.id,
     },
   }
@@ -188,16 +188,16 @@ function rigaMese(nome: string, m: MeseDelTitolo, cambi: CambioFineMese[]): Riga
   const f = fonteInParole(p.fonte === 'stima' && p.nota ? p.nota : p.fonte)
   const aMano = p.fonte === 'a mano'
   // La nota dice perché la fonte non è la prima scelta; per i mesi del file Excel dice solo da quale foglio venivano.
-  const notaDaMostrare = f.nome !== 'dal tuo file Excel' && p.fonte !== 'stima'
+  const notaDaMostrare = f.nome !== NOME_FILE_EXCEL && p.fonte !== 'stima'
   const notePrezzo: string[] = []
   // Il prezzo di quel fine mese si corregge nel pannello, che mostra già "a mano", la data e il prezzo di prima
   // (ticket 8): la nota in parole serve solo per un prezzo a mano preso da un mese prima.
   const aManoDaPrima = aMano && p.data !== m.mese
   if (aManoDaPrima && p.prima)
     notePrezzo.push(
-      `Scritto a mano${p.quando ? ` il ${data(p.quando)}` : ''}: prima era ${prezzoTesto(p.prima.prezzo, p.valuta)} (${fonteInParole(p.prima.fonte).nome}).`,
+      `Inserito manualmente${p.quando ? ` il ${data(p.quando)}` : ''}; valore precedente ${prezzoTesto(p.prima.prezzo, p.valuta)} (${fonteInParole(p.prima.fonte).nome}).`,
     )
-  else if (aManoDaPrima) notePrezzo.push(`Scritto a mano${p.quando ? ` il ${data(p.quando)}` : ''}.`)
+  else if (aManoDaPrima) notePrezzo.push(`Inserito manualmente${p.quando ? ` il ${data(p.quando)}` : ''}.`)
   if (p.nota && notaDaMostrare) notePrezzo.push(p.nota)
   const prezzoN: Numero = {
     n: p.prezzo,
@@ -205,7 +205,7 @@ function rigaMese(nome: string, m: MeseDelTitolo, cambi: CambioFineMese[]): Riga
       ...m.valore.perche,
       titolo: `Prezzo di ${nome} a fine ${mese(m.mese)}`,
       grande: prezzo(p.prezzo, p.valuta),
-      frase: `Il prezzo di chiusura dell’ultimo giorno di borsa del mese${p.seduta && p.seduta !== p.data ? ` (${data(p.seduta)})` : ''}. Con le quote che avevi fa il valore:`,
+      frase: `Prezzo di chiusura dell’ultimo giorno di borsa del mese${p.seduta && p.seduta !== p.data ? ` (${data(p.seduta)})` : ''}. Moltiplicato per le quote in portafoglio dà il controvalore:`,
       note: [...notePrezzo, ...m.valore.perche.note],
     },
   }
@@ -219,7 +219,7 @@ function rigaMese(nome: string, m: MeseDelTitolo, cambi: CambioFineMese[]): Riga
           perche: {
             titolo: `Cambio a fine ${mese(m.mese)}`,
             grande: cambio(p.cambio),
-            frase: `Quante ${nomeValuta(p.valuta)} valeva 1 euro a fine mese. Il prezzo in ${nomeValuta(p.valuta)} diviso il cambio dà il prezzo in euro:`,
+            frase: `Cambio di fine mese: ${nomeValuta(p.valuta)} per 1 euro. Il prezzo in ${nomeValuta(p.valuta)} diviso per il cambio dà il prezzo in euro:`,
             conto: [
               riga('Prezzo', prezzo(p.prezzo, p.valuta)),
               riga('÷ cambio', cambio(p.cambio)),
@@ -227,7 +227,7 @@ function rigaMese(nome: string, m: MeseDelTitolo, cambi: CambioFineMese[]): Riga
             ],
             note: [
               c ? `Fonte del cambio: ${fonteCambio}.` : `Il cambio viene con il prezzo: ${f.nome}.`,
-              ...(c?.prima ? [`Prima era ${cambioTesto(c.prima.cambio)} (${c.prima.fonte}).`] : []),
+              ...(c?.prima ? [`Valore precedente: ${cambioTesto(c.prima.cambio)} (${c.prima.fonte}).`] : []),
             ],
           },
         }
@@ -255,21 +255,21 @@ export function venditaInParole(v: VenditaSpiegata): Pezzo[] {
   const pezzi: Pezzo[] = [
     'Il ',
     { b: data(o.data) },
-    ' hai venduto ',
+    ' sono state vendute ',
     { b: `${quoteTesto(o.quantita)} quote su ${quoteTesto(v.quotePrima)}` },
     ` a ${prezzoTesto(o.prezzo, o.valuta)}${o.valuta !== 'EUR' ? ` (cambio ${cambioTesto(o.cambio)})` : ''}`,
-    ' e hai incassato ',
+    ', per un ricavo di ',
     { b: euroTesto(o.totale, 2) },
-    o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già tolta). ` : '. ',
-    `Quelle ${quoteTesto(o.quantita)} quote ti erano costate in media ${prezzoTesto(v.costoMedio, 'EUR')} l’una, cioè ${euroTesto(v.costoQuote, 2)}. `,
-    { b: `Guadagno incassato: ${guadagnoEuro(g, 2)}`, segno: g },
-    ` (${numero(o.totale, 2)} − ${numero(v.costoQuote, 2)}). `,
+    o.commissioni > 0 ? ` (commissione di ${euroTesto(o.commissioni, 2)} già dedotta). ` : '. ',
+    `Al prezzo medio di carico di ${prezzoTesto(v.costoMedio, 'EUR')}, quelle ${quoteTesto(o.quantita)} quote erano costate ${euroTesto(v.costoQuote, 2)}. `,
+    { b: `${plusMinus(g)} realizzata: ${guadagnoEuro(g, 2)}`, segno: g },
+    ` (${numero(o.totale, 2)} − ${numero(v.costoQuote, 2)}), al lordo delle imposte. `,
   ]
   if (rimaste > QUASI_ZERO)
     pezzi.push(
-      `Le ${quoteTesto(rimaste)} quote rimaste tengono lo stesso costo medio di ${prezzoTesto(v.costoMedio, 'EUR')}; i soldi incassati restano nel guadagno del titolo.`,
+      `Le ${quoteTesto(rimaste)} quote rimaste mantengono il prezzo medio di carico di ${prezzoTesto(v.costoMedio, 'EUR')}; il ricavo resta nel calcolo della plusvalenza del titolo.`,
     )
-  else pezzi.push('Hai venduto tutte le quote: il titolo è tra i Venduti.')
+  else pezzi.push('Vendute tutte le quote: il titolo è tra i Venduti.')
   return pezzi
 }
 
@@ -285,7 +285,7 @@ function paragrafi(c: ContoTitolo, ops: Operazione[], divs: Dividendo[]): Paragr
   if (c.stato === 'aperto' && p && c.valore.n !== null) {
     const inValuta = p.valuta !== 'EUR'
     out.push({
-      nome: 'Valore',
+      nome: 'Controvalore',
       pezzi: [
         `${quoteTesto(c.quote)} quote × ${prezzoTesto(p.prezzo, p.valuta)}`,
         inValuta
@@ -300,47 +300,47 @@ function paragrafi(c: ContoTitolo, ops: Operazione[], divs: Dividendo[]): Paragr
     out.push({
       nome: 'Prezzo',
       pezzi: [
-        `Il prezzo di chiusura dell’ultimo giorno di borsa di ${mese(p.data)}, ${f.nome === 'dal tuo file Excel' ? 'preso dal tuo file Excel' : p.fonte === 'a mano' ? 'scritto a mano' : `da ${f.nome}`}. `,
+        `Prezzo di chiusura dell’ultimo giorno di borsa di ${mese(p.data)}, ${f.nome === NOME_FILE_EXCEL ? 'dal file Excel iniziale' : p.fonte === 'a mano' ? 'inserito manualmente' : `da ${f.nome}`}. `,
         f.borsa
-          ? 'È la borsa dove l’hai comprato.'
-          : f.nome === 'dal tuo file Excel'
-            ? `Dal prossimo aggiornamento di fine mese arriverà da ${c.titolo.nomeBorsa}, la borsa dove l’hai comprato.`
-            : `La borsa dove l’hai comprato è ${c.titolo.nomeBorsa}: questa volta il prezzo viene da un’altra fonte.`,
-        inValuta ? ` Il prezzo è in ${nomeValuta(p.valuta)}: tutti i conti sono in euro, al cambio BCE di fine mese.` : '',
+          ? 'È la borsa di quotazione del titolo.'
+          : f.nome === NOME_FILE_EXCEL
+            ? `Dal prossimo aggiornamento di fine mese verrà da ${c.titolo.nomeBorsa}, la borsa di quotazione.`
+            : `La borsa di quotazione è ${c.titolo.nomeBorsa}: questo mese il prezzo viene da un’altra fonte.`,
+        inValuta ? ` Il prezzo è in ${nomeValuta(p.valuta)}: tutti i calcoli sono in euro, al cambio BCE di fine mese.` : '',
       ],
     })
   } else if (c.stato === 'nuovo') {
     out.push({
-      nome: 'Valore',
-      pezzi: ['Lo hai comprato dopo l’ultimo fine mese con i prezzi: valore e guadagno arrivano con il prossimo aggiornamento di fine mese.'],
+      nome: 'Controvalore',
+      pezzi: ['Acquistato dopo l’ultimo fine mese con i prezzi: controvalore e plusvalenza saranno disponibili con il prossimo aggiornamento di fine mese.'],
     })
   }
 
   const commissioni = somma(acquisti.map((o) => o.commissioni))
   out.push({
-    nome: 'Pagato',
+    nome: "Costo d'acquisto",
     pezzi: [
       { b: euroTesto(c.pagato.n ?? 0, 2) },
-      acquisti.length > 1 ? `: la somma dei ${acquisti.length} acquisti` : ': quello che hai pagato per comprarlo',
+      acquisti.length > 1 ? `: la somma dei ${acquisti.length} acquisti` : ' per l’acquisto',
       commissioni > 0 ? `, commissioni comprese (in tutto ${euroTesto(commissioni, 2)}).` : ', commissioni comprese.',
     ],
   })
   if (c.stato === 'aperto' && c.costoMedio.n !== null)
     out.push({
-      nome: 'Costo medio',
+      nome: 'Prezzo medio di carico',
       pezzi: [
         { b: prezzoTesto(c.costoMedio.n, 'EUR') },
-        ` a quota: quanto ti è costata in media una delle ${quoteTesto(c.quote)} quote che hai, commissioni comprese.`,
-        vendite.length ? ' Con una vendita le quote rimaste tengono lo stesso costo medio.' : '',
+        ` per quota: il costo medio di ciascuna delle ${quoteTesto(c.quote)} quote in portafoglio, commissioni comprese.`,
+        vendite.length ? ' Con una vendita parziale le quote rimaste mantengono il prezzo medio di carico.' : '',
       ],
     })
   if (vendite.length)
     out.push({
-      nome: 'Incassato',
+      nome: 'Ricavo delle vendite',
       pezzi: [
         { b: euroTesto(c.incassato.n ?? 0, 2) },
         vendite.length > 1 ? ` da ${vendite.length} vendite` : ' dalla vendita',
-        ', commissioni già tolte. Il guadagno di ogni vendita è nella scheda Operazioni.',
+        ', commissioni già dedotte. La plusvalenza realizzata di ogni vendita è nella scheda Operazioni.',
       ],
     })
   out.push({
@@ -348,33 +348,33 @@ function paragrafi(c: ContoTitolo, ops: Operazione[], divs: Dividendo[]): Paragr
     pezzi: divs.length
       ? [
           { b: euroTesto(c.dividendiTutti.n ?? 0, 2) },
-          ` netti in ${divs.length} ${divs.length === 1 ? 'pagamento' : 'pagamenti'}: quello che è arrivato sul conto, cioè il lordo meno le imposte. Entrano nel guadagno.`,
+          ` netti in ${divs.length} ${divs.length === 1 ? 'pagamento' : 'pagamenti'}: importo accreditato, cioè lordo meno imposte. Entrano nella plusvalenza.`,
         ]
       : [`${c.nomeCorto} non ha pagato dividendi: se è ad accumulazione, li reinveste nel prezzo.`],
   })
   if (g !== null) {
     const parti = [
-      c.stato === 'aperto' ? 'valore' : null,
-      vendite.length ? 'incassato vendendo' : null,
+      c.stato === 'aperto' ? 'controvalore' : null,
+      vendite.length ? 'ricavo delle vendite' : null,
       divs.length ? 'dividendi netti' : null,
     ].filter(Boolean)
     out.push({
-      nome: 'Guadagno',
+      nome: plusMinus(g),
       pezzi: [
-        `${parti.join(' + ').replace(/^./, (x) => x.toUpperCase())} − pagato = `,
+        `${parti.join(' + ').replace(/^./, (x) => x.toUpperCase())} − costo d’acquisto = `,
         { b: guadagnoEuro(g, 2), segno: g },
-        c.dallAcquisto.n !== null ? `, cioè ${pct(c.dallAcquisto.n)} di quello che hai pagato. ` : '. ',
-        'È prima delle tasse sulla vendita.',
+        c.dallAcquisto.n !== null ? `, cioè ${pct(c.dallAcquisto.n)} sul costo. ` : '. ',
+        'Al lordo delle imposte sulla vendita.',
       ],
     })
   }
   out.push({
-    nome: 'Medio annuo',
+    nome: 'Rendimento annualizzato',
     pezzi:
       c.medioAnnuo.n !== null
         ? [
             { b: `${pct(c.medioAnnuo.n)} all’anno` },
-            `: la percentuale che, ripetuta ogni anno per ${numero(c.anni ?? 0, 1)} anni, porta da quello che hai pagato a quello che hai oggi, tenendo conto di quando sono entrati e usciti i soldi (dividendi compresi).`,
+            `: il tasso annuo composto che, ripetuto per ${numero(c.anni ?? 0, 1)} anni, dà il risultato ottenuto, tenendo conto di quando sono entrati e usciti i capitali (dividendi compresi).`,
           ]
         : [c.medioAnnuo.perche.frase ?? '—'],
   })

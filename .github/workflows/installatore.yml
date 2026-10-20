@@ -1,7 +1,7 @@
 # Costruisce l'installatore per Windows e lo mette in una Release di questo repository.
 # Parte a ogni modifica di main, ma lavora solo se la versione di package.json non ha ancora la sua Release
 # (es. "version": "0.2.0" e nessuna Release v0.2.0): per pubblicare una versione nuova basta cambiare quel numero.
-# L'applicazione installata guarda le Release all'apertura e chiede "C'è una versione nuova: la installo?".
+# L'applicazione installata guarda le Release all'apertura e chiede "È disponibile una nuova versione: installarla?".
 # La Release nasce come bozza e si pubblica solo alla fine, con tutti i file (installatore, .blockmap e latest.yml):
 # se electron-builder la crea da solo, i file caricati insieme provano a crearla due volte e il secondo si ferma
 # ("already_exists"), come è successo alla prima v0.1.0. Se la costruzione si ferma a metà resta la bozza:
@@ -72,13 +72,13 @@ jobs:
         run: |
           v=${{ steps.versione.outputs.versione }}
           {
-            echo "**Scarica Portafoglio-titoli-$v.exe** qui sotto, in *Assets*, e aprilo per installarlo."
+            echo "**Scaricare Portafoglio-titoli-$v.exe** qui sotto, in *Assets*, e aprirlo per installarlo."
             echo
-            echo "Al primo avvio Windows può dire «PC protetto da Windows»: scegli «Ulteriori informazioni» e poi «Esegui comunque»."
+            echo "Al primo avvio Windows può mostrare «PC protetto da Windows»: selezionare «Ulteriori informazioni» e poi «Esegui comunque»."
             echo
-            echo "Se il programma è già installato non serve scaricare niente: all'apertura chiede da solo «C'è una versione nuova: la installo?»."
+            echo "Se il programma è già installato non serve scaricare nulla: all'avvio compare «È disponibile una nuova versione: installarla?»."
             echo
-            echo "Come si apre e come si usa: [la guida](https://github.com/teodea/portafoglio#readme)."
+            echo "Installazione e uso: [la guida](https://github.com/teodea/portafoglio#readme)."
           } > note.md
           gh release create "v$v" --draft --target "$GITHUB_SHA" --title "Portafoglio titoli $v" --notes-file note.md
 

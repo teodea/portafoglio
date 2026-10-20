@@ -48,7 +48,7 @@ export function leggiIstat(testo: string): NicArrivato[] {
   const col = righe[0].split(',')
   const i = (nome: string) => col.indexOf(nome)
   const [iTipo, iMisura, iVoce, iMese, iValore, iStato] = ['DATA_TYPE', 'MEASURE', 'ECOICOP_2', 'TIME_PERIOD', 'OBS_VALUE', 'OBS_STATUS'].map(i)
-  if (iTipo < 0 || iMese < 0 || iValore < 0) throw new Error('ISTAT ha risposto con dati che non si leggono')
+  if (iTipo < 0 || iMese < 0 || iValore < 0) throw new Error('ISTAT ha risposto con dati non leggibili')
   const perMese = new Map<string, NicArrivato>()
   for (const r of righe.slice(1)) {
     const c = r.split(',')
@@ -85,21 +85,21 @@ export async function nicIstat(mesi: readonly string[], scarica: Scarica = fetch
       // Nessun dato nel periodo (per esempio il mese non è ancora uscito): ISTAT risponde 404.
       if (risposta.status === 404) return ''
       if (risposta.status === 429 || risposta.status === 403)
-        throw new Error('ISTAT chiede di aspettare: troppe richieste. Riprova al prossimo aggiornamento')
+        throw new Error('ISTAT chiede di attendere: troppe richieste. Riprovare al prossimo aggiornamento')
       if (!risposta.ok) throw new Error(`ISTAT non ha risposto (errore ${risposta.status})`)
       return await risposta.text()
     }, limite)
   } catch (e) {
     const nome = e instanceof Error ? e.name : ''
     if (nome === 'TimeoutError' || nome === 'AbortError') return { ok: false, perche: 'ISTAT non ha risposto in tempo' }
-    if (e instanceof TypeError) return { ok: false, perche: 'ISTAT non ha risposto: controlla la connessione a internet' }
+    if (e instanceof TypeError) return { ok: false, perche: 'ISTAT non ha risposto: controllare la connessione a internet' }
     return { ok: false, perche: e instanceof Error ? e.message : 'ISTAT non ha risposto' }
   }
   let valori: NicArrivato[]
   try {
     valori = leggiIstat(testo)
   } catch (e) {
-    return { ok: false, perche: e instanceof Error ? e.message : 'ISTAT ha risposto con dati che non si leggono' }
+    return { ok: false, perche: e instanceof Error ? e.message : 'ISTAT ha risposto con dati non leggibili' }
   }
   const voluti = new Set(chiesti)
   return { ok: true, valori: valori.filter((v) => voluti.has(meseDi(v.data)) && v.data >= inizioMese(chiesti[0])) }

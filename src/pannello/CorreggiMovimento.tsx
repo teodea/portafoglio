@@ -1,7 +1,7 @@
 // La correzione a mano di un movimento, nel pannello "Da dove viene" (ticket 11, mappa 26): lo stesso gesto
-// dei prezzi (ticket 8). "Se qualcosa è sbagliato": le caselle con i valori di adesso, "Correggi a mano",
-// una conferma che elenca cosa cambia, poi la scrittura sicura con la copia prima. Dopo, il chip "a mano",
-// "prima era ~~30~~, ora 31" e "Torna a com'era". In fondo "Togli questo movimento", per uno registrato per sbaglio.
+// dei prezzi (ticket 8). "Correzione dei dati": le caselle con i valori di adesso, "Correggi",
+// una conferma che elenca cosa cambia, poi la scrittura sicura con la copia prima. Dopo, il chip "manuale",
+// "precedente ~~30~~, attuale 31" e "Ripristina i valori precedenti". In fondo "Elimina il movimento", per uno registrato per sbaglio.
 // Il movimento si legge dal file di adesso, non dalla spiegazione: dopo la correzione si vede subito com'è.
 // Come in Registra, il pagato (o l'incassato) si rifà da solo con il conto quando cambi quote, prezzo, cambio o
 // commissioni, finché non lo scrivi tu; se non torna con il conto, lo si dice (collaudo del 19/10, punto 4).
@@ -104,15 +104,15 @@ export function CorreggiMovimento({ id }: { id: string }) {
       const t = testi[k]
       const v = k === 'data' ? leggiData(t) : leggiNumero(t)
       if (v === null) {
-        setSbagliato(k === 'data' ? 'La data va scritta come 12/10/2026.' : `${nome(k)}: scrivi un numero, per esempio 12,75.`)
+        setSbagliato(k === 'data' ? 'Inserire la data nel formato 12/10/2026.' : `${nome(k)}: inserire un numero, per esempio 12,75.`)
         return
       }
       if (v !== valori[k]) nuovi[k] = v
     }
-    if (Object.keys(nuovi).length === 0) return setSbagliato('Non hai cambiato niente: scrivi il numero giusto nella sua casella.')
+    if (Object.keys(nuovi).length === 0) return setSbagliato('Nessun valore modificato: inserire il dato corretto nella relativa casella.')
     const m: ModificaMovimento = { azione: 'correggi', id, campi: nuovi }
     const ok = controllaModifica(dati, m)
-    if (!ok.ok) return setSbagliato(`Così non va: ${ok.perche}.`)
+    if (!ok.ok) return setSbagliato(`Correzione non possibile: ${ok.perche}.`)
     setSbagliato(null)
     setEsito(null)
     setConferma(m)
@@ -127,23 +127,23 @@ export function CorreggiMovimento({ id }: { id: string }) {
     setConferma(null)
     const r = risposta as EsitoMovimento | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho scritto niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. Il file non è stato modificato.` })
     if (r.esito === 'cambiato')
       return setEsito({
         ok: false,
-        testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho scritto niente e ho ricaricato i dati. Controlla il movimento e rifai.',
+        testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato scritto nulla e i dati sono stati ricaricati. Verificare il movimento e ripetere l’operazione.',
       })
     const copia = FRASE_COPIA
     if (m.azione === 'togli') {
       // Il pannello si chiude da solo (il movimento non c'è più): il messaggio va in basso.
-      mostraAvviso(`Tolto: ${quale}. ${copia}`)
+      mostraAvviso(`Movimento eliminato: ${quale}. ${copia}`)
       return
     }
-    setEsito({ ok: true, testo: `${m.azione === 'correggi' ? 'Corretto' : 'Rimesso com’era'}. ${copia}` })
+    setEsito({ ok: true, testo: `${m.azione === 'correggi' ? 'Correzione salvata' : 'Valori precedenti ripristinati'}. ${copia}` })
   }
 
   return (
-    <section className="correzione correzione-movimento" aria-label="Correzione a mano">
+    <section className="correzione correzione-movimento" aria-label="Correzione manuale">
       {prima && (
         <div className="stato-mano">
           <p>
@@ -153,7 +153,7 @@ export function CorreggiMovimento({ id }: { id: string }) {
           <ul>
             {Object.entries(prima).map(([k, v]) => (
               <li key={k}>
-                {nome(k as Campo)}: prima era <s>{scrivi(k as Campo, v)}</s>, ora {scrivi(k as Campo, valori[k])}.
+                {nome(k as Campo)}: precedente <s>{scrivi(k as Campo, v)}</s>, attuale {scrivi(k as Campo, valori[k])}.
               </li>
             ))}
           </ul>
@@ -171,7 +171,7 @@ export function CorreggiMovimento({ id }: { id: string }) {
         <div className="conferma" role="group" aria-label="Conferma">
           {conferma.azione === 'correggi' && (
             <>
-              <p>Correggo a mano {quale}:</p>
+              <p>Correzione manuale di {quale}:</p>
               <ul>
                 {Object.entries(conferma.campi).map(([k, v]) => (
                   <li key={k}>
@@ -179,12 +179,12 @@ export function CorreggiMovimento({ id }: { id: string }) {
                   </li>
                 ))}
               </ul>
-              <p>Resterà segnato “a mano” e si vedrà cosa c’era prima. Prima di scrivere faccio una copia del file.</p>
+              <p>Il movimento resterà segnato come “manuale”, con i valori precedenti visibili. Prima della scrittura si salva una copia del file.</p>
             </>
           )}
           {conferma.azione === 'torna' && (
             <>
-              <p>Rimetto {quale} com’era prima della correzione a mano:</p>
+              <p>Ripristino di {quale} ai valori precedenti la correzione manuale:</p>
               <ul>
                 {Object.entries(prima ?? {}).map(([k, v]) => (
                   <li key={k}>
@@ -192,18 +192,18 @@ export function CorreggiMovimento({ id }: { id: string }) {
                   </li>
                 ))}
               </ul>
-              <p>Prima di scrivere faccio una copia del file.</p>
+              <p>Prima della scrittura si salva una copia del file.</p>
             </>
           )}
           {conferma.azione === 'togli' && (
             <p>
-              Tolgo dal file {quale} ({euro(trovato.tipo === 'operazione' ? trovato.operazione.totale : trovato.dividendo.netto, 2)}). Prima di scrivere
-              faccio una copia del file: se ti serve di nuovo, è lì.
+              Si elimina dal file {quale} ({euro(trovato.tipo === 'operazione' ? trovato.operazione.totale : trovato.dividendo.netto, 2)}). Prima della
+              scrittura si salva una copia del file, da cui il movimento resta recuperabile.
             </p>
           )}
           <div className="bottoni">
             <button type="button" className="btn primario" autoFocus disabled={occupato} onClick={() => void scriviNelFile(conferma)}>
-              {conferma.azione === 'correggi' ? 'Sì, correggi' : conferma.azione === 'torna' ? 'Sì, torna a com’era' : 'Sì, togli'}
+              {conferma.azione === 'correggi' ? 'Sì, correggi' : conferma.azione === 'torna' ? 'Sì, ripristina' : 'Sì, elimina'}
             </button>
             <button type="button" className="btn" disabled={occupato} onClick={() => setConferma(null)}>
               Annulla
@@ -222,15 +222,15 @@ export function CorreggiMovimento({ id }: { id: string }) {
                   setEsito(null)
                   const m: ModificaMovimento = { azione: 'torna', id }
                   const ok = controllaModifica(dati, m)
-                  if (!ok.ok) return setSbagliato(`Non si può: ${ok.perche}.`)
+                  if (!ok.ok) return setSbagliato(`Ripristino non possibile: ${ok.perche}.`)
                   setConferma(m)
                 }}
               >
-                Torna a com’era
+                Ripristina i valori precedenti
               </button>
             </div>
           )}
-          <h3>Se qualcosa è sbagliato</h3>
+          <h3>Correzione dei dati</h3>
           <form
             className="campi-correzione"
             onSubmit={(e) => {
@@ -261,9 +261,9 @@ export function CorreggiMovimento({ id }: { id: string }) {
               <div className="avviso-conto" role="status">
                 <Icona nome="info" />
                 <p>
-                  Il conto (quote × prezzo, ± commissioni) fa {euro(nonTorna.conto, 2)}, ma {operazione.tipo === 'vendita' ? 'l’incassato' : 'il pagato'} in tutto è{' '}
-                  {euro(nonTorna.totale, 2)} ({guadagnoEuro(nonTorna.totale - nonTorna.conto, 2)}). Se hai cambiato le quote o il prezzo, correggi anche{' '}
-                  {operazione.tipo === 'vendita' ? 'l’incassato' : 'il pagato'}; se la differenza è un rateo o una ritenuta della banca, va bene così.
+                  Il calcolo (quote × prezzo, ± commissioni) dà {euro(nonTorna.conto, 2)}, ma {operazione.tipo === 'vendita' ? 'il ricavo della vendita' : 'il costo d’acquisto'} indicato è{' '}
+                  {euro(nonTorna.totale, 2)} ({guadagnoEuro(nonTorna.totale - nonTorna.conto, 2)}). Se sono state modificate le quote o il prezzo, correggere anche{' '}
+                  {operazione.tipo === 'vendita' ? 'il ricavo della vendita' : 'il costo d’acquisto'}; una differenza dovuta a ratei o ritenute della banca è corretta.
                 </p>
               </div>
             )}
@@ -274,22 +274,22 @@ export function CorreggiMovimento({ id }: { id: string }) {
             )}
             <div className="bottoni">
               <button type="submit" className="btn primario" disabled={occupato}>
-                Correggi a mano
+                Correggi
               </button>
             </div>
           </form>
           <p className="tenue piccolo">
             {trovato.tipo === 'dividendo'
-              ? 'Il netto si rifà da solo: lordo meno imposte. '
+              ? 'Il netto si ricalcola automaticamente: lordo meno imposte. '
               : seguiIlConto
-                ? `${operazione?.tipo === 'vendita' ? 'L’incassato' : 'Il pagato'} si rifà da solo con il conto quando cambi quote, prezzo o commissioni, finché non lo scrivi tu. `
+                ? `${operazione?.tipo === 'vendita' ? 'Il ricavo della vendita' : 'Il costo d’acquisto'} si ricalcola automaticamente al variare di quote, prezzo o commissioni, finché non viene inserito manualmente. `
                 : ''}
-            Il movimento corretto resta segnato “a mano” e si vede
-            cosa c’era prima. Niente si scrive nel file finché non confermi.
+            Il movimento corretto resta segnato come “manuale”, con i valori
+            precedenti visibili. Il file non viene modificato fino alla conferma.
           </p>
 
-          <h3>Registrato per sbaglio?</h3>
-          <p className="tenue piccolo">Per esempio lo stesso movimento registrato due volte. Prima di toglierlo faccio una copia del file.</p>
+          <h3>Movimento registrato per errore</h3>
+          <p className="tenue piccolo">Per esempio un movimento registrato due volte. Prima dell’eliminazione si salva una copia del file.</p>
           <div className="bottoni">
             <button
               type="button"
@@ -299,12 +299,12 @@ export function CorreggiMovimento({ id }: { id: string }) {
                 setEsito(null)
                 const m: ModificaMovimento = { azione: 'togli', id }
                 const ok = controllaModifica(dati, m)
-                if (!ok.ok) return setSbagliato(`Non si può togliere: ${ok.perche}. Prima togli o correggi quella vendita.`)
+                if (!ok.ok) return setSbagliato(`Eliminazione non possibile: ${ok.perche}. Eliminare o correggere prima la vendita indicata.`)
                 setSbagliato(null)
                 setConferma(m)
               }}
             >
-              Togli questo movimento
+              Elimina il movimento
             </button>
           </div>
         </>
@@ -334,7 +334,7 @@ function nomeDelCampo(k: Campo, valuta: string, tipo?: 'acquisto' | 'vendita'): 
     case 'commissioni':
       return 'Commissioni (€)'
     case 'totale':
-      return tipo === 'vendita' ? 'Incassato in tutto (€)' : 'Pagato in tutto (€)'
+      return tipo === 'vendita' ? 'Ricavo della vendita (€)' : 'Costo d’acquisto (€)'
     case 'lordo':
       return 'Lordo (€)'
     case 'imposte':

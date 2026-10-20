@@ -22,7 +22,7 @@ export type MisuraConfronto = 'medio' | 'anno' | 'inizio'
 
 export type RigaConfronto = {
   id: IdConfronto | 'portafoglio'
-  /** Il nome nella classifica: "S&P 500", "Inflazione", "Il tuo portafoglio". */
+  /** Il nome nella classifica: "S&P 500", "Inflazione", "Portafoglio". */
   nome: string
   /** Il giorno a cui arriva il confronto: il fine mese, o prima per l'inflazione senza l'ultimo NIC. */
   fino: string | null
@@ -132,30 +132,30 @@ function stessiEuro(mov: Movimento[], fino: string, d0: string, l: Lettore): Esi
     valore += v
     passi.push(riga(`${dataIt(m.data)}: ${m.quale} ${euroTesto(Math.abs(m.importo), 2)} × ${numero(pf.euro, 2)} ÷ ${numero(q.euro, 2)}`, euro(v)))
     if (q.nota) note.add(q.nota.charAt(0).toUpperCase() + q.nota.slice(1) + '.')
-    if (q.aMano) note.add(`Il valore del ${dataIt(m.data)} è scritto a mano.`)
+    if (q.aMano) note.add(`Il valore del ${dataIt(m.data)} è inserito manualmente.`)
   }
   const investiti = somma(qui.map((m) => m.importo))
   const motivi: string[] = []
 
   // dall'inizio
   const inizio = investiti > 1e-9 ? (valore - investiti) / investiti : null
-  if (inizio === null) motivi.push("Dall'inizio non c'è: i soldi tolti sono almeno quanti quelli messi.")
+  if (inizio === null) motivi.push("Rendimento dall'inizio non disponibile: i prelievi hanno raggiunto i versamenti.")
 
   // medio annuo
   const primo = qui.find((m) => m.tipo === 'acquisto')?.data ?? qui[0].data
   let medio: number | null = null
-  if (anniTra(primo, fino) < ANNI_MINIMI_MEDIO) motivi.push('Il medio annuo non c’è: su meno di sei mesi direbbe poco.')
+  if (anniTra(primo, fino) < ANNI_MINIMI_MEDIO) motivi.push('Rendimento annualizzato non disponibile: su meno di sei mesi non è significativo.')
   else {
     medio = xirr([...qui.map((m) => ({ data: m.data, importo: -m.importo })), { data: fino, importo: valore }])
-    if (medio === null) motivi.push('Il medio annuo non c’è: con questi movimenti non si trova un tasso che torni.')
+    if (medio === null) motivi.push('Rendimento annualizzato non disponibile: con questi movimenti il tasso non è calcolabile.')
   }
 
   // anno in corso: dal 31/12 dell'anno prima, senza i soldi nuovi
   let anno: number | null = null
   const prima = qui.filter((m) => m.data <= d0)
   const p0 = prima.length ? l.leggi(d0) : null
-  if (fino <= d0) motivi.push("L'anno non c'è ancora.")
-  else if (prima.length && !p0) motivi.push(`L'anno non c'è: manca il valore ${l.mancaDi(d0)}.`)
+  if (fino <= d0) motivi.push('Rendimento da inizio anno non ancora disponibile.')
+  else if (prima.length && !p0) motivi.push(`Rendimento da inizio anno non disponibile: manca il valore ${l.mancaDi(d0)}.`)
   else {
     const v0 = p0 ? somma(prima.map((m) => (m.importo * p0.euro) / l.leggi(m.data)!.euro)) : 0
     const flussi = qui.filter((m) => m.data > d0).map((m) => ({ data: m.data, importo: m.importo }))
@@ -164,21 +164,21 @@ function stessiEuro(mov: Movimento[], fino: string, d0: string, l: Lettore): Esi
 
   const righe: RigaConto[] = [riga(`${l.allaFine(fino)}${pf.dettaglio ? `: ${pf.dettaglio}` : ''}`, pf.cifra), ...passi]
   righe.push(riga(`Valore a fine ${nomeDelMese(meseDi(fino))}`, euro(valore)))
-  if (pf.aMano) note.add(`Il valore di fine ${nomeDelMese(meseDi(fino))} è scritto a mano.`)
+  if (pf.aMano) note.add(`Il valore di fine ${nomeDelMese(meseDi(fino))} è inserito manualmente.`)
   const aMano = pf.aMano || qui.some((m) => l.leggi(m.data)!.aMano) || (p0?.aMano ?? false)
   return { ok: true, valore, investiti, anno, inizio, medio, motivi, passi: righe, note: [...note], aMano }
 }
 
 const cifraPct = (n: number | null) => (n === null ? testo('—') : percentuale(n))
 
-/** Le cinque righe dei numeri: soldi investiti, valore, anno, dall'inizio, medio annuo. */
+/** Le cinque righe dei numeri: capitale investito, valore, da inizio anno, dall'inizio, annualizzato. */
 function quattroNumeri(anno: string, fino: string, investiti: number, valore: number, a: number | null, i: number | null, m: number | null, valoreNome = `Valore a fine ${nomeDelMese(meseDi(fino))}`): RigaConto[] {
   return [
-    riga('Soldi investiti (messi − tolti)', euro(investiti)),
+    riga('Capitale investito (versamenti − prelievi)', euro(investiti)),
     riga(valoreNome, euro(valore)),
-    riga(`Anno ${anno}`, cifraPct(a)),
-    riga("Dall'inizio", cifraPct(i)),
-    riga('Medio annuo', cifraPct(m)),
+    riga(`Rendimento da inizio ${anno}`, cifraPct(a)),
+    riga("Rendimento dall'inizio", cifraPct(i)),
+    riga('Rendimento annualizzato', cifraPct(m)),
   ]
 }
 
@@ -193,14 +193,14 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
   const mov: Movimento[] = (dati.operazioni ?? [])
     .filter((o) => nomi.has(o.titolo) && o.data <= fine)
     .sort((a, b) => (a.data < b.data ? -1 : a.data > b.data ? 1 : 0))
-    .map((o) => ({ data: o.data, importo: o.tipo === 'acquisto' ? o.totale : -o.totale, tipo: o.tipo, quale: o.tipo === 'acquisto' ? `messi (${nomi.get(o.titolo)})` : `tolti (${nomi.get(o.titolo)})` }))
+    .map((o) => ({ data: o.data, importo: o.tipo === 'acquisto' ? o.totale : -o.totale, tipo: o.tipo, quale: o.tipo === 'acquisto' ? `versamento (${nomi.get(o.titolo)})` : `prelievo (${nomi.get(o.titolo)})` }))
 
   // ---------- il portafoglio ----------
   const valoreTu = (conti.valore.n ?? 0) + (conti.dividendi.n ?? 0)
   const investitiTu = conti.investiti.n ?? 0
   const portafoglio: RigaConfronto = {
     id: 'portafoglio',
-    nome: 'Il tuo portafoglio',
+    nome: 'Portafoglio',
     fino: fine,
     finoA: null,
     valore: valoreTu,
@@ -210,27 +210,27 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
     manca: null,
     aMano: false,
     perche: {
-      titolo: 'Il tuo portafoglio nel confronto',
+      titolo: 'Portafoglio nel confronto',
       grande: euro(valoreTu),
       dopo: `a fine ${meseFine}`,
       frase:
-        'Nel confronto il portafoglio vale i titoli più i dividendi incassati, perché i riferimenti hanno i dividendi reinvestiti: così il confronto è alla pari.',
+        'Nel confronto il valore del portafoglio comprende il controvalore dei titoli e i dividendi netti, perché i riferimenti includono i dividendi reinvestiti.',
       conto: quattroNumeri(annoS, fine, investitiTu, valoreTu, conti.annoInCorso.n, conti.dallInizio.n, conti.medioAnnuo.n, 'Valore nel confronto'),
       passi: {
         titolo: 'Il valore nel confronto',
         righe: [
-          riga(`Valore dei titoli a fine ${meseFine}`, euro(conti.valore.n ?? 0)),
-          riga('+ dividendi netti incassati', euro(conti.dividendi.n ?? 0)),
+          riga(`Controvalore dei titoli a fine ${meseFine}`, euro(conti.valore.n ?? 0)),
+          riga('+ dividendi netti', euro(conti.dividendi.n ?? 0)),
           riga('Valore nel confronto', euro(valoreTu)),
         ],
       },
       note: [
-        'Anno, dall’inizio e medio annuo sono quelli del riquadro “Quanto stai guadagnando”: lì ogni numero ha il suo conto.',
-        'I riferimenti partono dagli stessi soldi, negli stessi giorni.',
+        'I rendimenti sono gli stessi della pagina Portafoglio, dove ogni numero ha il suo calcolo.',
+        'I riferimenti sono calcolati sugli stessi importi, nelle stesse date.',
       ],
     },
   }
-  const fraseTu = `Il tuo portafoglio, con gli stessi soldi: ${euroTesto(valoreTu)} (titoli più dividendi)${conti.medioAnnuo.n !== null ? `, ${pct(conti.medioAnnuo.n)} all’anno` : ''}.`
+  const fraseTu = `Portafoglio, sugli stessi importi: ${euroTesto(valoreTu)} (titoli più dividendi)${conti.medioAnnuo.n !== null ? `, ${pct(conti.medioAnnuo.n)} all’anno` : ''}.`
 
   // ---------- i sette riferimenti ----------
   const riferimenti = CONFRONTI.map((id): RigaConfronto => {
@@ -250,10 +250,13 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
         const mancanti = []
         for (let m = meseDopo(ultimo); m <= meseDi(fine); m = meseDopo(m)) mancanti.push(nomeDelMese(m))
         noteFino.push(
-          `Il NIC di ${mancanti.join(' e ')} non c’è ancora${mancanti.length === 1 ? ` (ISTAT lo pubblica ${quandoEsceNic(meseDi(fine))})` : ''}: il confronto con l’inflazione arriva ${finoA} e si completa al prossimo aggiornamento.`,
+          `Il NIC di ${mancanti.join(' e ')} non è ancora disponibile${mancanti.length === 1 ? ` (ISTAT lo pubblica ${quandoEsceNic(meseDi(fine))})` : ''}: il confronto con l’inflazione arriva ${finoA} e sarà completato al prossimo aggiornamento.`,
         )
         const dopo = mov.filter((m) => m.data > fino).length
-        if (dopo) noteFino.push(`${dopo === 1 ? 'Il movimento' : `I ${dopo} movimenti`} dopo il ${dataIt(fino)} ${dopo === 1 ? 'entra' : 'entrano'} quando arriva il NIC.`)
+        if (dopo)
+          noteFino.push(
+            `${dopo === 1 ? 'Il movimento successivo' : `I ${dopo} movimenti successivi`} al ${dataIt(fino)} ${dopo === 1 ? 'sarà incluso' : 'saranno inclusi'} con la pubblicazione del NIC.`,
+          )
       }
     }
     const meseFino = nomeDelMese(meseDi(fino))
@@ -264,9 +267,9 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
     if (!esito.ok) {
       const vuoto = nic ? !(dati.nic ?? []).length : !(dati.riferimenti ?? []).some((v) => v.riferimento === id)
       const manca = !esito.mancano.length
-        ? `Non ci sono ancora acquisti da confrontare${nic && finoA ? ` ${finoA}` : ''}.`
+        ? `Nessun acquisto da confrontare${nic && finoA ? ` ${finoA}` : ''}.`
         : vuoto
-          ? `Nel file non ci sono ancora i valori ${nic ? 'del NIC' : `di ${nome}`}: arrivano con Aggiorna fine mese.`
+          ? `Nel file non ci sono ancora i valori ${nic ? 'del NIC' : `di ${nome}`}: saranno scaricati con Aggiorna fine mese.`
           : `Nel file manca ${esito.mancano.length === 1 ? 'il valore' : 'qualche valore'} ${nic ? 'del NIC' : `di ${nome}`}: ${esito.mancano.slice(0, 4).join(', ')}${esito.mancano.length > 4 ? '…' : ''}.`
       return {
         id,
@@ -286,7 +289,7 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
           conto: [],
           note: esito.mancano.length
             ? [
-                `“Scarica di nuovo” chiede ${nic ? 'a ISTAT' : 'a investing.com'} i valori che mancano; se non risponde, il prossimo Aggiorna fine mese li riprende da solo.`,
+                `“Scarica di nuovo” richiede ${nic ? 'a ISTAT' : 'a investing.com'} i valori mancanti; in caso di mancata risposta, li recupera il prossimo Aggiorna fine mese.`,
               ]
             : [],
           riferimento: rif,
@@ -314,8 +317,8 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
         grande: euro(esito.valore),
         dopo: `a fine ${meseFino}`,
         frase: nic
-          ? `Se i soldi che hai messo e tolto tu, negli stessi giorni, fossero cresciuti solo quanto i prezzi (inflazione NIC di ISTAT), a fine ${meseFino} varrebbero così: è quanto dovrebbero valere per non perdere potere d’acquisto.`
-          : `Se i soldi che hai messo e tolto tu, negli stessi giorni, fossero andati su ${nome} (${cosa}${DESCRIZIONE[id].valuta === 'USD' ? ', portato in euro' : ''}), a fine ${meseFino} varrebbero così.`,
+          ? `Valore che avrebbero gli stessi versamenti e prelievi, nelle stesse date, se si fossero rivalutati come i prezzi al consumo (inflazione NIC di ISTAT): è il valore necessario a fine ${meseFino} per non perdere potere d’acquisto.`
+          : `Valore che avrebbero a fine ${meseFino} gli stessi versamenti e prelievi, nelle stesse date, se fossero stati investiti in ${nome} (${cosa}${DESCRIZIONE[id].valuta === 'USD' ? ', convertito in euro' : ''}).`,
         conto: quattroNumeri(annoS, fino, esito.investiti, esito.valore, esito.anno, esito.inizio, esito.medio),
         passi: {
           titolo: 'Il conto, movimento per movimento',
@@ -323,8 +326,8 @@ export function confrontoConIRiferimenti(dati: FileDati, conti: ContiPortafoglio
         },
         note: [
           nic
-            ? `Ogni movimento cresce quanto i prezzi dal suo mese ${finoAl(meseDi(fino)).replace(/^fino /, '')}: soldi × NIC di ${meseFino} ÷ NIC del mese del movimento. Le vendite tolgono soldi nello stesso modo.`
-            : `Ogni movimento cresce (o cala) quanto ${nome} dal suo giorno a fine ${meseFino}: soldi × valore a fine mese ÷ valore di quel giorno. Le vendite tolgono soldi nello stesso modo.`,
+            ? `Ogni movimento si rivaluta come i prezzi dal suo mese ${finoAl(meseDi(fino)).replace(/^fino /, '')}: importo × NIC di ${meseFino} ÷ NIC del mese del movimento. Le vendite si sottraggono allo stesso modo.`
+            : `Ogni movimento varia come ${nome} dalla sua data a fine ${meseFino}: importo × valore di fine mese ÷ valore di quella data. Le vendite si sottraggono allo stesso modo.`,
           ...noteFino,
           ...esito.motivi,
           fonte,
@@ -377,9 +380,9 @@ export function lunghezzaBarra(n: number | null, massimo: number): number {
   return Math.max(1, Math.min(100, (n / massimo) * 100))
 }
 
-/** Il nome del bottone della misura: "All'anno in media", "Anno 2026", "Dall'inizio". */
+/** Il nome del bottone della misura: "Annualizzato", "Anno 2026", "Dall'inizio". */
 export function nomeMisura(m: MisuraConfronto, anno: string): string {
-  return m === 'medio' ? 'All’anno in media' : m === 'anno' ? `Anno ${anno}` : 'Dall’inizio'
+  return m === 'medio' ? 'Annualizzato' : m === 'anno' ? `Anno ${anno}` : 'Dall’inizio'
 }
 
 /** Rifà il "Da dove viene" di una riga sui dati di adesso (dopo una correzione o "Scarica di nuovo"). */

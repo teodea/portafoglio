@@ -68,6 +68,16 @@ export function nomeBreve(fonte: string): string {
   return fonte.replace(/ \(.*\)$/, '')
 }
 
+/**
+ * Il nome della fonte da mostrare. Nel file restano i valori di sempre ("a mano", "dal tuo file Excel"):
+ * sulle pagine diventano "manuale" e "file Excel iniziale". Le altre fonti si mostrano come sono.
+ */
+export function fonteDaMostrare(fonte: string): string {
+  if (fonte === FONTE.aMano) return 'manuale'
+  if (fonte === FONTE.fileExcel) return 'file Excel iniziale'
+  return fonte
+}
+
 /** Le fonti ufficiali: la borsa di quotazione (o Euronext Milano per Milano). */
 export function eUfficiale(fonte: string): boolean {
   return (

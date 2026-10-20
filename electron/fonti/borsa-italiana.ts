@@ -32,10 +32,10 @@ export function leggiBorsaItaliana(testo: string): Chiusura[] {
   try {
     valore = JSON.parse(testo)
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
   const righe = (valore as { d?: unknown } | null)?.d
-  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati che non si leggono')
+  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati non leggibili')
   const chiusure: Chiusura[] = []
   for (const r of righe) {
     if (!Array.isArray(r) || typeof r[0] !== 'number' || typeof r[1] !== 'number') continue
@@ -45,7 +45,7 @@ export function leggiBorsaItaliana(testo: string): Chiusura[] {
 }
 
 export async function chiusureBorsaItaliana(t: RichiestaPrezzo, scarica: Scarica = fetch): Promise<Chiusura[]> {
-  if (!t.simbolo) throw new NonVa('nel file manca il simbolo del titolo, che serve per chiedere il prezzo')
+  if (!t.simbolo) throw new NonVa('nel file manca il simbolo del titolo, necessario per richiedere il prezzo')
   // Gli ETF stanno sotto ".ETF", le azioni sotto ".MTA".
   for (const chiave of [`${t.simbolo}.ETF`, `${t.simbolo}.MTA`]) {
     const testo = await scaricaTesto(

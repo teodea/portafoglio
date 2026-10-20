@@ -24,7 +24,7 @@ import { creaRiferimenti, frasiDopoIlSalvataggio, riferimentiDaSalvare } from '.
 import type { IdRiferimento } from '../dati/tipi.ts'
 import { useScaricaRiferimenti } from './scarica-riferimenti.ts'
 
-/** Cosa resta da dire dopo "Salva": il riquadro "<Mese> è salvato". */
+/** Cosa resta da dire dopo "Salva": il riquadro "Aggiornamento di <mese> salvato". */
 export type Salvato = {
   mese: string
   copia: string
@@ -103,7 +103,7 @@ export function AggiornaProvider({ children }: { children: ReactNode }) {
       try {
         stato = statoDaEsito(await ponte.prezzoFineMese(richiestaDi(r), mese))
       } catch {
-        stato = { tipo: 'manca' as const, perche: 'qualcosa non è andato: riprova' }
+        stato = { tipo: 'manca' as const, perche: 'si è verificato un errore: riprovare' }
       }
       cambia((a) => conTitolo(a, r.id, (x) => ({ ...x, stato })), numero)
     },
@@ -117,7 +117,7 @@ export function AggiornaProvider({ children }: { children: ReactNode }) {
       try {
         stato = statoDaCambio(await ponte.cambioFineMese(valuta, mese))
       } catch {
-        stato = { tipo: 'manca' as const, perche: 'qualcosa non è andato: riprova' }
+        stato = { tipo: 'manca' as const, perche: 'si è verificato un errore: riprovare' }
       }
       cambia((a) => conCambio(a, valuta, (x) => ({ ...x, stato })), numero)
     },
@@ -169,12 +169,12 @@ export function AggiornaProvider({ children }: { children: ReactNode }) {
     const e = esito as Awaited<ReturnType<typeof ponte.salvaMese>> | null
     if (!e) return
     if (e.esito === 'errore') {
-      setAvviso(`Non ho salvato: ${e.perche}. Il file è rimasto com’era.`)
+      setAvviso(`Si è verificato un errore: ${e.perche}. Il file dei dati non è stato modificato.`)
       return
     }
     if (e.esito === 'cambiato') {
       setAvviso(
-        'Il file è stato cambiato da un altro PC (o fuori dall’applicazione) mentre aggiornavi: non ho scritto niente e ho ricaricato i dati. Controlla la lista e premi di nuovo Salva.',
+        'Il file dei dati è stato modificato da un altro computer (o fuori dal programma) durante l’aggiornamento: non è stato scritto nulla e i dati sono stati ricaricati. Controllare la lista e salvare di nuovo.',
       )
       return
     }

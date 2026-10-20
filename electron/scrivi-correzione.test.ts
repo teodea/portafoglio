@@ -83,7 +83,7 @@ describe('scrivere una correzione a mano', () => {
   it('una correzione che non si può fare non scrive niente e dice perché', async () => {
     const testo = await readFile(file(), 'utf8')
     const scritto = await scriviCorrezione(cartella, impronta(testo), { tipo: 'torna', titolo: MOND, data: SETTEMBRE }, orologioDaProva())
-    expect(scritto).toEqual({ esito: 'errore', perche: 'il prezzo di MOND a fine settembre 2026 non ha un prezzo di prima' })
+    expect(scritto).toEqual({ esito: 'errore', perche: 'il prezzo di MOND a fine settembre 2026 non ha un prezzo precedente' })
     expect(await readFile(file(), 'utf8')).toBe(testo)
     expect((await apriCartella(cartella)).apertura.stato).toBe('pronto')
   })

@@ -75,7 +75,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     if (nic) {
       const mesi = [...new Set([...mesiNicDaChiedere(dati, mese, false), mese])].sort()
       const r = await ponte.nicIstat(mesi)
-      if (!r.ok) return setScarico({ stato: 'no', testo: `${r.perche[0].toUpperCase()}${r.perche.slice(1)}. Riprova più tardi, oppure scrivi il NIC qui sotto.` })
+      if (!r.ok) return setScarico({ stato: 'no', testo: `${r.perche[0].toUpperCase()}${r.perche.slice(1)}. Riprovare più tardi o inserire il NIC qui sotto.` })
       const arrivati: NicDelMese[] = r.valori.map((x) => ({ data: x.data, valore: x.valore, base: x.base, fonte: FONTE_NIC.istat, ...(x.nota ? { nota: x.nota } : {}) }))
       const delMese = arrivati.find((x) => x.data === rif.data)
       const cambiati = arrivati.filter((x) => {
@@ -84,8 +84,8 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
       })
       const frase = delMese ? (
         <>
-          ISTAT dice <b>{numero(delMese.valore, 1, 2)}</b> (base {delMese.base} = 100) per {meseEAnno(mese)}
-          {v ? (v.valore === delMese.valore ? ': uguale a quello che c’è.' : `: diverso da ${numero(v.valore, 1, 2)} che c’è adesso.`) : '.'}
+          ISTAT riporta <b>{numero(delMese.valore, 1, 2)}</b> (base {delMese.base} = 100) per {meseEAnno(mese)}
+          {v ? (v.valore === delMese.valore ? ': uguale a quello presente.' : `: diverso dal valore attuale, ${numero(v.valore, 1, 2)}.`) : '.'}
         </>
       ) : (
         <>ISTAT non ha ancora pubblicato il NIC di {meseEAnno(mese)}: esce {quandoEsceNic(mese)}.</>
@@ -95,7 +95,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
         testo: (
           <>
             {frase}
-            {cambiati.filter((x) => x.data !== rif.data).length > 0 && ` Arrivano anche ${cambiati.filter((x) => x.data !== rif.data).length} mesi che mancavano.`}
+            {cambiati.filter((x) => x.data !== rif.data).length > 0 && ` Sono disponibili anche ${cambiati.filter((x) => x.data !== rif.data).length} mesi mancanti.`}
           </>
         ),
         scrivi: cambiati.length ? { tipo: 'scaricati', id: 'nic', riferimenti: [], nic: cambiati } : null,
@@ -104,7 +104,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     const id = rif.id as Exclude<RifValore['id'], 'nic'>
     const date = [...new Set([...dateDaChiedere(dati, id, mese, false), rif.data])].sort()
     const r = await ponte.valoriRiferimento(id, date)
-    if (!r.ok) return setScarico({ stato: 'no', testo: `${r.perche[0].toUpperCase()}${r.perche.slice(1)}. Riprova più tardi, oppure scrivi il valore qui sotto.` })
+    if (!r.ok) return setScarico({ stato: 'no', testo: `${r.perche[0].toUpperCase()}${r.perche.slice(1)}. Riprovare più tardi o inserire il valore qui sotto.` })
     const arrivati: ValoreRiferimento[] = r.valori.map((x) => ({
       riferimento: id,
       data: x.data,
@@ -125,11 +125,11 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     const altri = cambiati.filter((x) => x.data !== rif.data).length
     const frase = delMese ? (
       <>
-        investing.com dice <b>{conCambio(delMese, rif.id)}</b> (chiusura del {data(delMese.seduta ?? delMese.data)})
+        investing.com riporta <b>{conCambio(delMese, rif.id)}</b> (chiusura del {data(delMese.seduta ?? delMese.data)})
         {vr
           ? vr.valore === delMese.valore && vr.cambio === delMese.cambio
-            ? ': uguale a quello che c’è.'
-            : `: diverso di ${percentuale(inEuroDi(delMese) / inEuroDi(vr) - 1)} in euro da quello che c’è adesso.`
+            ? ': uguale a quello presente.'
+            : `: differenza in euro di ${percentuale(inEuroDi(delMese) / inEuroDi(vr) - 1)} rispetto al valore attuale.`
           : '.'}
       </>
     ) : (
@@ -140,7 +140,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
       testo: (
         <>
           {frase}
-          {altri > 0 && ` Arrivano anche ${altri === 1 ? 'un valore che mancava' : `${altri} valori che mancavano`}.`}
+          {altri > 0 && ` ${altri === 1 ? 'È disponibile anche un valore mancante' : `Sono disponibili anche ${altri} valori mancanti`}.`}
           {r.mancano.filter((d) => d !== rif.data).length > 0 && ` Mancano ancora i valori del ${r.mancano.filter((d) => d !== rif.data).map(data).join(', ')}.`}
         </>
       ),
@@ -154,9 +154,9 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     const c = serveCambio ? leggiNumero(testoCambio) : undefined
     const vr = v as ValoreRiferimento | undefined
     let problema: string | null = null
-    if (n === null) problema = `Scrivi un numero più di zero, per esempio ${nic ? '104,6' : valuta === 'USD' ? '17.160,41' : '146,10'}.`
-    else if (serveCambio && c === null) problema = 'Scrivi anche il cambio BCE: quanti dollari per 1 euro, per esempio 1,1355.'
-    else if (v && n === v.valore && (c === undefined || c === vr?.cambio)) problema = 'È uguale al valore che c’è già.'
+    if (n === null) problema = `Inserire un numero maggiore di zero, per esempio ${nic ? '104,6' : valuta === 'USD' ? '17.160,41' : '146,10'}.`
+    else if (serveCambio && c === null) problema = 'Inserire anche il cambio BCE (dollari per 1 euro), per esempio 1,1355.'
+    else if (v && n === v.valore && (c === undefined || c === vr?.cambio)) problema = 'Il valore è uguale a quello già presente.'
     if (problema || n === null) {
       setSbagliato(problema)
       campo.current?.focus()
@@ -170,9 +170,9 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
       s,
       frase: (
         <>
-          Scrivo <b>{nuovo}</b>
-          {v ? ` al posto di ${scriviValore(rif.id, v.valore)}` : ''} come {nic ? `NIC di ${meseEAnno(mese)} (base ${baseDelNic(rif.data)} = 100)` : `valore di ${qualeValore(rif)}`}. Resterà segnato
-          “a mano”.
+          Si scrive <b>{nuovo}</b>
+          {v ? ` al posto di ${scriviValore(rif.id, v.valore)}` : ''} come {nic ? `NIC di ${meseEAnno(mese)} (base ${baseDelNic(rif.data)} = 100)` : `valore di ${qualeValore(rif)}`}. Il valore resterà
+          segnato come “manuale”.
         </>
       ),
     })
@@ -188,16 +188,16 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
     setScarico(null)
     const r = risposta as EsitoCorrezione | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho scritto niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. Il file non è stato modificato.` })
     if (r.esito === 'cambiato')
       return setEsito({
         ok: false,
-        testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho scritto niente e ho ricaricato i dati. Controlla il valore e rifai.',
+        testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato scritto nulla e i dati sono stati ricaricati. Verificare il valore e ripetere l’operazione.',
       })
     setTesto('')
     setTestoCambio('')
-    const fatto = s.tipo === 'correggi' ? 'Corretto' : s.tipo === 'torna' ? 'Rimesso il valore di prima' : 'Scritto il valore scaricato di nuovo'
-    setEsito({ ok: true, testo: `${fatto}: i numeri della classifica si sono rifatti. ${FRASE_COPIA}` })
+    const fatto = s.tipo === 'correggi' ? 'Correzione salvata' : s.tipo === 'torna' ? 'Valore precedente ripristinato' : 'Valore scaricato salvato'
+    setEsito({ ok: true, testo: `${fatto}: i dati della classifica sono stati ricalcolati. ${FRASE_COPIA}` })
   }
 
   const titolo = nic ? `Il NIC di ${meseEAnno(mese)}` : `Il valore di fine ${meseEAnno(mese)}`
@@ -216,7 +216,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
               {v.quando ? ` il ${data(v.quando)}` : ''}
               {prima ? (
                 <>
-                  . Prima era <s>{scriviValore(rif.id, prima.valore)}</s>, {prima.fonte}.
+                  . Valore precedente: <s>{scriviValore(rif.id, prima.valore)}</s>, {prima.fonte === FONTE_RIFERIMENTO.aMano ? 'inserito manualmente' : prima.fonte}.
                 </>
               ) : (
                 '.'
@@ -235,21 +235,21 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
           <span className="tenue">manca</span>
           <br />
           <span className="tenue piccolo">
-            {nic ? `ISTAT pubblica il NIC di ${meseEAnno(mese)} ${quandoEsceNic(mese)}.` : `Nel file non c’è il valore di ${nomeDelConfronto(rif.id)} a fine ${meseEAnno(mese)}.`}
+            {nic ? `ISTAT pubblica il NIC di ${meseEAnno(mese)} ${quandoEsceNic(mese)}.` : `Il valore di ${nomeDelConfronto(rif.id)} a fine ${meseEAnno(mese)} non è presente.`}
           </span>
         </p>
       )}
 
       <div className="bottoni">
         <button type="button" className="btn" disabled={occupato || scarico?.stato === 'scarica'} onClick={() => void scarica()}>
-          <Icona nome="aggiorna" piccola /> {scarico?.stato === 'scarica' ? 'Scarico…' : 'Scarica di nuovo'}
+          <Icona nome="aggiorna" piccola /> {scarico?.stato === 'scarica' ? 'Scaricamento in corso…' : 'Scarica di nuovo'}
         </button>
       </div>
       {scarico && scarico.stato !== 'scarica' && (
-        <div className="conferma" role="group" aria-label={`Cosa dice ${nomeFonte}`}>
+        <div className="conferma" role="group" aria-label={`Valore di ${nomeFonte}`}>
           <p>
             {scarico.testo}
-            {scarico.stato === 'arrivato' && scarico.scrivi && ' Prima di scrivere faccio una copia del file.'}
+            {scarico.stato === 'arrivato' && scarico.scrivi && ' Prima della scrittura si salva una copia del file.'}
           </p>
           <div className="bottoni">
             {scarico.stato === 'arrivato' && scarico.scrivi ? (
@@ -258,12 +258,12 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
                   Scrivi nel file
                 </button>
                 <button type="button" className="btn" disabled={occupato} onClick={() => setScarico(null)}>
-                  Lascia com’è
+                  Lascia invariato
                 </button>
               </>
             ) : (
               <button type="button" className="btn" onClick={() => setScarico(null)}>
-                Va bene
+                Chiudi
               </button>
             )}
           </div>
@@ -272,7 +272,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
 
       {conferma ? (
         <div className="conferma" role="group" aria-label="Conferma">
-          <p>{conferma.frase} Prima di scrivere faccio una copia del file.</p>
+          <p>{conferma.frase} Prima della scrittura si salva una copia del file.</p>
           <div className="bottoni">
             <button type="button" className="btn primario" autoFocus disabled={occupato} onClick={() => void scriviNelFile(conferma.s)}>
               {conferma.s.tipo === 'torna' ? 'Sì, torna al valore di prima' : 'Sì, correggi'}
@@ -287,11 +287,11 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
           <label>
             {v
               ? nic
-                ? 'Se il NIC è sbagliato, scrivi quello giusto'
-                : 'Se il valore di fine mese è sbagliato, scrivi quello giusto'
+                ? 'Se il NIC è errato, inserire quello corretto'
+                : 'Se il valore di fine mese è errato, inserire quello corretto'
               : nic
-                ? `Scrivi il NIC di ${meseEAnno(mese)}`
-                : `Scrivi il valore di fine ${meseEAnno(mese)}`}
+                ? `Inserire il NIC di ${meseEAnno(mese)}`
+                : `Inserire il valore di fine ${meseEAnno(mese)}`}
             <span className="campo-valuta">
               <input
                 ref={campo}
@@ -341,7 +341,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
           )}
           <div className="bottoni">
             <button type="button" className="btn primario" disabled={occupato} onClick={chiedi}>
-              Correggi a mano
+              Correggi
             </button>
             {prima && v && (
               <button
@@ -355,7 +355,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
                     s: { tipo: 'torna', id: rif.id, data: rif.data },
                     frase: (
                       <>
-                        Rimetto <b>{scriviValore(rif.id, prima.valore)}</b> ({prima.fonte}) al posto di {scriviValore(rif.id, v.valore)} scritto a mano.
+                        Si ripristina <b>{scriviValore(rif.id, prima.valore)}</b> ({prima.fonte}) al posto di {scriviValore(rif.id, v.valore)}, inserito manualmente.
                       </>
                     ),
                   })
@@ -374,7 +374,7 @@ export function ValoreDelRiferimento({ rif }: { rif: RifValore }) {
           <span>{esito.testo}</span>
         </p>
       )}
-      <p className="tenue piccolo">Il valore corretto resta segnato “a mano”. Niente si scrive nel file finché non confermi.</p>
+      <p className="tenue piccolo">Il valore corretto resta segnato come “manuale”. Il file non viene modificato fino alla conferma.</p>
     </section>
   )
 }

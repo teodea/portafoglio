@@ -1,107 +1,107 @@
 # Portafoglio titoli
 
-Il programma per Windows che dice **come sta andando il portafoglio titoli di famiglia**: quanto hai guadagnato, quanto rende all'anno, e come va rispetto agli indici di borsa, ai BTP e all'inflazione.
+Il programma per Windows che mostra **l'andamento del portafoglio titoli di famiglia**: controvalore, plusvalenza, rendimento annualizzato e confronto con gli indici di borsa, i BTP e l'inflazione.
 
-## ⬇️ Scaricalo
+## ⬇️ Scaricare il programma
 
-**[Scarica l'ultima versione](https://github.com/teodea/portafoglio/releases/latest)**: nella pagina che si apre, sotto **Assets**, clicca **Portafoglio-titoli-‹versione›.exe**. Poi aprilo per installarlo (i passaggi sono qui sotto, in «Installarlo»).
+**[Scarica l'ultima versione](https://github.com/teodea/portafoglio/releases/latest)**: nella pagina che si apre, sotto **Assets**, selezionare **Portafoglio-titoli-‹versione›.exe** e aprirlo per installarlo (i passaggi sono più sotto, in «Installazione»).
 
-Questa pagina è la guida: come si installa, come si apre e come si usa.
+Questa pagina è la guida: installazione, primo avvio e uso.
 
 ## In breve
 
-- **I dati stanno in un file solo**, `portafoglio.json`, in una cartella di OneDrive (per esempio **Documenti › Finanze**). Il programma non contiene dati: li legge da lì.
-- Ogni volta che il programma scrive nel file, **prima ne fa una copia** nella sottocartella `copie`. Non si perde mai niente.
-- Se più persone usano il programma su PC diversi, tutti scelgono la stessa cartella di OneDrive. Se il file è stato cambiato da un altro PC, il programma se ne accorge e non scrive sopra.
-- Ogni numero si può cliccare: si apre il pannello **«Da dove viene»**, che spiega il conto in parole.
+- **I dati stanno in un unico file**, `portafoglio.json`, in una cartella di OneDrive (per esempio **Documenti › Finanze**). Il programma non contiene dati: li legge da lì.
+- Prima di ogni modifica al file, il programma **ne salva una copia** nella sottocartella `copie`. Nessun dato va perso.
+- Se il programma è usato su più computer, su tutti si sceglie la stessa cartella di OneDrive. Se il file è stato modificato da un altro computer, il programma se ne accorge e non lo sovrascrive.
+- Ogni numero è selezionabile: si apre un pannello con la **provenienza**, cioè il calcolo riga per riga e le fonti.
 
-## Installarlo
+## Installazione
 
 Il file da scaricare è **Portafoglio-titoli-‹versione›.exe**, dalla [pagina delle versioni](https://github.com/teodea/portafoglio/releases/latest): è l'installatore.
 
-1. Apri il file **Portafoglio-titoli-….exe** scaricato (di solito è nella cartella Download).
-2. Windows può dire **«PC protetto da Windows»**: il programma non è firmato (lo usa solo la famiglia). Clicca **«Ulteriori informazioni»** e poi **«Esegui comunque»**. Succede solo la prima volta.
-3. L'installazione è un clic: non chiede la password di amministratore e alla fine apre il programma.
+1. Aprire il file **Portafoglio-titoli-….exe** scaricato (di norma si trova nella cartella Download).
+2. Windows può mostrare **«PC protetto da Windows»**: il programma non è firmato digitalmente (è a uso della famiglia). Selezionare **«Ulteriori informazioni»** e poi **«Esegui comunque»**. Succede solo la prima volta.
+3. L'installazione si completa con un clic, non richiede la password di amministratore e al termine apre il programma.
 4. Sul desktop e nel menu Start compare l'icona **Portafoglio titoli**.
 
-**Le versioni nuove arrivano da sole.** Quando c'è una versione nuova, in cima alle pagine compare **«C'è una versione nuova: la installo?»**. Con **Sì** si scarica e si installa quando chiudi il programma; con **Non ora** te lo richiede la volta dopo. Disinstallando il programma, i dati in OneDrive non si toccano.
+**Gli aggiornamenti sono automatici.** Quando è disponibile una nuova versione, in cima alle pagine compare **«È disponibile una nuova versione: installarla?»**. Con **Installa** la versione si scarica e si installa alla chiusura del programma; con **Non ora** la richiesta si ripete all'avvio successivo. La disinstallazione non tocca i dati in OneDrive.
 
-## Aprirlo
+## Primo avvio
 
-Doppio clic sull'icona **Portafoglio titoli** sul desktop, oppure cercalo nel menu Start. Si apre una finestra sola: se è già aperto, torna in primo piano.
+Doppio clic sull'icona **Portafoglio titoli** sul desktop, oppure dal menu Start. Il programma ha una sola finestra: se è già aperto, torna in primo piano.
 
-**La prima volta** il programma chiede **«Dove sono i tuoi dati?»**:
+**Al primo avvio** il programma chiede la **cartella dei dati**:
 
-1. Clicca il tasto per scegliere la cartella.
-2. Vai nella cartella di OneDrive dove c'è `portafoglio.json` e conferma con **«Usa questa cartella»**.
-3. Il programma controlla il file e apre la pagina **Portafoglio**. Dalla volta dopo si ricorda la cartella da solo.
+1. Selezionare **«Scegli la cartella dei dati»**.
+2. Aprire la cartella di OneDrive che contiene `portafoglio.json` e confermare.
+3. Il programma controlla il file e apre la pagina **Portafoglio**. La cartella viene ricordata per gli avvii successivi.
 
-Se un giorno la cartella non si trova più (OneDrive non collegato, cartella spostata), il programma lo dice e ti fa scegliere di nuovo. La cartella si cambia anche dalla pagina **Dati**, con **«Cambia»**.
+Se la cartella non è più raggiungibile (OneDrive non collegato, cartella spostata), il programma lo segnala e chiede di sceglierla di nuovo. La cartella si cambia anche dalla pagina **Dati**, con **«Cambia»**.
 
-Per chiudere il programma basta la **X** in alto a destra: quando è chiuso non resta acceso niente.
+Il programma si chiude con la **X** in alto a destra: da chiuso non resta attivo nulla.
 
 ## Le pagine
 
-Il menu a sinistra ha quattro pagine (con la finestra stretta il menu va in alto).
+Il menu ha quattro pagine (a sinistra; con la finestra stretta, in alto).
 
-**Portafoglio**: la risposta a «come sto andando?». In grande il guadagno di tutto il portafoglio, compresi i titoli già venduti. Sotto: soldi investiti, guadagno dall'inizio, medio annuo, l'ultimo mese e l'anno in corso. Poi il grafico del valore mese per mese (clic su un mese per i suoi numeri), la classifica rispetto ai **riferimenti** (FTSE MIB, Euro Stoxx 50, S&P 500, Nasdaq-100, Dow Jones, BTP 10 anni, inflazione) e i titoli **in cima** e **in fondo alla classifica**.
+**Portafoglio**: il quadro complessivo. In grande la plusvalenza di tutto il portafoglio, titoli venduti compresi, con il rendimento sul capitale investito e il rendimento annualizzato. Sotto: controvalore, capitale investito, rendimento del mese, rendimento da inizio anno e dividendi netti. Poi l'andamento del controvalore mese per mese, il **confronto con i riferimenti** (FTSE MIB, Euro Stoxx 50, S&P 500, Nasdaq-100, Dow Jones, BTP 10 anni, inflazione) e i titoli migliori e peggiori.
 
-**Titoli**: un titolo per riga, con valore, pagato, guadagno, medio annuo e prezzo di fine mese. I numeri in alto contano **solo i titoli che hai oggi**; per questo il guadagno è un po' diverso da quello del Portafoglio, che conta anche i venduti (lo dice sotto il numero). Le schede: Oggi, Mese per mese, Dividendi, Venduti. Clic su un titolo per la sua **Scheda**: grafico, mese per mese, operazioni e costo medio.
+**Titoli**: un titolo per riga, con controvalore, costo, plus/minusvalenza, rendimento, rendimento annualizzato e prezzo di fine mese. I riquadri in alto contano **solo i titoli in portafoglio**; per questo la plusvalenza può differire da quella della pagina Portafoglio, che comprende anche i titoli venduti. Le schede: ‹data dei prezzi›, Mese per mese, Dividendi, Venduti. Selezionando un titolo si apre la sua **scheda**: grafico, mese per mese, operazioni, dividendi e provenienza dei numeri.
 
-**Movimenti**: tutti gli acquisti, le vendite e i dividendi, dal più recente. In alto il tasto **Registra** per aggiungerne uno.
+**Movimenti**: tutti gli acquisti, le vendite e i dividendi, dal più recente. In alto il tasto **Registra** per inserirne uno.
 
-**Dati**: cosa c'è nel file: la cartella, se il file è a posto, l'ultima copia, i prezzi di fine mese (con la fonte e il controllo di investing.com), inflazione, cambi e riferimenti, e l'elenco delle **copie**. In alto **Scarica in Excel**.
+**Dati**: il contenuto del file: la cartella, lo stato del file, l'ultima copia, i prezzi di fine mese (con la fonte e il controllo di investing.com), inflazione, cambi e riferimenti, e l'elenco delle **copie**. In alto **Scarica in Excel**.
 
-**Il pannello «Da dove viene».** Clic su qualunque numero (o su una riga): da destra si apre un pannello che spiega il numero in parole, con il conto riga per riga e la fonte. Si chiude con la X, con **Esc** o cliccando fuori.
+**Il pannello della provenienza.** Selezionando un numero (o una riga) si apre da destra un pannello che lo spiega, con il calcolo riga per riga e la fonte. Si chiude con la X, con **Esc** o selezionando un punto fuori dal pannello.
 
-## Le cose da fare
+## Operazioni
 
 ### Registrare un acquisto, una vendita o un dividendo
 
 Pagina **Movimenti › Registra**.
 
-- **Dal PDF della banca (il modo più comodo):** trascina nel riquadro il PDF della banca (o sceglilo dalla cartella). Il programma legge i numeri e mostra il movimento in una frase. Se il titolo è nuovo, chiede «Cos'è, in parole semplici» e cerca da solo il suo codice su investing.com.
-- **A mano:** scegli acquisto, vendita o dividendo e copia i numeri dal documento della banca. Il pagato si calcola da solo (quote × prezzo + commissioni). Una cedola di un'obbligazione si registra come dividendo, il rimborso a scadenza come vendita.
-- Prima di scrivere il programma chiede **«È tutto giusto?»**: niente va nel file finché non confermi.
+- **Dal PDF della banca (il modo più rapido):** trascinare il PDF nel riquadro, oppure selezionarlo dalla cartella. Il programma legge i dati e mostra il movimento in sintesi. Per un titolo nuovo chiede la **descrizione in parole semplici** e cerca da solo il codice su investing.com.
+- **Inserimento manuale:** scegliere acquisto, vendita o dividendo e riportare i dati dal documento della banca. Il costo d'acquisto si calcola automaticamente (quote × prezzo + commissioni). Una cedola di un'obbligazione si registra come dividendo, il rimborso a scadenza come vendita.
+- Prima della registrazione il programma chiede **«I dati sono corretti?»**: il file non viene modificato fino alla conferma con **«Sì, registra»**.
 
-### Correggere un movimento sbagliato
+### Correggere un movimento
 
-In **Movimenti** clicca il movimento: nel pannello, sotto **«Se qualcosa è sbagliato»**, cambia il numero e premi **Correggi a mano**, poi conferma. Se cambi le quote o il prezzo, il pagato si rifà da solo; se non torna, il programma lo dice. Il movimento resta segnato «a mano» e si vede cosa c'era prima; **«Torna a com'era»** lo rimette. Un movimento registrato due volte si toglie con **«Togli questo movimento»**.
+In **Movimenti** selezionare il movimento: nel pannello, sotto **«Correzione dei dati»**, modificare il valore, selezionare **Correggi** e confermare. Se cambiano le quote o il prezzo, l'importo si ricalcola; se i valori non sono coerenti, il programma lo segnala. Il movimento resta segnato come «manuale», con i valori precedenti in vista; **«Ripristina i valori precedenti»** li rimette. Un movimento registrato per errore si rimuove con **«Elimina il movimento»**.
 
 ### Correggere un prezzo di fine mese
 
-Clic sul prezzo (in Titoli o in Dati): nel pannello si scrive quello giusto. Lo stesso per inflazione, cambi e riferimenti, dalla pagina Dati.
+Selezionare il prezzo (in Titoli o in Dati) e, nel pannello, inserire quello corretto. Lo stesso vale per inflazione, cambi e riferimenti, dalla pagina Dati.
 
-### Aggiornare a fine mese
+### Aggiornamento di fine mese
 
-Dal primo giorno del mese, in cima alle pagine compare **«‹Mese› è finito: aggiorna i prezzi di fine mese»** (e il tasto **Aggiorna fine mese** in basso a sinistra).
+Dal primo giorno del mese, in cima alle pagine compare **«‹Mese› è concluso: aggiornare i prezzi di fine mese»**, con il tasto **Aggiorna fine mese** (anche nel menu).
 
-1. Premi il tasto: la lista si riempie da sola con i prezzi di chiusura dalla borsa di ogni titolo, i cambi, i riferimenti e l'inflazione.
-2. Se un prezzo non arriva: **Riprova**, oppure **Scrivo a mano**. Riferimenti e inflazione possono aspettare (l'ISTAT pubblica l'inflazione a metà del mese dopo).
-3. Premi **Salva ‹mese›**. Prima di salvare il programma fa una copia del file.
+1. Selezionare il tasto: l'elenco si compila automaticamente con i prezzi di chiusura dalla borsa di ogni titolo, i cambi, i riferimenti e l'inflazione.
+2. Se un prezzo non arriva: **Riprova**, oppure **Inserisci manualmente**. Riferimenti e inflazione non sono necessari per salvare (l'ISTAT pubblica l'inflazione a metà del mese successivo).
+3. Selezionare **Salva ‹mese›**. Prima del salvataggio il programma salva una copia del file.
 
-Un mese già salvato si può rifare con **Rifai ‹mese›**: si vede cosa cambia rispetto a prima e, per ogni prezzo diverso, si può tenere quello di prima.
+Un mese già salvato si può ripetere con **Ripeti ‹mese›**: si vedono le differenze rispetto al salvataggio precedente e, per ogni prezzo diverso, si può mantenere il precedente.
 
-### Scaricare in Excel
+### Esportare in Excel
 
-Pagina **Dati › Scarica in Excel**: il file arriva nella cartella Download, con un foglio per titoli, movimenti, prezzi, mese per mese e riferimenti. Serve per guardare o mandare i numeri: le modifiche fatte in Excel **non** tornano nel programma.
+Pagina **Dati › Scarica in Excel**: il file viene salvato nella cartella Download, con un foglio per titoli, movimenti, prezzi, controvalore mese per mese e riferimenti. Serve per consultare o inviare i numeri: le modifiche fatte in Excel **non** tornano nel programma.
 
-### I codici investing.com (una volta sola)
+### I codici investing.com (una sola volta)
 
-Il controllo di investing.com mette accanto al prezzo della borsa quello di investing.com, e fa da riserva se la borsa non risponde. Per farlo servono i codici dei titoli. Pagina **Dati**, scheda **Prezzi dei titoli**, **«Cerca i codici investing.com»**: il programma li cerca, tu guardi che il prezzo di ieri sia vicino a quello del file, spunti e confermi.
+Il controllo con investing.com affianca al prezzo della borsa quello di investing.com e fa da riserva se la borsa non risponde. Per farlo servono i codici dei titoli. Pagina **Dati**, scheda **Prezzi dei titoli**, **«Cerca i codici investing.com»**: il programma li cerca; si verifica che il prezzo del giorno precedente sia vicino a quello del file, si selezionano e si conferma.
 
-## Se qualcosa va storto
+## In caso di problemi
 
-**Ho sbagliato e voglio tornare indietro.** Pagina **Dati**, scheda **Copie**: c'è una copia del file prima di ogni scrittura, con la data e il perché (per esempio «prima dell'aggiornamento di ottobre»). **«Torna a questa copia»** rimette il file com'era; il file di adesso non si perde, diventa a sua volta una copia.
+**Tornare a una situazione precedente.** Pagina **Dati**, scheda **Copie**: c'è una copia del file prima di ogni modifica, con la data e il motivo (per esempio «prima dell'aggiornamento di ottobre»). **«Torna a questa copia»** ripristina il file; quello attuale non va perso, diventa a sua volta una copia.
 
-**Il programma dice che il file non si legge.** Succede se qualcuno l'ha aperto e cambiato con un altro programma. Il programma dice dov'è l'errore, non tocca niente e propone **«Torna all'ultima copia»**. Il file rotto non si cancella: va nella cartella `copie`.
+**«Il file dei dati non è leggibile».** Succede se il file è stato aperto e modificato con un altro programma. Il programma indica dov'è l'errore, non modifica nulla e propone **«Ripristina l'ultima copia»**. Il file danneggiato non viene cancellato: va nella cartella `copie`.
 
-**«Il file è stato cambiato da un altro PC».** Qualcuno ha scritto nel file da un altro computer mentre lo guardavi. Il programma non ha scritto niente e ha ricaricato i dati: controlla e rifai.
+**«Il file è stato modificato da un altro computer».** Il file è stato scritto da un altro computer durante l'uso. Il programma non ha scritto nulla e ha ricaricato i dati: verificare e ripetere l'operazione.
 
-**Un prezzo non arriva a fine mese.** Riprova più tardi, oppure scrivilo a mano copiandolo dal sito della borsa: resta segnato «a mano».
+**Un prezzo di fine mese non arriva.** Riprovare più tardi, oppure inserirlo manualmente copiandolo dal sito della borsa: resta segnato come «manuale».
 
-**Windows dice «PC protetto da Windows».** È normale al primo avvio: **Ulteriori informazioni › Esegui comunque**.
+**Windows mostra «PC protetto da Windows».** È normale al primo avvio: **Ulteriori informazioni › Esegui comunque**.
 
 ---
 
-Per chi cura il programma: come è fatto, come si prova e come si pubblica una versione nuova è in [SVILUPPO.md](SVILUPPO.md).
+Per chi cura il programma: struttura, prove e pubblicazione di una nuova versione sono descritte in [SVILUPPO.md](SVILUPPO.md).

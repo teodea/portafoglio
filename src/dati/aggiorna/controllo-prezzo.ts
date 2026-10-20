@@ -1,5 +1,5 @@
 // Il controllo di investing.com (ticket 27 della mappa): accanto al prezzo della borsa, il prezzo che dà
-// investing.com per lo stesso fine mese. "uguale", "diverso di +0,6%", oppure perché non si è potuto fare.
+// investing.com per lo stesso fine mese. "uguale", "differenza di +0,6%", oppure perché non si è potuto fare.
 // Si vede nella lista di Aggiorna, nel pannello del prezzo e (ticket 13) nella pagina Dati.
 // Modulo puro.
 import type { ControlloPrezzo } from '../tipi.ts'
@@ -48,7 +48,7 @@ export function senzaCodice(c: Confronto | null): boolean {
   return c?.tipo === 'non-fatto' && /manca il codice investing\.com/.test(c.perche)
 }
 
-/** Quanti controlli sono uguali, quali sono diversi e quanti non si sono fatti: per il riquadro "<Mese> è salvato". */
+/** Quanti controlli sono uguali, quali sono diversi e quanti non si sono fatti: per il riquadro "Aggiornamento di <mese> salvato". */
 export function contaControlli(confronti: { titolo: string; confronto: Confronto | null }[]): {
   uguali: number
   diversi: { titolo: string; differenza: number }[]
@@ -100,13 +100,13 @@ export function controlloValido(c: unknown): c is ControlloPrezzo {
 const numero = (n: number, min: number, max: number, segno = false) =>
   new Intl.NumberFormat('it-IT', { minimumFractionDigits: min, maximumFractionDigits: max, signDisplay: segno ? 'exceptZero' : 'auto' }).format(n)
 
-/** Il controllo in una frase, per il pannello "Da dove viene" del prezzo. Null se il controllo non c'è. */
+/** Il controllo in una frase, per il pannello "Provenienza" del prezzo. Null se il controllo non c'è. */
 export function controlloInParole(prezzo: number, valuta: string, controllo: ControlloPrezzo | undefined): string | null {
   const c = confronta(prezzo, controllo)
   if (!c) return null
-  if (c.tipo === 'non-fatto') return `Controllo di investing.com non fatto: ${c.perche}.`
+  if (c.tipo === 'non-fatto') return `Controllo con investing.com non eseguito: ${c.perche}.`
   const altro = c.nota ? ` (${c.nota})` : ''
-  if (c.tipo === 'uguale') return `Controllo di investing.com: stesso prezzo${altro}.`
+  if (c.tipo === 'uguale') return `Controllo con investing.com: stesso prezzo${altro}.`
   const d = numero(c.differenza, Math.abs(c.differenza) < 0.1 ? 2 : 1, Math.abs(c.differenza) < 0.1 ? 2 : 1, true)
-  return `Controllo di investing.com: dice ${numero(c.controllo, 2, 4)} ${valuta === 'EUR' ? '€' : valuta}${altro}, diverso di ${d}%. Di solito vale la borsa.`
+  return `Controllo con investing.com: ${numero(c.controllo, 2, 4)} ${valuta === 'EUR' ? '€' : valuta}${altro}, differenza di ${d}%. Di norma vale il prezzo della borsa.`
 }

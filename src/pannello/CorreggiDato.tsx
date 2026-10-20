@@ -1,6 +1,6 @@
 // La correzione a mano di un NIC, di un cambio o di un riferimento di fine mese, nel pannello "Da dove viene"
 // (ticket 13, mappa 27): "Scarica di nuovo" dalla sua fonte, la casella per scriverlo (anche quando manca),
-// "Correggi a mano" con conferma, poi la scrittura sicura con la copia prima. Dopo restano il chip "a mano"
+// "Correggi" con conferma, poi la scrittura sicura con la copia prima. Dopo restano il chip "manuale"
 // e il valore di prima barrato, con "Torna al valore di prima". Stesso schema di CorreggiPrezzo.tsx (ticket 8).
 // Il dato si legge dal file di adesso, non dalla spiegazione: dopo la correzione si vede subito com'è.
 import { useMemo, useRef, useState } from 'react'
@@ -88,7 +88,7 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
 
   const chiedi = async () => {
     const n = leggiNumero(testo)
-    const problema = n === null ? `Scrivi un numero più di zero, per esempio ${dato.tipo === 'nic' ? '104,6' : dato.tipo === 'cambio' ? '0,8546' : '14123,45'}.` : x && n === valoreDelDato(x) ? 'È uguale a quello che c’è già.' : null
+    const problema = n === null ? `Inserire un numero maggiore di zero, per esempio ${dato.tipo === 'nic' ? '104,6' : dato.tipo === 'cambio' ? '0,8546' : '14123,45'}.` : x && n === valoreDelDato(x) ? 'Il valore è uguale a quello già presente.' : null
     if (problema || n === null) {
       setSbagliato(problema)
       campo.current?.focus()
@@ -100,7 +100,7 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
       setScarica(true)
       try {
         const e = await ponte.cambioFineMese('USD', meseDi(dato.data))
-        if (!e.ok) return setEsito({ ok: false, testo: `Per scrivere il valore in euro serve il cambio BCE del dollaro, ma la BCE non ha risposto: ${e.perche}. Riprova più tardi.` })
+        if (!e.ok) return setEsito({ ok: false, testo: `Per il valore in euro occorre il cambio BCE del dollaro, ma la BCE non ha risposto: ${e.perche}. Riprovare più tardi.` })
         setConferma({ azione: 'correggi', dato, valore: n, cambio: e.cambio })
       } finally {
         setScarica(false)
@@ -115,12 +115,12 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
     setScarica(true)
     try {
       const r = await scaricaDiNuovo(dato)
-      if (!r.ok) return setEsito({ ok: false, testo: `Non è arrivato niente: ${r.perche}.` })
+      if (!r.ok) return setEsito({ ok: false, testo: `Nessun dato ricevuto: ${r.perche}.` })
       if (x && x.fonte === fonte && valoreDelDato(x) === r.c.valore)
-        return setEsito({ ok: true, testo: `${fonte} dà lo stesso valore, ${scrivi(dato, r.c.valore)}: non c’è niente da cambiare.` })
+        return setEsito({ ok: true, testo: `${fonte} riporta lo stesso valore, ${scrivi(dato, r.c.valore)}: nessuna modifica necessaria.` })
       setConferma(r.c)
     } catch (e) {
-      setEsito({ ok: false, testo: `Non è arrivato niente: ${percheInParole(e)}.` })
+      setEsito({ ok: false, testo: `Nessun dato ricevuto: ${percheInParole(e)}.` })
     } finally {
       setScarica(false)
     }
@@ -135,27 +135,27 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
     setConferma(null)
     const r = risposta as EsitoCorrezioneDato | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho scritto niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. Il file non è stato modificato.` })
     if (r.esito === 'cambiato')
       return setEsito({
         ok: false,
-        testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho scritto niente e ho ricaricato i dati. Controlla il dato e rifai la correzione.',
+        testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato scritto nulla e i dati sono stati ricaricati. Verificare il dato e ripetere la correzione.',
       })
     setTesto('')
-    const fatto = c.azione === 'correggi' ? (x ? 'Corretto' : 'Scritto') : c.azione === 'torna' ? 'Rimesso il valore di prima' : `Scritto il valore di ${fonte}`
+    const fatto = c.azione === 'correggi' ? (x ? 'Correzione salvata' : 'Valore inserito') : c.azione === 'torna' ? 'Valore precedente ripristinato' : `Valore di ${fonte} salvato`
     setEsito({ ok: true, testo: `${fatto}. ${FRASE_COPIA}` })
   }
 
   const ora = x ? scrivi(dato, valoreDelDato(x)) : null
   return (
-    <section className="correzione" aria-label="Correzione a mano">
+    <section className="correzione" aria-label="Correzione manuale">
       {aMano && (
         <p className="stato-mano">
           <ChipAMano lungo={!!prima} />
           {x?.quando ? ` il ${data(x.quando)}` : ''}
           {prima ? (
             <>
-              . Prima era <s>{scrivi(dato, prima.numero)}</s>, {prima.fonte === 'a mano' ? 'scritto a mano' : `da ${prima.fonte}`}.
+              . Valore precedente: <s>{scrivi(dato, prima.numero)}</s>, {prima.fonte === 'a mano' ? 'inserito manualmente' : `da ${prima.fonte}`}.
             </>
           ) : (
             '.'
@@ -168,22 +168,22 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
           <p>
             {conferma.azione === 'correggi' && (
               <>
-                Scrivo <b>{scrivi(dato, conferma.valore)}</b> {ora ? `al posto di ${ora}` : 'dove adesso manca'} per {quale}. Resterà segnato “a mano”.
-                {conferma.cambio && ` In euro vale con il cambio BCE del dollaro di fine mese, ${datoInCifre({ tipo: 'cambio', valuta: 'USD', data: dato.data }, conferma.cambio)}.`}
+                Si scrive <b>{scrivi(dato, conferma.valore)}</b> {ora ? `al posto di ${ora}` : 'dove ora manca'} per {quale}. Il dato resterà segnato come “manuale”.
+                {conferma.cambio && ` Il valore in euro si calcola con il cambio BCE del dollaro di fine mese, ${datoInCifre({ tipo: 'cambio', valuta: 'USD', data: dato.data }, conferma.cambio)}.`}
               </>
             )}
             {conferma.azione === 'torna' && prima && (
               <>
-                Rimetto <b>{scrivi(dato, prima.numero)}</b> ({prima.fonte}) al posto di {ora} scritto a mano.
+                Si ripristina <b>{scrivi(dato, prima.numero)}</b> ({prima.fonte === 'a mano' ? 'inserito manualmente' : prima.fonte}) al posto di {ora}, inserito manualmente.
               </>
             )}
             {conferma.azione === 'scaricato' && (
               <>
-                {fonte} dice <b>{scrivi(dato, conferma.valore)}</b>
-                {conferma.seduta ? ` (${dato.tipo === 'cambio' ? 'cambio di riferimento' : 'chiusura'} del ${data(conferma.seduta)})` : ''}. Lo scrivo {ora ? `al posto di ${ora}${aMano ? ' scritto a mano' : ''}` : 'dove adesso manca'}.
+                {fonte} riporta <b>{scrivi(dato, conferma.valore)}</b>
+                {conferma.seduta ? ` (${dato.tipo === 'cambio' ? 'cambio di riferimento' : 'chiusura'} del ${data(conferma.seduta)})` : ''}. Sarà scritto {ora ? `al posto di ${ora}${aMano ? ', inserito manualmente' : ''}` : 'dove ora manca'}.
               </>
             )}{' '}
-            Prima di scrivere faccio una copia del file.
+            Prima della scrittura si salva una copia del file.
           </p>
           <div className="bottoni">
             <button type="button" className="btn primario" autoFocus disabled={occupatoOra} onClick={() => void scriviNelFile(conferma)}>
@@ -199,11 +199,11 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
           <div className="bottoni">
             <button type="button" className="btn" disabled={occupatoOra} onClick={() => void scaricaOra()}>
               <Icona nome="aggiorna" piccola />
-              {scarica ? 'Scarico…' : 'Scarica di nuovo'}
+              {scarica ? 'Scaricamento in corso…' : 'Scarica di nuovo'}
             </button>
           </div>
           <label>
-            {x ? 'Se è sbagliato, scrivi quello giusto' : `Scrivi ${nomeColonna(dato) === 'Inflazione NIC' ? 'il NIC' : 'il valore'} a mano`}
+            {x ? 'Se il valore è errato, inserire quello corretto' : `Inserire manualmente ${nomeColonna(dato) === 'Inflazione NIC' ? 'il NIC' : 'il valore'}`}
             <span className="campo-valuta">
               <input
                 ref={campo}
@@ -232,7 +232,7 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
           )}
           <div className="bottoni">
             <button type="button" className="btn primario" disabled={occupatoOra} onClick={() => void chiedi()}>
-              {x ? 'Correggi a mano' : 'Scrivi a mano'}
+              {x ? 'Correggi' : 'Inserisci'}
             </button>
             {prima && aMano && (
               <button
@@ -258,13 +258,13 @@ export function CorreggiDato({ dato }: { dato: RifDato }) {
         </p>
       )}
       <p className="tenue piccolo">
-        Resta segnato “a mano” in tutte le tabelle
-        {dato.tipo === 'cambio' ? ' (se rifai quel mese, arriva di nuovo il cambio della BCE)' : ' e l’aggiornamento di fine mese non lo cambia'}. Niente si scrive nel file
-        finché non confermi.
+        Il dato resta segnato come “manuale” in tutte le tabelle
+        {dato.tipo === 'cambio' ? ' (rifacendo quel mese, torna il cambio della BCE)' : ' e l’aggiornamento di fine mese non lo modifica'}. Il file non viene
+        modificato fino alla conferma.
         {dato.tipo === 'nic' && (
           <>
             {' '}
-            Il NIC di ISTAT si legge su{' '}
+            Il NIC di ISTAT è consultabile su{' '}
             <a href="https://esploradati.istat.it/" target="_blank" rel="noreferrer">
               esploradati.istat.it
             </a>{' '}

@@ -1,5 +1,5 @@
 // L'aggiornamento dell'applicazione: all'apertura si controlla su GitHub se c'è una versione nuova
-// e si chiede "C'è una versione nuova: la installo?". Con il sì si scarica e si installa alla chiusura;
+// e si chiede "È disponibile una nuova versione: installarla?". Con il sì si scarica e si installa alla chiusura;
 // con "Non ora" non si fa niente e si richiede la volta dopo. Mai controlli ad applicazione chiusa.
 // Modulo puro: il processo principale tiene lo stato con prossimoStato(), le pagine lo mostrano con inParole().
 
@@ -60,28 +60,28 @@ export function inParole(s: StatoAggiornamento): InParole | null {
       return null
     case 'disponibile':
       return {
-        testo: `C'è una versione nuova (${s.versione}): la installo?`,
+        testo: `È disponibile una nuova versione (${s.versione}): installarla?`,
         bottoni: [
           { testo: 'Non ora', installa: false },
-          { testo: 'Sì, installala', installa: true, primario: true },
+          { testo: 'Installa', installa: true, primario: true },
         ],
         chiudibile: false,
       }
     case 'scarico':
       return {
-        testo: `Scarico la versione ${s.versione}… ${s.percento}%. Si installa quando chiudi l'applicazione.`,
+        testo: `Scaricamento della versione ${s.versione}… ${s.percento}%. L'installazione avverrà alla chiusura del programma.`,
         bottoni: [],
         chiudibile: true,
       }
     case 'pronta':
       return {
-        testo: `La versione ${s.versione} è pronta: si installa quando chiudi l'applicazione.`,
+        testo: `La versione ${s.versione} è pronta: l'installazione avverrà alla chiusura del programma.`,
         bottoni: [],
         chiudibile: true,
       }
     case 'non-scaricata':
       return {
-        testo: `Non sono riuscito a scaricare la versione ${s.versione}. Riprovo adesso, oppure te lo richiedo la prossima volta.`,
+        testo: `Non è stato possibile scaricare la versione ${s.versione}. Riprovare adesso, oppure la richiesta verrà ripetuta al prossimo avvio.`,
         bottoni: [
           { testo: 'Non ora', installa: false },
           { testo: 'Riprova', installa: true, primario: true },
@@ -111,7 +111,7 @@ export function fonteDiProva(indirizzo: string | undefined): string | null {
 export type PonteAggiornamento = {
   /** Lo stato di adesso. */
   leggi(): Promise<StatoAggiornamento>
-  /** La risposta a "la installo?": true installa (scarica ora, installa alla chiusura), false "Non ora". */
+  /** La risposta a "installarla?": true installa (scarica ora, installa alla chiusura), false "Non ora". */
   rispondi(installa: boolean): Promise<StatoAggiornamento>
   /** Chiamata a ogni cambio di stato; restituisce la funzione per smettere di ascoltare. */
   quandoCambia(fai: (s: StatoAggiornamento) => void): () => void

@@ -1,5 +1,5 @@
-// "I titoli che vanno meglio e peggio" (mappa, ticket 28): 3 migliori e 3 peggiori in due colonne,
-// "Dall'acquisto" o sull'ultimo mese. Il clic su una riga apre la Scheda del titolo; il clic sulla
+// "Titoli migliori e peggiori" (mappa, ticket 28): 3 migliori e 3 peggiori in due colonne,
+// per rendimento sul costo o sull'ultimo mese. Il clic su una riga apre la Scheda del titolo; il clic sulla
 // percentuale apre "Da dove viene". In fondo il link a tutti i titoli.
 import type { KeyboardEvent, MouseEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -27,7 +27,7 @@ function Colonna({ titolo, righe }: { titolo: string; righe: Colonne['meglio'] }
     <div>
       <h3>{titolo}</h3>
       {righe.length === 0 ? (
-        <p className="tenue piccolo">Servono almeno due titoli per confrontarli.</p>
+        <p className="tenue piccolo">Il confronto richiede almeno due titoli.</p>
       ) : (
         <ul className="classifica">
           {righe.map(({ conto, numero }) => (
@@ -58,14 +58,14 @@ export function MeglioPeggio({ titoli, misura, scegli }: { titoli: ContiTitoli; 
   const { meglio, peggio, senzaNumero } = meglioPeggio(titoli.titoli, misura)
   const fine = titoli.fine!
   const misure: [MisuraTitoli, string][] = [
-    ['acquisto', 'Dall’acquisto'],
+    ['acquisto', 'Rendimento'],
     ['mese', nomeUltimoMese(fine)],
   ]
   return (
     <div className="riquadro blocco meglio-peggio">
       <div className="testa">
-        <h2>I titoli che vanno meglio e peggio</h2>
-        <div className="segmenti" role="group" aria-label="Come misurarli">
+        <h2>Titoli migliori e peggiori</h2>
+        <div className="segmenti" role="group" aria-label="Misura">
           {misure.map(([k, nome]) => (
             <button key={k} type="button" aria-pressed={misura === k} onClick={() => scegli(k)}>
               {nome}
@@ -81,8 +81,8 @@ export function MeglioPeggio({ titoli, misura, scegli }: { titoli: ContiTitoli; 
       <div className="piede">
         <span className="tenue">
           {misura === 'mese' && senzaNumero.length > 0
-            ? `${senzaNumero.map((t) => t.nomeCorto).join(', ')} ${senzaNumero.length === 1 ? 'è entrato' : 'sono entrati'} a ${nomeMese(fine)}: ${senzaNumero.length === 1 ? 'il suo mese si conta' : 'il loro mese si conta'} dal prossimo.`
-            : 'Clic su un titolo per aprirne la scheda; clic sulla percentuale per sapere da dove viene.'}
+            ? `${senzaNumero.map((t) => t.nomeCorto).join(', ')}: ${senzaNumero.length === 1 ? 'acquistato' : 'acquistati'} a ${nomeMese(fine)}, il rendimento mensile si calcola dal mese successivo.`
+            : 'Selezionare un titolo per aprirne la scheda; selezionare un valore per il dettaglio del calcolo.'}
         </span>
         <Link to="/titoli" className="link">
           Tutti i {titoli.aperti.quanti} titoli →

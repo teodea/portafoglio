@@ -40,11 +40,11 @@ export function leggiInvesting(testo: string): Chiusura[] {
   try {
     valore = JSON.parse(testo)
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
   const righe = (valore as { data?: unknown } | null)?.data
   if (righe === null) return []
-  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati che non si leggono')
+  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati non leggibili')
   const chiusure: Chiusura[] = []
   for (const r of righe as { rowDateTimestamp?: unknown; last_closeRaw?: unknown }[]) {
     const data = typeof r.rowDateTimestamp === 'string' ? r.rowDateTimestamp.slice(0, 10) : ''
@@ -74,7 +74,7 @@ export async function chiusureInvesting(
     }
   }
   if (t.valuta !== 'EUR' && !yahoo)
-    throw new NonVa('non si può usare: senza Yahoo non so se il prezzo è in sterline o in pence')
+    throw new NonVa('non si può usare: senza Yahoo non si sa se il prezzo è in sterline o in pence')
   const parametri = new URLSearchParams({
     'start-date': inizioMese(mese),
     'end-date': fineMese(mese),

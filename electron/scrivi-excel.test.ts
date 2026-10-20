@@ -44,10 +44,10 @@ describe('il file Excel', () => {
     expect(wb.worksheets.map((w) => w.name)).toEqual([...NOMI_FOGLI])
 
     const leggimi = wb.getWorksheet('Leggimi')!
-    expect(leggimi.getCell('A1').value).toBe('Portafoglio titoli: i tuoi dati')
+    expect(leggimi.getCell('A1').value).toBe('Portafoglio titoli: esportazione dei dati')
     expect(leggimi.getCell('A1').font?.bold).toBe(true)
     expect(leggimi.getCell('A1').font?.size).toBe(14)
-    const valore = leggimi.getColumn(1).values.indexOf('Valore')
+    const valore = leggimi.getColumn(1).values.indexOf('Controvalore')
     expect(leggimi.getCell(valore, 2).value).toBe(contiDelPortafoglio(dati).valore.n)
     expect(leggimi.getCell(valore, 2).numFmt).toBe(FORMATI.euro)
     expect(leggimi.getColumn(2).width).toBe(100)
@@ -58,7 +58,7 @@ describe('il file Excel', () => {
     expect(titoli.getCell('A1').fill).toMatchObject({ type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEF2F7' } })
     expect(titoli.views[0]).toMatchObject({ state: 'frozen', xSplit: 1, ySplit: 1 })
     expect(titoli.autoFilter).toBeTruthy()
-    const valoreCol = (titoli.getRow(1).values as unknown[]).indexOf('Valore')
+    const valoreCol = (titoli.getRow(1).values as unknown[]).indexOf('Controvalore')
     expect(typeof titoli.getCell(2, valoreCol).value).toBe('number')
     expect(titoli.getCell(2, valoreCol).numFmt).toBe(FORMATI.euro)
 
@@ -71,7 +71,7 @@ describe('il file Excel', () => {
     const mesi = wb.getWorksheet('Valore mese per mese')!
     expect(mesi.getCell('C1').value).toBeInstanceOf(Date)
     expect(mesi.getCell('C1').numFmt).toBe(FORMATI.mese)
-    expect(mesi.getCell(mesi.rowCount, 1).value).toBe('Soldi investiti')
+    expect(mesi.getCell(mesi.rowCount, 1).value).toBe('Capitale investito')
     expect(mesi.getCell(mesi.rowCount, 1).font?.bold).toBe(true)
 
     // Nessuna cella è una formula.

@@ -1,5 +1,5 @@
-// Il grafico "Come è cresciuto il valore" (DESIGN.md, "Grafico a linea"): il valore a ogni fine mese
-// in blu, i soldi investiti tratteggiati in grigio. Al passaggio del mouse (o con le frecce) il mirino
+// Il grafico "Andamento del controvalore" (DESIGN.md, "Grafico a linea"): il controvalore a ogni fine mese
+// in blu, il capitale investito tratteggiato in grigio. Al passaggio del mouse (o con le frecce) il mirino
 // e il fumetto; il clic (o Invio) apre "Da dove viene" del valore di quel mese.
 // SVG disegnato a mano alla larghezza vera, così testo e linee non si deformano.
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react'
@@ -34,7 +34,7 @@ export function GraficoValore({ punti }: { punti: PuntoDelValore[] }) {
     return () => ro.disconnect()
   }, [ciSono])
 
-  if (punti.length === 0) return <div className="vuoto">Il grafico arriva con il primo prezzo di fine mese.</div>
+  if (punti.length === 0) return <div className="vuoto">Il grafico compare con il primo prezzo di fine mese.</div>
 
   const valori = punti.flatMap((p) => [p.valore.n ?? 0, p.investiti])
   const linee = griglia(Math.min(...valori) * 0.95, Math.max(...valori) * 1.03)
@@ -79,7 +79,7 @@ export function GraficoValore({ punti }: { punti: PuntoDelValore[] }) {
   const diff = p ? valoreDi(p) - p.investiti : 0
   const primo = punti[0]
   const ultimo = punti[punti.length - 1]
-  const descrizione = `Valore a ogni fine mese, da ${mese(primo.mese)} (${euro(valoreDi(primo))}) a ${mese(ultimo.mese)} (${euro(valoreDi(ultimo))}), con i soldi investiti. Frecce per scorrere i mesi, Invio per il conto.`
+  const descrizione = `Controvalore a ogni fine mese, da ${mese(primo.mese)} (${euro(valoreDi(primo))}) a ${mese(ultimo.mese)} (${euro(valoreDi(ultimo))}), con il capitale investito. Frecce per scorrere i mesi, Invio per il dettaglio del calcolo.`
 
   return (
     <div className="grafico">
@@ -131,25 +131,25 @@ export function GraficoValore({ punti }: { punti: PuntoDelValore[] }) {
         {p && scelto !== null && (
           <div className="fumetto" style={{ left: Math.max(4, Math.min(x(scelto) + 14, w - 196)) }}>
             <b>{mese(p.mese)}</b>
-            <span>Valore {euro(valoreDi(p))}</span>
-            <span>Soldi investiti {euro(p.investiti)}</span>
+            <span>Controvalore {euro(valoreDi(p))}</span>
+            <span>Capitale investito {euro(p.investiti)}</span>
             <span className={classeSegno(segno(diff))}>{guadagnoEuro(diff)}</span>
           </div>
         )}
       </div>
       <p className="solo-lettore" aria-live="polite">
-        {p ? `${mese(p.mese)}: valore ${euro(valoreDi(p))}, soldi investiti ${euro(p.investiti)}, ${guadagnoEuro(diff)}.` : ''}
+        {p ? `${mese(p.mese)}: controvalore ${euro(valoreDi(p))}, capitale investito ${euro(p.investiti)}, ${diff < 0 ? 'minusvalenza' : 'plusvalenza'} ${guadagnoEuro(diff)}.` : ''}
       </p>
       <div className="legenda" aria-hidden="true">
         <span>
           <i />
-          Valore a fine mese
+          Controvalore a fine mese
         </span>
         <span>
           <i className="investiti" />
-          Soldi investiti
+          Capitale investito
         </span>
-        <span className="tenue">Clic su un mese per il conto</span>
+        <span className="tenue">Selezionare un mese per il dettaglio del calcolo</span>
       </div>
     </div>
   )

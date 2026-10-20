@@ -1,9 +1,9 @@
 // La pagina Portafoglio, la prima che si apre (mappa, ticket 28, versione B "prima la risposta"):
 // 1. testata con "Prezzi al …";
-// 2. il riquadro della risposta "Quanto stai guadagnando" e accanto la classifica "Fai meglio dei riferimenti?"
+// 2. il riquadro della risposta "Plusvalenza" e accanto la classifica "Confronto con i riferimenti"
 //    (ticket 10), uno sotto l'altro nella finestra stretta;
-// 3. il grafico "Come è cresciuto il valore", dall'inizio o negli ultimi 12 mesi;
-// 4. i 3 titoli che vanno meglio e i 3 che vanno peggio.
+// 3. il grafico "Andamento del controvalore", dall'inizio o negli ultimi 12 mesi;
+// 4. i 3 titoli migliori e i 3 peggiori.
 import { useMemo, useState } from 'react'
 import { contiDelPortafoglio, type MisuraTitoli } from '../conti/portafoglio.ts'
 import { confrontoConIRiferimenti } from '../conti/riferimenti.ts'
@@ -44,8 +44,8 @@ export function Portafoglio() {
         {testata}
         <div className="riquadro vuoto">
           {titoli.titoli.length === 0
-            ? 'Nel file dei dati non ci sono ancora titoli: arrivano quando registri il primo acquisto.'
-            : 'Nel file dei dati non ci sono ancora prezzi di fine mese: quanto stai guadagnando si vede dopo il primo aggiornamento.'}
+            ? 'Nel file dei dati non sono ancora presenti titoli: compaiono con la registrazione del primo acquisto.'
+            : 'Nel file dei dati non sono ancora presenti prezzi di fine mese: i risultati compaiono dopo il primo aggiornamento di fine mese.'}
         </div>
       </section>
     )
@@ -63,8 +63,8 @@ export function Portafoglio() {
 
       <div className="riquadro blocco">
         <div className="testa">
-          <h2>Come è cresciuto il valore</h2>
-          <div className="segmenti" role="group" aria-label="Quali mesi vedere">
+          <h2>Andamento del controvalore</h2>
+          <div className="segmenti" role="group" aria-label="Periodo">
             {PERIODI.map(([k, nome]) => (
               <button key={k} type="button" aria-pressed={periodo === k} onClick={() => setPeriodo(k)}>
                 {nome}

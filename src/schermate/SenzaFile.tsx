@@ -20,10 +20,10 @@ export function SenzaFile({ apertura }: { apertura: SenzaFileStato }) {
     return (
       <div className="schermata">
         <div className="riquadro">
-          <h1>Dove sono i tuoi dati?</h1>
+          <h1>Cartella dei dati</h1>
           <p>
-            Portafoglio titoli tiene tutto nel file <b>portafoglio.json</b>, dentro una cartella del tuo PC che scegli tu
-            (per esempio una cartella dentro <b>OneDrive › Documenti</b>). L’applicazione la ricorda: la scegli una volta sola.
+            Portafoglio titoli conserva tutti i dati nel file <b>portafoglio.json</b>, in una cartella del computer a scelta
+            (per esempio in <b>OneDrive › Documenti</b>). La cartella si sceglie una volta sola: l’applicazione la ricorda.
           </p>
           <div className="bottoni">{scegli}</div>
         </div>
@@ -34,10 +34,10 @@ export function SenzaFile({ apertura }: { apertura: SenzaFileStato }) {
     return (
       <div className="schermata">
         <div className="riquadro">
-          <h1>Non trovo la cartella dei dati</h1>
+          <h1>Cartella dei dati non trovata</h1>
           <p>
-            La cartella <b>{apertura.cartella.percorso}</b> non c’è più, o non si raggiunge. Se è su OneDrive, forse il PC
-            non l’ha ancora scaricata: aspetta un momento e riprova.
+            La cartella <b>{apertura.cartella.percorso}</b> non esiste più o non è raggiungibile. Se si trova su OneDrive,
+            potrebbe non essere ancora stata scaricata sul computer: attendere qualche istante e riprovare.
           </p>
           <div className="bottoni">
             <button type="button" className="btn" disabled={occupato} onClick={() => void esegui(() => ponte.apri())}>
@@ -52,22 +52,22 @@ export function SenzaFile({ apertura }: { apertura: SenzaFileStato }) {
   return (
     <div className="schermata">
       <div className="riquadro">
-        <h1>In questa cartella non ci sono i dati</h1>
+        <h1>La cartella non contiene i dati</h1>
         <p>
-          Nella cartella <b>{apertura.cartella.nome}</b> non c’è il file <b>portafoglio.json</b>. Se i tuoi dati sono in
-          un’altra cartella, sceglila. Se invece vuoi cominciare da zero, posso creare qui un portafoglio vuoto.
+          Nella cartella <b>{apertura.cartella.nome}</b> non è presente il file <b>portafoglio.json</b>. Se i dati si
+          trovano in un’altra cartella, sceglierla; per cominciare da zero, è possibile creare qui un portafoglio vuoto.
         </p>
         {conferma ? (
           <div className="spiega">
             <p>
-              Creo un portafoglio vuoto in <b>{apertura.cartella.percorso}</b>?
+              Creare un portafoglio vuoto in <b>{apertura.cartella.percorso}</b>?
             </p>
             <div className="bottoni" style={{ marginTop: 12 }}>
               <button type="button" className="btn primario" disabled={occupato} onClick={() => void esegui(() => ponte.creaFileVuoto())}>
-                Sì, crea il portafoglio vuoto
+                Crea il portafoglio vuoto
               </button>
               <button type="button" className="btn" onClick={() => setConferma(false)}>
-                No
+                Annulla
               </button>
             </div>
           </div>
@@ -75,7 +75,7 @@ export function SenzaFile({ apertura }: { apertura: SenzaFileStato }) {
           <div className="bottoni">
             {scegli}
             <button type="button" className="btn" onClick={() => setConferma(true)}>
-              Comincia da zero qui
+              Crea un portafoglio vuoto
             </button>
             <button type="button" className="btn" onClick={() => void ponte.apriInEsplora('dati')}>
               Apri la cartella

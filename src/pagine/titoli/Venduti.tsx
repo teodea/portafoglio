@@ -9,25 +9,25 @@ export function Venduti({ conti }: { conti: ContiTitoli }) {
   const righe = conti.titoli.filter((t) => t.stato === 'chiuso')
   const con2 = (n: number) => euro(n, 2)
 
-  if (righe.length === 0) return <div className="vuoto">Non hai venduto nessun titolo: li hai ancora tutti.</div>
+  if (righe.length === 0) return <div className="vuoto">Nessun titolo venduto.</div>
 
   return (
     <>
       <div className="attrezzi">
-        <span>Titoli che non hai più: venduti del tutto o rimborsati a scadenza. Il loro guadagno resta nel guadagno del portafoglio.</span>
+        <span>Titoli venduti del tutto o rimborsati a scadenza. Il loro risultato resta compreso in quello del portafoglio.</span>
       </div>
       <div className="scorre">
         <table>
           <thead>
             <tr>
               <th>Titolo</th>
-              <th>Comprato</th>
-              <th>Venduto</th>
-              <th className="n">Pagato</th>
-              <th className="n">Incassato</th>
+              <th>Acquisto</th>
+              <th>Vendita</th>
+              <th className="n">Costo</th>
+              <th className="n">Ricavo</th>
               <th className="n">Dividendi</th>
-              <th className="n">Guadagno</th>
-              <th className="n">Dall’acquisto</th>
+              <th className="n">Plus/minus</th>
+              <th className="n">Rendimento</th>
             </tr>
           </thead>
           <tbody>

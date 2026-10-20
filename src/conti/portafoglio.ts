@@ -10,7 +10,7 @@
 import type { FileDati } from '../dati/tipi.ts'
 import { data, euro as euroTesto, mese, nomeMese, numero, percentuale as pct } from '../formato.ts'
 import { euro, guadagno, percentuale, riga, testo, type Numero, type RigaConto } from './spiegazione.ts'
-import { ANNI_MINIMI_MEDIO, contiDeiTitoli, senzaSoldiNuovi, type ContiTitoli, type ContoTitolo } from './titoli.ts'
+import { ANNI_MINIMI_MEDIO, contiDeiTitoli, plusMinus, senzaSoldiNuovi, type ContiTitoli, type ContoTitolo } from './titoli.ts'
 import { anniTra, xirr } from './xirr.ts'
 
 const QUASI_ZERO = 1e-9
@@ -84,18 +84,18 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
   const investitiN = pagatoN - incassatoN
   const valoreN = titoli.aperti.valore.n ?? 0
   if (!fine) {
-    const vuoto = (t: string) => manca(t, 'Nel file non ci sono ancora prezzi di fine mese: i numeri arrivano con il primo aggiornamento.')
+    const vuoto = (t: string) => manca(t, 'Nessun prezzo di fine mese disponibile: i valori saranno calcolati con il primo aggiornamento.')
     return {
       fine: null,
       anno: null,
-      valore: vuoto('Valore dei titoli'),
-      investiti: vuoto('Soldi investiti'),
-      guadagno: vuoto('Quanto stai guadagnando'),
-      dallInizio: vuoto("Guadagno dall'inizio"),
-      medioAnnuo: vuoto('Medio annuo'),
-      mese: vuoto('Il mese'),
-      annoInCorso: vuoto("L'anno"),
-      dividendi: vuoto('Dividendi incassati'),
+      valore: vuoto('Controvalore dei titoli'),
+      investiti: vuoto('Capitale investito'),
+      guadagno: vuoto('Plusvalenza del portafoglio'),
+      dallInizio: vuoto('Rendimento sul capitale investito'),
+      medioAnnuo: vuoto('Rendimento annualizzato'),
+      mese: vuoto('Rendimento del mese'),
+      annoInCorso: vuoto('Rendimento da inizio anno'),
+      dividendi: vuoto('Dividendi netti'),
       serie: [],
       titoli,
     }
@@ -105,24 +105,24 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
   const notaDopo = dopo
     ? [
         dopo === 1
-          ? `Un movimento dopo il ${data(fine)} entra nei conti con il prossimo aggiornamento di fine mese.`
-          : `${dopo} movimenti dopo il ${data(fine)} entrano nei conti con il prossimo aggiornamento di fine mese.`,
+          ? `Un movimento successivo al ${data(fine)} sarà incluso con il prossimo aggiornamento di fine mese.`
+          : `${dopo} movimenti successivi al ${data(fine)} saranno inclusi con il prossimo aggiornamento di fine mese.`,
       ]
     : []
 
-  // ---------- soldi investiti ----------
+  // ---------- capitale investito ----------
   const investiti: Numero = {
     n: investitiN,
     perche: {
-      titolo: 'Soldi investiti',
+      titolo: 'Capitale investito',
       grande: euro(investitiN),
-      frase: 'I soldi tuoi che restano dentro il portafoglio: quello che hai pagato per comprare, commissioni comprese, meno quello che hai incassato vendendo.',
+      frase: "Il capitale proprio che resta nel portafoglio: costo d'acquisto di tutti i titoli, commissioni comprese, meno il ricavo delle vendite.",
       conto: [
-        riga(`Pagato per comprare (${quanti(acquisti.length, 'acquisto', 'acquisti')})`, euro(pagatoN)),
-        ...(vendite.length ? [riga(`− incassato vendendo (${quanti(vendite.length, 'vendita', 'vendite')})`, euro(incassatoN))] : []),
-        riga('Soldi investiti', euro(investitiN)),
+        riga(`Costo d'acquisto (${quanti(acquisti.length, 'acquisto', 'acquisti')})`, euro(pagatoN)),
+        ...(vendite.length ? [riga(`− ricavo delle vendite (${quanti(vendite.length, 'vendita', 'vendite')})`, euro(incassatoN))] : []),
+        riga('Capitale investito', euro(investitiN)),
       ],
-      note: ['I dividendi non entrano qui: sono guadagno.', ...notaDopo],
+      note: ['I dividendi non rientrano nel capitale investito: fanno parte della plusvalenza.', ...notaDopo],
     },
   }
 
@@ -134,24 +134,31 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
       ? {
           n: g / investitiN,
           perche: {
-            titolo: "Guadagno dall'inizio",
+            titolo: 'Rendimento sul capitale investito',
             grande: percentuale(g / investitiN),
-            frase: 'Il guadagno diviso i soldi investiti.',
-            conto: [riga('Guadagno', guadagno(g)), riga('÷ soldi investiti (pagato − incassato)', euro(investitiN)), riga("Dall'inizio", percentuale(g / investitiN))],
-            note: ['Con grandi vendite in guadagno questa percentuale si gonfia, perché i soldi investiti scendono: il medio annuo resta giusto.'],
+            frase: `${plusMinus(g)} del portafoglio divisa per il capitale investito.`,
+            conto: [
+              riga(plusMinus(g), guadagno(g)),
+              riga("÷ capitale investito (costo d'acquisto − ricavo delle vendite)", euro(investitiN)),
+              riga("Rendimento dall'inizio", percentuale(g / investitiN)),
+            ],
+            note: ['Con vendite rilevanti in plusvalenza questa percentuale aumenta, perché il capitale investito si riduce: il rendimento annualizzato non ne risente.'],
           },
         }
-      : manca("Guadagno dall'inizio", 'I soldi investiti non sono più di zero: hai incassato vendendo almeno quanto avevi pagato. Guarda il guadagno in euro.')
+      : manca(
+          'Rendimento sul capitale investito',
+          "Capitale investito pari a zero o negativo: il ricavo delle vendite ha raggiunto il costo d'acquisto. Vale il risultato in euro.",
+        )
 
-  // ---------- medio annuo ----------
+  // ---------- rendimento annualizzato ----------
   const primo = acquisti[0]?.data ?? null
   const anni = primo ? anniTra(primo, fine) : null
   let medioAnnuo: Numero
-  if (!primo || anni === null) medioAnnuo = manca('Medio annuo', 'Non ci sono ancora acquisti prima dell’ultimo fine mese.')
+  if (!primo || anni === null) medioAnnuo = manca('Rendimento annualizzato', 'Nessun acquisto prima dell’ultimo fine mese.')
   else if (anni < ANNI_MINIMI_MEDIO)
     medioAnnuo = manca(
-      'Medio annuo',
-      `Il primo acquisto è del ${data(primo)}: su meno di sei mesi un medio annuo direbbe poco. Guarda il guadagno dall'inizio${dallInizio.n === null ? '' : `: ${pct(dallInizio.n)}`}.`,
+      'Rendimento annualizzato',
+      `Il primo acquisto è del ${data(primo)}: su meno di sei mesi il rendimento annualizzato non è significativo. Rendimento sul capitale investito${dallInizio.n === null ? ': non disponibile' : `: ${pct(dallInizio.n)}`}.`,
     )
   else {
     const flussi = [
@@ -161,23 +168,23 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
     const r = xirr([...flussi, { data: fine, importo: valoreN }])
     medioAnnuo =
       r === null
-        ? manca('Medio annuo', 'Con questi movimenti non si trova un tasso che torni.')
+        ? manca('Rendimento annualizzato', 'Con questi movimenti il tasso non è calcolabile.')
         : {
             n: r,
             perche: {
-              titolo: 'Medio annuo del portafoglio',
+              titolo: 'Rendimento annualizzato del portafoglio',
               grande: percentuale(r),
               dopo: "all'anno",
               frase:
-                'La percentuale che, ripetuta ogni anno, dà il tuo guadagno, tenendo conto di quando è entrato e uscito ogni euro: come nei rendiconti delle banche.',
+                'Il tasso annuo composto che, ripetuto ogni anno, dà il risultato ottenuto, tenendo conto di quando sono entrati e usciti i capitali (tasso interno di rendimento, come nei rendiconti bancari). Comprende i dividendi.',
               conto: [
                 ...flussi.map((f) => riga(`${data(f.data)}: ${f.cosa}`, euro(f.importo))),
-                riga(`Valore dei titoli a ${quandoFine}`, euro(valoreN)),
-                riga('Medio annuo', percentuale(r)),
+                riga(`Controvalore dei titoli a ${quandoFine}`, euro(valoreN)),
+                riga('Rendimento annualizzato', percentuale(r)),
               ],
               note: [
-                `Dal primo acquisto (${data(primo)}) sono passati ${numero(anni, 1)} anni, ma non tutti i soldi sono entrati quel giorno: ogni euro conta per il tempo in cui è rimasto investito.`,
-                'I soldi messi sono negativi; quelli ricevuti (vendite e dividendi) e il valore di oggi sono positivi.',
+                `Dal primo acquisto (${data(primo)}) sono passati ${numero(anni, 1)} anni, ma i capitali sono entrati in date diverse: ogni importo pesa per il tempo in cui è rimasto investito.`,
+                'Gli acquisti sono negativi; vendite, dividendi e controvalore finale sono positivi.',
               ],
             },
           }
@@ -186,23 +193,24 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
   const guadagnoTot: Numero = {
     n: g,
     perche: {
-      titolo: 'Quanto stai guadagnando',
+      titolo: `${plusMinus(g)} del portafoglio`,
       grande: guadagno(g),
-      frase: 'Il guadagno di tutti i titoli, compresi quelli già venduti: il valore di oggi, più quello che hai incassato vendendo e i dividendi, meno quello che hai pagato.',
+      frase:
+        "Il risultato di tutti i titoli, compresi quelli venduti: controvalore a fine mese, più ricavo delle vendite e dividendi netti, meno costo d'acquisto.",
       conto: [
-        riga(`Valore dei titoli a ${quandoFine}`, euro(valoreN)),
-        ...(incassatoN ? [riga('+ incassato vendendo', euro(incassatoN))] : []),
+        riga(`Controvalore dei titoli a ${quandoFine}`, euro(valoreN)),
+        ...(incassatoN ? [riga('+ ricavo delle vendite', euro(incassatoN))] : []),
         ...(dividendiN ? [riga('+ dividendi netti', euro(dividendiN))] : []),
-        riga('− pagato per comprare', euro(pagatoN)),
-        riga('Guadagno', guadagno(g)),
+        riga("− costo d'acquisto", euro(pagatoN)),
+        riga(plusMinus(g), guadagno(g)),
       ],
       note: [
-        ...(dallInizio.n !== null ? [`Diviso i soldi investiti (${euroTesto(investitiN, 2)}) fa ${pct(dallInizio.n)} dall'inizio.`] : []),
+        ...(dallInizio.n !== null ? [`Sul capitale investito (${euroTesto(investitiN, 2)}) corrisponde a ${pct(dallInizio.n)} dall'inizio.`] : []),
         ...(medioAnnuo.n !== null
-          ? [`Tenendo conto di quando è entrato ogni euro è ${pct(medioAnnuo.n)} all'anno in media: clic sul numero per il conto.`]
+          ? [`Tenendo conto delle date dei movimenti corrisponde a ${pct(medioAnnuo.n)} all'anno: selezionare il numero per il calcolo.`]
           : []),
-        chiusi.length ? `Comprende i titoli già venduti (${elenco(chiusi)}).` : 'Non hai titoli venduti.',
-        'È prima delle tasse sulla vendita. Le commissioni sono nel pagato.',
+        chiusi.length ? `Comprende i titoli già venduti (${elenco(chiusi)}).` : 'Nessun titolo venduto.',
+        "Comprende i dividendi netti. Al lordo delle imposte sulla vendita; le commissioni sono nel costo d'acquisto.",
         ...notaDopo,
       ],
     },
@@ -211,39 +219,39 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
   // ---------- l'anno in corso ----------
   const annoS = fine.slice(0, 4)
   const d0 = `${Number(annoS) - 1}-12-31`
-  const titoloAnno = `L'anno ${annoS}`
+  const titoloAnno = `Rendimento da inizio ${annoS}`
   let annoInCorso: Numero
   const v0Mese = titoli.totaliDelMese.get(d0)?.valore.n
   const primaDellAnno = ops.some((o) => o.data <= d0)
   if (v0Mese === undefined && primaDellAnno)
-    annoInCorso = manca(titoloAnno, `Nel file manca il valore dei titoli al ${data(d0)}, da cui si misura l'anno.`)
+    annoInCorso = manca(titoloAnno, `Nel file manca il controvalore dei titoli al ${data(d0)}, da cui si misura l'anno.`)
   else {
     const v0 = v0Mese ?? 0
     const flussi = ops.filter((o) => o.data > d0).map((o) => ({ data: o.data, importo: o.tipo === 'acquisto' ? o.totale : -o.totale, o }))
     const divAnno = somma(divs.filter((d) => d.data > d0).map((d) => d.netto))
     const { r, guadagno: gA, base, netti } = senzaSoldiNuovi(d0, fine, { v0, v1: valoreN, flussi, dividendi: divAnno })
     const lungo = anniTra(d0, fine)
-    const conto: RigaConto[] = [riga(`Valore a ${quandoFine}`, euro(valoreN)), riga(`− valore al ${data(d0)}`, euro(v0))]
-    if (netti > QUASI_ZERO) conto.push(riga(`− soldi messi nel ${annoS}`, euro(netti)))
-    if (netti < -QUASI_ZERO) conto.push(riga(`+ soldi tolti nel ${annoS} (vendite)`, euro(-netti)))
+    const conto: RigaConto[] = [riga(`Controvalore a ${quandoFine}`, euro(valoreN)), riga(`− controvalore al ${data(d0)}`, euro(v0))]
+    if (netti > QUASI_ZERO) conto.push(riga(`− versamenti netti del ${annoS} (acquisti)`, euro(netti)))
+    if (netti < -QUASI_ZERO) conto.push(riga(`+ prelievi netti del ${annoS} (vendite)`, euro(-netti)))
     if (divAnno > 0) conto.push(riga(`+ dividendi netti del ${annoS}`, euro(divAnno)))
-    conto.push(riga("= guadagno dell'anno", guadagno(gA)))
-    conto.push(riga(flussi.length ? `÷ valore al ${data(d0)}, con i soldi dell'anno pesati per i giorni` : `÷ valore al ${data(d0)}`, euro(base)))
-    if (r !== null) conto.push(riga(`Anno ${annoS}`, percentuale(r)))
+    conto.push(riga("= risultato dell'anno", guadagno(gA)))
+    conto.push(riga(flussi.length ? `÷ controvalore al ${data(d0)}, con i movimenti dell'anno ponderati per i giorni` : `÷ controvalore al ${data(d0)}`, euro(base)))
+    if (r !== null) conto.push(riga(`Da inizio ${annoS}`, percentuale(r)))
     annoInCorso = {
       n: r,
       perche: {
         titolo: titoloAnno,
         grande: r === null ? testo('—') : percentuale(r),
-        frase: `Di quanto è cresciuto il valore dal ${data(d0)} a ${quandoFine}, senza contare come guadagno i soldi messi o tolti nell'anno.`,
+        frase: `Rendimento del portafoglio dal ${data(d0)} a ${quandoFine}, al netto dei versamenti e dei prelievi dell'anno.`,
         conto,
         note: [
           ...flussi.map(
             (f) =>
-              `${data(f.data)}: ${f.o.tipo} di ${nomeDi(f.o.titolo)} (${euroTesto(f.o.totale, 2)}). ${f.o.tipo === 'acquisto' ? 'Conta solo da quando è entrato' : 'Esce dal conto da quel giorno'}: ${numero(lungo > 0 ? (anniTra(f.data, fine) / lungo) * 100 : 0, 0)}% del periodo.`,
+              `${data(f.data)}: ${f.o.tipo} di ${nomeDi(f.o.titolo)} (${euroTesto(f.o.totale, 2)}). ${f.o.tipo === 'acquisto' ? 'Pesa dalla data dell’acquisto' : 'Esce dal calcolo da quella data'}: ${numero(lungo > 0 ? (anniTra(f.data, fine) / lungo) * 100 : 0, 0)}% del periodo.`,
           ),
-          v0 === 0 ? `Il portafoglio è cominciato nel ${annoS}: si misura dal prezzo d'acquisto.` : "Un titolo comprato nell'anno si misura dal prezzo d'acquisto.",
-          'I soldi messi durante l’anno non sono guadagno.',
+          v0 === 0 ? `Il portafoglio è cominciato nel ${annoS}: si misura dal prezzo d'acquisto.` : "Un titolo acquistato nell'anno si misura dal prezzo d'acquisto.",
+          'Gli acquisti e le vendite dell’anno non contano come rendimento.',
         ],
       },
     }
@@ -255,15 +263,15 @@ export function contiDelPortafoglio(dati: FileDati, titoli: ContiTitoli = contiD
   const dividendi: Numero = {
     n: dividendiN,
     perche: {
-      titolo: 'Dividendi incassati',
+      titolo: 'Dividendi netti',
       grande: euro(dividendiN),
       frase: divs.length
-        ? 'I dividendi netti di tutti i titoli, dal primo: quello che è arrivato sul conto dopo le imposte.'
-        : 'Non hai ancora incassato dividendi: i titoli ad accumulazione li reinvestono nel prezzo.',
+        ? 'Dividendi netti di tutti i titoli, dal primo: importo accreditato, al netto delle imposte.'
+        : 'Nessun dividendo incassato: i titoli ad accumulazione li reinvestono nel prezzo.',
       conto: divs.length ? [...conDividendi.map((t) => riga(t.nomeCorto, euro(t.dividendi.n ?? 0))), riga('Totale', euro(dividendiN))] : [],
       note: [
-        ...(divs.length ? ['Entrano nel guadagno. Le cedole delle obbligazioni sono contate qui.'] : []),
-        ...(divDopo ? [`${divDopo === 1 ? 'Un dividendo arrivato' : `${divDopo} dividendi arrivati`} dopo il ${data(fine)} ${divDopo === 1 ? 'entra' : 'entrano'} con il prossimo aggiornamento.`] : []),
+        ...(divs.length ? ['Entrano nella plusvalenza. Comprende le cedole delle obbligazioni.'] : []),
+        ...(divDopo ? [`${divDopo === 1 ? 'Un dividendo accreditato' : `${divDopo} dividendi accreditati`} dopo il ${data(fine)} ${divDopo === 1 ? 'sarà incluso' : 'saranno inclusi'} con il prossimo aggiornamento.`] : []),
       ],
     },
   }

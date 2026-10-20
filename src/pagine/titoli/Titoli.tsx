@@ -47,7 +47,7 @@ export function Titoli() {
         <div className="testata">
           <h1>Titoli</h1>
         </div>
-        <div className="riquadro vuoto">Nel file dei dati non ci sono ancora titoli: arrivano quando registri il primo acquisto.</div>
+        <div className="riquadro vuoto">Nel file dei dati non sono ancora presenti titoli: compaiono con la registrazione del primo acquisto.</div>
       </section>
     )
 
@@ -63,18 +63,18 @@ export function Titoli() {
       <div className="numeri">
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(aperti.valore.perche)}>
           <small>
-            Valore dei {aperti.quanti} {aperti.quanti === 1 ? 'titolo' : 'titoli'}
+            Controvalore ({aperti.quanti} {aperti.quanti === 1 ? 'titolo' : 'titoli'})
           </small>
           <b>{euro(aperti.valore.n ?? 0)}</b>
-          <span>pagati all’acquisto {euro(aperti.pagato.n ?? 0)}</span>
+          <span>Costo d’acquisto {euro(aperti.pagato.n ?? 0)}</span>
         </button>
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(aperti.guadagno.perche)}>
-          <small>Guadagno dei titoli</small>
+          <small>{g < 0 ? 'Minusvalenza' : 'Plusvalenza'}</small>
           <b className={classeSegno(segno(g))}>{guadagnoEuro(g)}</b>
-          <span className={pct === null ? '' : classeSegno(segnoPercentuale(pct))}>{pct === null ? '—' : `${percentuale(pct)} dall’acquisto`}</span>
+          <span className={pct === null ? '' : classeSegno(segnoPercentuale(pct))}>{pct === null ? '—' : `${percentuale(pct)} sul costo`}</span>
         </button>
         <button type="button" className="numero capo" aria-haspopup="dialog" onClick={() => spiega(ultimoMese.perche)}>
-          <small>{fine ? `Il mese di ${nomeMese(fine)}` : 'L’ultimo mese'}</small>
+          <small>{fine ? `Rendimento di ${nomeMese(fine)}` : 'Rendimento dell’ultimo mese'}</small>
           <b className={ultimoMese.n === null ? 'tenue' : classeSegno(segnoPercentuale(ultimoMese.n))}>
             {ultimoMese.n === null ? '—' : percentuale(ultimoMese.n)}
           </b>
@@ -82,7 +82,7 @@ export function Titoli() {
       </div>
 
       <div className="riquadro">
-        <div className="schede" role="tablist" aria-label="Come vedere i titoli">
+        <div className="schede" role="tablist" aria-label="Viste dei titoli">
           {SCHEDE.map((s, i) => (
             <button
               key={s}

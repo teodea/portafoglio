@@ -81,7 +81,7 @@ describe('il controllo del file all’apertura', () => {
     expect(p.scrittura).toBe(false)
     expect(p.spiegazione).toContain('il prezzo n. 2')
     expect(p.spiegazione).toContain('dovrebbe essere un numero')
-    expect(p.spiegazione).toContain('togli le virgolette')
+    expect(p.spiegazione).toContain('togliere le virgolette')
   })
 
   it('una data impossibile', () => {
@@ -114,6 +114,6 @@ describe('il controllo del file all’apertura', () => {
 
   it('un file di una versione più nuova', () => {
     const dati = { ...portafoglioInventato(), versione: 9 }
-    expect(problemaDi(JSON.stringify(dati)).spiegazione).toContain('più nuova')
+    expect(problemaDi(JSON.stringify(dati)).spiegazione).toContain('più recente')
   })
 })

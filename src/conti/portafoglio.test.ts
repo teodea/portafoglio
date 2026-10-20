@@ -173,7 +173,7 @@ describe('l’anno in corso senza i soldi nuovi', () => {
     const atteso = (2250 - 1000 - 1000 + 20) / (1000 + 1000 * peso)
     expect(c.annoInCorso.n).toBeCloseTo(atteso, 10)
     expect(ultimaRiga(c.annoInCorso)).toBeCloseTo(atteso, 10)
-    expect(c.annoInCorso.perche.conto.map((r) => r.etichetta)).toContain('− soldi messi nel 2026')
+    expect(c.annoInCorso.perche.conto.map((r) => r.etichetta)).toContain('− versamenti netti del 2026 (acquisti)')
     expect(c.annoInCorso.perche.note[0]).toContain('acquisto di MMMM')
   })
 
@@ -186,7 +186,7 @@ describe('l’anno in corso senza i soldi nuovi', () => {
     })
     const c = contiDelPortafoglio(dati)
     expect(c.annoInCorso.n!).toBeGreaterThan(0)
-    expect(c.annoInCorso.perche.conto.map((r) => r.etichetta)).toContain('+ soldi tolti nel 2026 (vendite)')
+    expect(c.annoInCorso.perche.conto.map((r) => r.etichetta)).toContain('+ prelievi netti del 2026 (vendite)')
   })
 
   it('un portafoglio cominciato nell’anno si misura dal prezzo d’acquisto', () => {
@@ -213,8 +213,8 @@ describe('i movimenti dopo l’ultimo fine mese', () => {
     expect(c.investiti.n).toBe(1000)
     expect(c.guadagno.n).toBeCloseTo(200, 10)
     expect(c.dividendi.n).toBe(0)
-    expect(c.guadagno.perche.note.join(' ')).toContain('3 movimenti dopo il 30/09/2026')
-    expect(c.dividendi.perche.note.join(' ')).toContain('Un dividendo arrivato dopo il 30/09/2026')
+    expect(c.guadagno.perche.note.join(' ')).toContain('3 movimenti successivi al 30/09/2026')
+    expect(c.dividendi.perche.note.join(' ')).toContain('Un dividendo accreditato dopo il 30/09/2026')
   })
 })
 

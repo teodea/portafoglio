@@ -62,11 +62,11 @@ export function leggiStoricoInvesting(testo: string): Chiusura[] {
   try {
     valore = JSON.parse(testo)
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
   const righe = (valore as { data?: unknown } | null)?.data
   if (righe === null || righe === undefined) return []
-  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati che non si leggono')
+  if (!Array.isArray(righe)) throw new NonVa('ha risposto con dati non leggibili')
   const chiusure: Chiusura[] = []
   for (const r of righe as { rowDateTimestamp?: unknown; last_close?: unknown; last_closeRaw?: unknown }[]) {
     const data = typeof r.rowDateTimestamp === 'string' ? r.rowDateTimestamp.slice(0, 10) : ''

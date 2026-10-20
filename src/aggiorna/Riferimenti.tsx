@@ -1,6 +1,6 @@
 // Riferimenti e inflazione nella schermata Aggiorna fine mese (ticket 9), come nella bozza 27: due riquadri
 // in alto e, nella lista, i gruppi "Riferimenti" e "Inflazione", che possono aspettare. Quando manca un valore
-// si legge "manca" con il perché e "Riprova"; il mese si salva lo stesso e si riprova al prossimo aggiornamento.
+// si legge "mancante" con il perché e "Riprova"; il mese si salva lo stesso e si riprova al prossimo aggiornamento.
 import { Fragment, useState, type ReactNode } from 'react'
 import { fineMese, meseDopo, meseEAnno, nomeMese } from '../dati/aggiorna/calendario.ts'
 import {
@@ -24,6 +24,7 @@ import {
   type RigaNic,
   type RigaRiferimento,
 } from '../dati/aggiorna/riferimenti.ts'
+import { fonteDaMostrare } from '../dati/aggiorna/fonti.ts'
 import { Icona } from '../icone.tsx'
 import { useAggiorna } from './contesto.tsx'
 import { cambio, euro, giorno, percentuale, prezzo, simboloValuta } from './numeri.ts'
@@ -36,7 +37,7 @@ function Fonte({ fonte, nota }: { fonte: string; nota?: string }) {
     <>
       <span className={`agg-fonte ${fonte === FONTE_RIFERIMENTO.aMano ? 'riserva' : 'borsa'}`}>
         <span className="punto" />
-        {fonte}
+        {fonteDaMostrare(fonte)}
       </span>
       {nota && <span className="agg-sotto">{Maiuscola(nota)}</span>}
     </>
@@ -61,7 +62,7 @@ function Pronto() {
   )
 }
 
-/** I due riquadri in alto: "Riferimenti 5 di 6, possono aspettare" e "Inflazione fino a settembre". */
+/** I due riquadri in alto: "Riferimenti 5 di 6, in arrivo, non necessari per salvare" e "Inflazione fino a settembre". */
 export function RiquadriRiferimenti({ p }: { p: ParteRiferimenti }) {
   const pronti = riferimentiPronti(p)
   const inCorso = p.righe.some((r) => r.stato.tipo === 'attesa' || r.stato.tipo === 'scarica')
@@ -75,21 +76,21 @@ export function RiquadriRiferimenti({ p }: { p: ParteRiferimenti }) {
         <b>
           {pronti} di {p.righe.length}
         </b>
-        <span>{inCorso ? 'in arrivo, possono aspettare' : pronti < p.righe.length ? 'gli altri si riprovano dopo' : 'tutti arrivati'}</span>
+        <span>{inCorso ? 'in arrivo, non necessari per salvare' : pronti < p.righe.length ? 'gli altri al prossimo aggiornamento' : 'tutti ricevuti'}</span>
       </div>
       <div className="numero">
         <small>Inflazione</small>
-        <b>{nicInCorso && !finoA ? '…' : finoA ? finoAl(finoA) : 'manca'}</b>
+        <b>{nicInCorso && !finoA ? '…' : finoA ? finoAl(finoA) : 'mancante'}</b>
         <span>
           {nicInCorso
             ? 'in arrivo da ISTAT'
             : p.nic.stato.tipo === 'manca'
               ? 'ISTAT non ha risposto'
               : nonAncora.includes(p.mese)
-                ? `${nomeMese(p.mese)} esce ${quandoEsceNic(p.mese)}`
+                ? `${nomeMese(p.mese)} disponibile ${quandoEsceNic(p.mese)}`
                 : p.nic.stato.tipo === 'arrivato'
-                  ? 'arrivata da ISTAT'
-                  : 'può aspettare'}
+                  ? 'ricevuta da ISTAT'
+                  : 'non necessaria per salvare'}
         </span>
       </div>
     </>
@@ -104,8 +105,8 @@ export function RigheRiferimenti({ p, colonne }: { p: ParteRiferimenti; colonne:
     <>
       <tr className="agg-gruppo">
         <td colSpan={colonne}>
-          Riferimenti <span className="tenue">· possono aspettare</span>
-          {p.primaVolta && p.dal && <span className="tenue"> · con la storia da {meseEAnno(p.dal)}</span>}
+          Riferimenti <span className="tenue">· non necessari per salvare</span>
+          {p.primaVolta && p.dal && <span className="tenue"> · con lo storico da {meseEAnno(p.dal)}</span>}
         </td>
       </tr>
       {p.righe.map((r) => (
@@ -116,7 +117,7 @@ export function RigheRiferimenti({ p, colonne }: { p: ParteRiferimenti; colonne:
       ))}
       <tr className="agg-gruppo">
         <td colSpan={colonne}>
-          Inflazione <span className="tenue">· può aspettare</span>
+          Inflazione <span className="tenue">· non necessaria per salvare</span>
         </td>
       </tr>
       {nic.map((riga, i) => (
@@ -127,7 +128,7 @@ export function RigheRiferimenti({ p, colonne }: { p: ParteRiferimenti; colonne:
 }
 
 /**
- * Le celle tra "Da dove viene" e lo stato: il controllo di investing.com, che per riferimenti e inflazione
+ * Le celle tra "Provenienza" e lo stato: il controllo di investing.com, che per riferimenti e inflazione
  * non c'è ("—"), e con "Rifai" la colonna "Prima".
  */
 function Mezzo({ colonne, children }: { colonne: number; children?: ReactNode }) {
@@ -191,11 +192,11 @@ function RigaDelRiferimento({
       <tr className="agg-manca">
         {nome}
         <td />
-        <td className="n tenue">manca</td>
+        <td className="n tenue">mancante</td>
         <td />
         <td colSpan={colonne - 5}>
           <span className="agg-sotto">
-            {Maiuscola(perche)}. Può aspettare: il mese si salva lo stesso e si riprova al prossimo aggiornamento.
+            {Maiuscola(perche)}. Non necessario per salvare: si richiede di nuovo al prossimo aggiornamento.
           </span>
         </td>
         <td className="n">
@@ -221,16 +222,16 @@ function RigaDelRiferimento({
       <td className={`n ${sm === null ? '' : sm >= 0 ? 'agg-su' : 'agg-giu'}`}>{sm === null ? '' : percentuale(sm)}</td>
       <td>
         {v.fonte === FONTE_RIFERIMENTO.aMano ? (
-          <Fonte fonte={v.fonte} nota="corretto a mano: resta com’era" />
+          <Fonte fonte={v.fonte} nota="inserito manualmente: resta invariato" />
         ) : r.stato.tipo === 'manca' ? (
-          <Fonte fonte={v.fonte} nota={`non riscaricato (${r.stato.perche}): resta quello di prima`} />
+          <Fonte fonte={v.fonte} nota={`non scaricato di nuovo (${r.stato.perche}): resta il valore precedente`} />
         ) : (
           <Fonte fonte={v.fonte} nota={v.nota} />
         )}
         {storia.arrivate > 0 && (
           <span className="agg-sotto">
-            con la storia: {storia.arrivate} {storia.arrivate === 1 ? 'data' : 'date'}
-            {storia.mancano.length ? `, ne mancano ${storia.mancano.length}` : ''}
+            con lo storico: {storia.arrivate} {storia.arrivate === 1 ? 'data' : 'date'}
+            {storia.mancano.length ? `, ${storia.mancano.length} mancanti` : ''}
           </span>
         )}
       </td>
@@ -270,7 +271,7 @@ function DettaglioRiferimento({ p, r, colonne }: { p: ParteRiferimenti; r: RigaR
         <div className="agg-dettaglio-corpo">
           <div>
             <p>
-              <b>{d.nome}</b>: {d.cosa}. Si confronta con gli stessi euro, nelle stesse date dei tuoi movimenti.
+              <b>{d.nome}</b>: {d.cosa}. Si misura come se lo stesso capitale fosse stato investito nelle stesse date dei movimenti.
             </p>
             {v && (
               <p>
@@ -279,9 +280,9 @@ function DettaglioRiferimento({ p, r, colonne }: { p: ParteRiferimenti; r: RigaR
             )}
             {storia.arrivate > 0 && (
               <p>
-                Insieme al valore di fine {nomeMese(p.mese)} sono arrivate {storia.arrivate} date della storia: le fine mese
+                Insieme al valore di fine {nomeMese(p.mese)} sono arrivati {storia.arrivate} valori dello storico: i fine mese
                 {p.dal ? ` da ${meseEAnno(p.dal)}` : ''} e le date dei movimenti.
-                {storia.mancano.length > 0 && ` Mancano ancora: ${elenco(storia.mancano.slice(0, 6).map(giorno))}${storia.mancano.length > 6 ? '…' : ''}.`}
+                {storia.mancano.length > 0 && ` Ancora mancanti: ${elenco(storia.mancano.slice(0, 6).map(giorno))}${storia.mancano.length > 6 ? '…' : ''}.`}
               </p>
             )}
           </div>
@@ -312,7 +313,7 @@ function RigaDelNic({ p, riga, colonne, primaRiga }: { p: ParteRiferimenti; riga
   const n = p.nic
   if (riga.tipo === 'storia') {
     const arrivati = n.stato.tipo === 'arrivato' ? n.stato.esito.valori.filter((v) => v.data < fineMese(meseDopo(riga.a))).length : 0
-    const nome = <NomeRiga nome={NOME_NIC} sotto={`storia da ${meseEAnno(riga.da)} ${nomeMese(riga.a).startsWith('a') ? 'ad' : 'a'} ${meseEAnno(riga.a)}`} />
+    const nome = <NomeRiga nome={NOME_NIC} sotto={`storico da ${meseEAnno(riga.da)} ${nomeMese(riga.a).startsWith('a') ? 'ad' : 'a'} ${meseEAnno(riga.a)}`} />
     if (n.stato.tipo === 'attesa' || n.stato.tipo === 'scarica')
       return (
         <tr>
@@ -333,7 +334,7 @@ function RigaDelNic({ p, riga, colonne, primaRiga }: { p: ParteRiferimenti; riga
         </td>
         <td />
         <td>
-          <Fonte fonte="ISTAT" nota={arrivati < riga.mesi ? `ne mancano ${riga.mesi - arrivati}: si riprendono dopo` : 'storia completa'} />
+          <Fonte fonte="ISTAT" nota={arrivati < riga.mesi ? `${riga.mesi - arrivati} mancanti: al prossimo aggiornamento` : 'storico completo'} />
         </td>
         <Mezzo colonne={colonne} />
         <td className="n">
@@ -364,12 +365,12 @@ function RigaDelNic({ p, riga, colonne, primaRiga }: { p: ParteRiferimenti; riga
       <tr>
         {nome}
         <td>ISTAT</td>
-        <td className="n tenue">non ancora</td>
+        <td className="n tenue">non ancora pubblicato</td>
         <td />
         <td colSpan={colonne - 5} className="tenue">
           <span className="agg-sotto">
-            ISTAT lo pubblica {quandoEsceNic(mese)}. Il confronto arriva {finoAl(prima)}; {nomeMese(mese)} si prende al prossimo
-            aggiornamento.
+            ISTAT lo pubblica {quandoEsceNic(mese)}. Il confronto è disponibile {finoAl(prima)}; {nomeMese(mese)} si acquisisce al
+            prossimo aggiornamento.
           </span>
         </td>
         <td />
@@ -393,7 +394,7 @@ function RigaDelNic({ p, riga, colonne, primaRiga }: { p: ParteRiferimenti; riga
       </td>
       <td className="n tenue">{sm === null ? '' : percentuale(sm)}</td>
       <td>
-        <Fonte fonte={v.fonte} nota={riga.mancava ? 'mancava dall’aggiornamento scorso' : v.nota} />
+        <Fonte fonte={v.fonte} nota={riga.mancava ? 'mancante all’aggiornamento precedente' : v.nota} />
       </td>
       <Mezzo colonne={colonne} />
       <td className="n">
@@ -408,10 +409,10 @@ function RigaNicManca({ nome, perche, colonne, riprova }: { nome: ReactNode; per
     <tr className="agg-manca">
       {nome}
       <td>ISTAT</td>
-      <td className="n tenue">manca</td>
+      <td className="n tenue">mancante</td>
       <td />
       <td colSpan={colonne - 5}>
-        <span className="agg-sotto">{Maiuscola(perche)}. Può aspettare: si riprende al prossimo aggiornamento.</span>
+        <span className="agg-sotto">{Maiuscola(perche)}. Non necessario per salvare: si richiede di nuovo al prossimo aggiornamento.</span>
       </td>
       <td className="n">
         {riprova && (

@@ -152,7 +152,7 @@ export async function tornaAllaCopia(
 
   // Solo un nome di file dentro "copie", niente percorsi.
   if (basename(fileCopia) !== fileCopia || !ordinaCopie([fileCopia]).length)
-    return riapriConAvviso('Non trovo quella copia.')
+    return riapriConAvviso('La copia scelta non è stata trovata.')
 
   let attuale: Buffer | null = null
   try {
@@ -162,19 +162,19 @@ export async function tornaAllaCopia(
   }
   if (attuale && impronta(attuale) !== improntaVista) {
     // Il file non è più quello controllato: si guarda di nuovo, senza toccarlo.
-    return riapriConAvviso('Il file è cambiato mentre lo guardavi: l’ho controllato di nuovo e non ho toccato niente.')
+    return riapriConAvviso('Il file dei dati è cambiato nel frattempo: è stato controllato di nuovo e lasciato invariato.')
   }
 
   let copia: Buffer
   try {
     copia = await readFile(join(cartellaCopie, fileCopia))
   } catch {
-    return riapriConAvviso('Non trovo quella copia nella cartella copie.')
+    return riapriConAvviso('La copia scelta non è nella cartella copie.')
   }
   const esitoCopia = controllaFile(copia.toString('utf8'))
   if (!esitoCopia.ok)
     return riapriConAvviso(
-      `Anche la copia ${fileCopia} non si legge${esitoCopia.problema.riga ? ` (riga ${esitoCopia.problema.riga})` : ''}: non l’ho usata. Scegli un’altra copia.`,
+      `Anche la copia ${fileCopia} non è leggibile${esitoCopia.problema.riga ? ` (riga ${esitoCopia.problema.riga})` : ''} e non è stata usata. Sceglierne un’altra.`,
     )
 
   // Prima di scrivere: il file rotto va in "copie", non si cancella.

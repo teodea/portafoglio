@@ -1,7 +1,7 @@
 // Dal PDF della banca alla bozza della schermata Registra (ticket 12). Modulo puro, provato con Vitest.
 //
 // Letto il PDF (dati/pdf-fineco.ts), la bozza ha i testi dei campi come li scriverebbe una persona,
-// e in "dalPdf" gli stessi testi: un campo uguale al PDF si segna "dal PDF", uno cambiato "a mano".
+// e in "dalPdf" gli stessi testi: un campo uguale al PDF si segna "dal PDF", uno cambiato "manuale".
 // Se il titolo non c'è ancora nel file, la bozza ha "nuovo": il riquadro "Titolo nuovo" (ISIN, simbolo e borsa
 // dal PDF, le parole semplici da scrivere, i codici delle riserve da cercare). Nel campo del titolo c'è allora NUOVO.
 import { giaRegistrato, leggiCampi, titoloDelPdf, unisciPdf, type Letto, type LettoUnito, type PdfAperto } from '../../dati/pdf-fineco.ts'
@@ -14,7 +14,7 @@ export const NUOVO = 'nuovo'
 
 /** Le cose della bozza che vengono solo dal PDF. */
 export type DalPdf = {
-  /** Dove stanno i PDF, per "Guarda il PDF" (null nel browser, durante lo sviluppo). */
+  /** Dove stanno i PDF, per "Apri il PDF" (null nel browser, durante lo sviluppo). */
   percorsi: (string | null)[]
   /** I pezzi dello stesso ordine sommati, se erano più di uno. */
   pezzi: { nome: string; quantita: number; prezzo: number; valuta: string; totale: number }[] | null
@@ -24,7 +24,7 @@ export type DalPdf = {
   quotePdf: number | null
   /** Cose da guardare, in parole. */
   avvisi: string[]
-  /** Il movimento già registrato con questo PDF: non si registra due volte ("Apri quel movimento"). */
+  /** Il movimento già registrato con questo PDF: non si registra due volte ("Apri il movimento"). */
   doppio: string | null
   /** Il riquadro "Titolo nuovo", se il titolo non è nel file. */
   nuovo: TitoloNuovoDelPdf | null
@@ -38,11 +38,11 @@ export type DaiPdf =
 
 /** Dai PDF aperti dal processo principale alla bozza; se non va, perché, in parole. */
 export function bozzaDaiPdf(dati: FileDati, aperti: PdfAperto[]): DaiPdf {
-  if (aperti.length === 0) return { ok: false, perche: 'Non c’è nessun PDF da leggere.' }
+  if (aperti.length === 0) return { ok: false, perche: 'Nessun PDF da leggere.' }
   const letti: Letto[] = []
   for (const a of aperti) {
-    if (!/\.pdf$/i.test(a.nome)) return { ok: false, perche: `${a.nome} non è un PDF. Trascina qui il PDF della banca.` }
-    if ('perche' in a) return { ok: false, perche: `Non riesco a leggere ${a.nome}: ${a.perche}.` }
+    if (!/\.pdf$/i.test(a.nome)) return { ok: false, perche: `${a.nome} non è un PDF. Trascinare qui il PDF della banca.` }
+    if ('perche' in a) return { ok: false, perche: `Impossibile leggere ${a.nome}: ${a.perche}.` }
     const l = leggiCampi(a.nome, a.percorso, a.campi)
     if (!l.ok) return { ok: false, perche: maiuscola(l.perche) + '.' }
     letti.push(l.letto)
@@ -51,7 +51,7 @@ export function bozzaDaiPdf(dati: FileDati, aperti: PdfAperto[]): DaiPdf {
   if (!u.ok) return { ok: false, perche: u.perche + '.' }
   const l = u.letto
   const titolo = titoloDelPdf(dati, l)
-  if (titolo.quale === 'non-hai') return { ok: false, perche: `Questo PDF non si può registrare: ${titolo.perche}.` }
+  if (titolo.quale === 'non-hai') return { ok: false, perche: `Il PDF non può essere registrato: ${titolo.perche}.` }
   const bozza =
     titolo.quale === 'trovato' ? bozzaDalLetto(l, titolo.id, titolo.altraBorsa, null) : bozzaDalLetto(l, NUOVO, undefined, titolo.borsa)
   bozza.dalPdfInfo!.doppio = giaRegistrato(dati, l)
@@ -62,7 +62,7 @@ const maiuscola = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 function bozzaDalLetto(l: LettoUnito, titolo: string, altraBorsa: string | undefined, borsaNuovo: Borsa | null): BozzaPdf {
   const avvisi = [...l.avvisi]
-  if (altraBorsa) avvisi.push(`Il PDF dice che hai venduto su ${altraBorsa}: la registro sul titolo che hai, quello con lo stesso ISIN.`)
+  if (altraBorsa) avvisi.push(`Il PDF indica una vendita su ${altraBorsa}: viene registrata sul titolo in portafoglio con lo stesso ISIN.`)
   const num = (n: number) => numeroNellaCasella(n)
   const testi: Record<CampoBozza, string> = {
     titolo,

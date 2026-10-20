@@ -60,15 +60,15 @@ export function controllaCodici(dati: FileDati, s: ScritturaCodici): { ok: true 
     const t = (dati.titoli ?? []).find((x) => x.id === c.titolo)
     if (!t) return no(`il titolo ${c.titolo} non è nel file`)
     const nome = t.simbolo ?? t.isin
-    if (visti.has(c.titolo)) return no(`${nome} è scritto due volte`)
+    if (visti.has(c.titolo)) return no(`${nome} compare due volte`)
     visti.add(c.titolo)
     if (c.codiceInvesting === undefined && c.codiceYahoo === undefined) return no(`per ${nome} non c’è nessun codice`)
     if (c.codiceInvesting !== undefined) {
-      if (!Number.isInteger(c.codiceInvesting) || c.codiceInvesting <= 0) return no(`il codice investing.com di ${nome} non va`)
+      if (!Number.isInteger(c.codiceInvesting) || c.codiceInvesting <= 0) return no(`il codice investing.com di ${nome} non è valido`)
       if (t.codiceInvesting !== undefined) return no(`${nome} ha già il codice investing.com`)
     }
     if (c.codiceYahoo !== undefined) {
-      if (!YAHOO.test(c.codiceYahoo)) return no(`il codice Yahoo di ${nome} non va`)
+      if (!YAHOO.test(c.codiceYahoo)) return no(`il codice Yahoo di ${nome} non è valido`)
       if (t.codiceYahoo !== undefined) return no(`${nome} ha già il codice Yahoo`)
     }
     if (c.borsaRiserve !== undefined) {

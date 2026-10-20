@@ -90,7 +90,7 @@ export function leggiJson(testoOriginale: string): JsonLetto {
     else if (c === ',') throw new Rotto(i, 'c’è una virgola dove dovrebbe esserci un dato', 'qui c’è una virgola di troppo')
     else if (c === "'")
       throw new Rotto(i, 'un testo è tra apici \' invece che tra virgolette "', 'qui serve la virgoletta "')
-    else throw new Rotto(i, `c’è un carattere che non dovrebbe esserci: ${c}`, `qui c’è ${c}`)
+    else throw new Rotto(i, `c’è un carattere non ammesso: ${c}`, `qui c’è ${c}`)
     fineUltimo = i
     if (typeof v !== 'number') numeroAppenaLetto = null
     return v
@@ -109,7 +109,7 @@ export function leggiJson(testoOriginale: string): JsonLetto {
     if (iniziaUnDato) {
       throw new Rotto(fineUltimo - 1, 'manca una virgola tra due dati', 'qui manca la virgola')
     }
-    throw new Rotto(i, `c’è un carattere che non dovrebbe esserci: ${c}`, `qui c’è ${c}`)
+    throw new Rotto(i, `c’è un carattere non ammesso: ${c}`, `qui c’è ${c}`)
   }
 
   const oggetto = (dove: string): Record<string, unknown> => {
@@ -211,7 +211,7 @@ export function leggiJson(testoOriginale: string): JsonLetto {
         }
         continue
       }
-      if (c < ' ') throw new Rotto(i, 'dentro un testo c’è un carattere di controllo (per esempio una tabulazione)', 'qui c’è un carattere strano')
+      if (c < ' ') throw new Rotto(i, 'dentro un testo c’è un carattere di controllo (per esempio una tabulazione)', 'qui c’è un carattere non ammesso')
       risultato += c
       i++
     }

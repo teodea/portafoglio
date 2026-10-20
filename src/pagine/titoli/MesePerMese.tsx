@@ -1,4 +1,4 @@
-// La scheda Mese per mese: gli ultimi 12 fine mese, come valore in €, variazione sul mese o % dall'acquisto.
+// La scheda Mese per mese: gli ultimi 12 fine mese, come controvalore, rendimento mensile o rendimento sul costo.
 import { eAMano } from '../../conti/prezzo-a-mano.ts'
 import type { ContiTitoli } from '../../conti/titoli.ts'
 import { euro, meseBreve, percentuale, segno } from '../../formato.ts'
@@ -7,9 +7,9 @@ import { Cella, NomeTitolo } from './comuni.tsx'
 import { rigaCheApre, useApriScheda } from './usa.ts'
 
 const VISTE = [
-  { k: 'valore', nome: 'Valore in €', frase: 'Clic su un valore per vedere quote, prezzo, cambio e fonte, o per correggere il prezzo.' },
-  { k: 'mese', nome: 'Sul mese', frase: 'Di quanto è cambiato ogni titolo nel mese, in euro, senza contare i soldi messi o tolti.' },
-  { k: 'acquisto', nome: 'Dall’acquisto', frase: 'Il guadagno di ogni titolo a quel fine mese, diviso quello che avevi pagato.' },
+  { k: 'valore', nome: 'Controvalore', frase: 'Selezionare un valore per quote, prezzo, cambio e fonte, o per correggere il prezzo.' },
+  { k: 'mese', nome: 'Rendimento mensile', frase: 'Rendimento di ogni titolo nel mese, al netto dei versamenti e dei prelievi.' },
+  { k: 'acquisto', nome: 'Rendimento sul costo', frase: 'Plusvalenza di ogni titolo a quel fine mese, divisa per il costo d’acquisto.' },
 ] as const
 type Vista = (typeof VISTE)[number]['k']
 
@@ -21,7 +21,7 @@ export function MesePerMese({ conti, vista: scelta, scegliVista }: { conti: Cont
   const pct = (n: number) => percentuale(n)
   const colorePct = (n: number) => segno(n * 100, 1)
 
-  if (mesi.length === 0 || righe.length === 0) return <div className="vuoto">Non ci sono ancora prezzi di fine mese dei titoli che hai.</div>
+  if (mesi.length === 0 || righe.length === 0) return <div className="vuoto">Non sono ancora presenti prezzi di fine mese per i titoli in portafoglio.</div>
 
   return (
     <>
@@ -29,7 +29,7 @@ export function MesePerMese({ conti, vista: scelta, scegliVista }: { conti: Cont
         <span>
           Ultimi {mesi.length} fine mese. {VISTE.find((v) => v.k === vista)!.frase}
         </span>
-        <div className="segmenti" role="group" aria-label="Cosa mostrare">
+        <div className="segmenti" role="group" aria-label="Vista">
           {VISTE.map((v) => (
             <button key={v.k} type="button" aria-pressed={vista === v.k} onClick={() => scegliVista(v.k)}>
               {v.nome}
@@ -77,7 +77,7 @@ export function MesePerMese({ conti, vista: scelta, scegliVista }: { conti: Cont
             ))}
             {vista !== 'acquisto' && (
               <tr className="totale">
-                <td>Tutti i titoli</td>
+                <td>Totale</td>
                 {mesi.map((m) => {
                   const tot = conti.totaliDelMese.get(m)!
                   return (

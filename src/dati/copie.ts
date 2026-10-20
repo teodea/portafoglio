@@ -75,7 +75,7 @@ export function ordinaCopie(nomi: string[]): Copia[] {
  * La frase dopo una scrittura: dove trovare la copia, senza il nome tecnico del file, che è lungo due righe
  * (collaudo del 19/10). Il nome intero si vede nella pagina Dati, scheda Copie, e in Esplora file.
  */
-export const FRASE_COPIA = 'Prima di scrivere ho fatto una copia del file: la trovi nella pagina Dati, scheda Copie, in cima all’elenco.'
+export const FRASE_COPIA = 'Prima della scrittura è stata fatta una copia del file: si trova nella pagina Dati, scheda Copie, in cima all’elenco.'
 
 /** "19/10/2026 alle 20:15" */
 export function quandoInParole(quando: string): string {

@@ -24,16 +24,16 @@ export function Copie({ copie }: { copie: Copia[] }) {
     setDaConfermare(null)
     const r = risposta as EsitoRitorno | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho cambiato niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. I dati non sono stati modificati.` })
     if (r.esito === 'cambiato')
       return setEsito({
         ok: false,
-        testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho cambiato niente e ho ricaricato i dati. Guarda le copie e riprova.',
+        testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato cambiato nulla e i dati sono stati ricaricati. Verificare le copie e riprovare.',
       })
     setEsito({
       ok: true,
       copia: r.copia,
-      testo: `Fatto: i dati sono tornati com’erano il ${quandoInParole(c.quando)}. Il file di prima non si è perso: è la copia “${r.copia}”, in cima all’elenco. Per tornare a quello, premi “Torna a questa copia” sulla sua riga.`,
+      testo: `Ripristino completato: i dati sono quelli del ${quandoInParole(c.quando)}. Il file precedente è conservato nella copia “${r.copia}”, in cima all’elenco; per ripristinarlo, usare “Torna a questa copia” sulla sua riga.`,
     })
   }
 
@@ -45,7 +45,7 @@ export function Copie({ copie }: { copie: Copia[] }) {
     <>
       <div className="attrezzi">
         <span>
-          Prima di ogni scrittura l’applicazione copia il file com’era nella cartella <b>copie</b>. Si tengono tutte.
+          Prima di ogni scrittura il file viene copiato nella cartella <b>copie</b>. Le copie sono conservate tutte.
         </span>
         <button type="button" className="btn" onClick={() => void ponte.apriInEsplora('copie')}>
           <Icona nome="cartella" piccola /> Apri la cartella
@@ -55,9 +55,9 @@ export function Copie({ copie }: { copie: Copia[] }) {
       {daConfermare && (
         <div className="spiega" role="group" aria-label="Conferma">
           <p>
-            Torno alla copia del <b>{quandoInParole(daConfermare.quando)}</b>
-            {daConfermare.perche && `, fatta ${daConfermare.perche}`}? I dati tornano com’erano allora. Il file di adesso non si perde: prima
-            ne faccio una copia, e puoi tornarci con “Torna a questa copia”.
+            Ripristinare la copia del <b>{quandoInParole(daConfermare.quando)}</b>
+            {daConfermare.perche && `, fatta ${daConfermare.perche}`}? I dati tornano a quella data. Il file attuale non va perso: prima del
+            ripristino se ne salva una copia, recuperabile con “Torna a questa copia”.
           </p>
           <div className="bottoni" style={{ marginTop: 12 }}>
             <button type="button" className="btn primario" autoFocus disabled={occupato} onClick={() => void torna(daConfermare)}>
@@ -77,14 +77,14 @@ export function Copie({ copie }: { copie: Copia[] }) {
       )}
 
       {copie.length === 0 ? (
-        <div className="vuoto">Nella cartella copie non c’è ancora nessuna copia: la prima si fa prima di scrivere nel file.</div>
+        <div className="vuoto">La cartella copie è vuota: la prima copia si salva alla prima scrittura nel file.</div>
       ) : (
         <div className="scorre">
           <table className="dati-copie">
             <thead>
               <tr>
                 <th>Quando</th>
-                <th>Perché è stata fatta, e il nome del file</th>
+                <th>Motivo e nome del file</th>
                 <th className="n"></th>
               </tr>
             </thead>
@@ -93,12 +93,12 @@ export function Copie({ copie }: { copie: Copia[] }) {
                 <tr key={c.file} className={esito?.copia === c.file ? 'dati-appena' : undefined}>
                   <td>{quandoInParole(c.quando)}</td>
                   <td>
-                    {c.rotta ? 'il file che non si leggeva, messo da parte' : c.perche || '—'}
+                    {c.rotta ? 'file non leggibile, messo da parte' : c.perche || '—'}
                     <span className="sotto dati-file">{c.file}</span>
                   </td>
                   <td className="n">
                     {c.rotta ? (
-                      <span className="tenue piccolo">non si legge</span>
+                      <span className="tenue piccolo">non leggibile</span>
                     ) : (
                       <button
                         type="button"

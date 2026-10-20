@@ -123,7 +123,7 @@ describe('scrivere una correzione di NIC, cambi o riferimenti', () => {
   it('una correzione impossibile non scrive niente', async () => {
     const prima = await leggiTesto()
     const r = await scriviCorrezioneDato(cartella, impronta(prima), { azione: 'torna', dato: { tipo: 'nic', data: '2026-09-30' } }, orologioDaProva())
-    expect(r).toEqual({ esito: 'errore', perche: 'il NIC di settembre 2026 non ha un valore di prima' })
+    expect(r).toEqual({ esito: 'errore', perche: 'il NIC di settembre 2026 non ha un valore precedente' })
     expect(await leggiTesto()).toBe(prima)
     expect(await copie()).toEqual([VECCHIA])
   })

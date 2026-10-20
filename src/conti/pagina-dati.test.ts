@@ -60,12 +60,12 @@ describe('la scheda Prezzi dei titoli', () => {
     expect(fraseFonti(contaFonti(righe))).toBe('1 da Euronext Milano · 1 da investing.com (riserva)')
   })
 
-  it('i mesi del file Excel dicono "dal tuo file Excel", senza controllo; un prezzo corretto conta "a mano"', () => {
+  it('i mesi del file Excel dicono "file Excel iniziale", senza controllo; un prezzo corretto conta "a mano"', () => {
     const dati = applicaCorrezione(aVersione3(portafoglioInventato()), { tipo: 'correggi', titolo: MOND, data: SETTEMBRE, prezzo: 12.57 }, '2026-10-19T18:00:00.000Z')
     const righe = righePrezzi(dati, SETTEMBRE)
     expect(righe[0]).toMatchObject({ nome: 'MOND', aMano: true, perche: null, controllo: null })
-    expect(righe[1].fonte.nome).toBe('dal tuo file Excel')
-    expect(fraseFonti(contaFonti(righe))).toBe('1 scritto a mano · 1 dal tuo file Excel')
+    expect(righe[1].fonte.nome).toBe('file Excel iniziale')
+    expect(fraseFonti(contaFonti(righe))).toBe('1 inserito manualmente · 1 dal file Excel iniziale')
   })
 
   it('il pannello del prezzo: fonte, seduta, perché, controllo, prezzo in euro, e la correzione', () => {
@@ -79,7 +79,7 @@ describe('la scheda Prezzi dei titoli', () => {
     ])
     expect(s.note).toContain('Fonte: investing.com (riserva), chiusura del 30/10/2026.')
     expect(s.note).toContain('London Stock Exchange non ha risposto.')
-    expect(s.note).toContain('Controllo di investing.com non fatto: il prezzo viene già da investing.com.')
+    expect(s.note).toContain('Controllo con investing.com non eseguito: il prezzo viene già da investing.com.')
     expect(s.correggi).toEqual({ titolo: TECN, data: OTTOBRE })
     // Dopo una correzione il pannello si rifà sui dati nuovi.
     const corretto = applicaCorrezione(conOttobre(), { tipo: 'correggi', titolo: TECN, data: OTTOBRE, prezzo: 53.5 }, '2026-11-04T10:00:00.000Z')
@@ -148,7 +148,7 @@ describe('la scheda Inflazione, cambi e riferimenti', () => {
     expect(s.note[0]).toBe('Fonte: investing.com, chiusura del 31/07/2026.')
     const manca = spiegaDato(dati, { tipo: 'riferimento', riferimento: 'nasdaq100', data: '2026-08-31' })
     expect(cifra(manca.grande)).toBe('manca')
-    expect(manca.frase).toMatch(/^investing.com non ha dato il valore di fine agosto/)
+    expect(manca.frase).toMatch(/^investing.com non ha fornito il valore di fine agosto/)
     expect(manca.correggiDato).toEqual({ tipo: 'riferimento', riferimento: 'nasdaq100', data: '2026-08-31' })
   })
 

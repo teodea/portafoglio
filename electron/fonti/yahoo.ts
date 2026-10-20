@@ -38,7 +38,7 @@ export function leggiYahoo(testo: string): GraficoYahoo {
   try {
     valore = JSON.parse(testo)
   } catch {
-    throw new NonVa('ha risposto con dati che non si leggono')
+    throw new NonVa('ha risposto con dati non leggibili')
   }
   type Risposta = {
     chart?: {

@@ -1,11 +1,11 @@
 // La schermata Aggiorna fine mese (ticket 27 della mappa): testata, riquadri, la lista a gruppi che si
-// riempie, "Riprova" e "Scrivo a mano", la barra ferma con "Annulla" e "Salva <mese>", poi "<Mese> è salvato"
-// con "Rifai <mese>". Se non c'è un mese da fare, dice qual è l'ultimo salvato e permette di rifarlo.
+// riempie, "Riprova" e "Inserisci manualmente", la barra ferma con "Annulla" e "Salva <mese>", poi
+// "Aggiornamento di <mese> salvato" con "Ripeti <mese>". Se non c'è un mese da fare, dice qual è l'ultimo salvato e permette di rifarlo.
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { confrontoDellaRiga, senzaCodice } from '../dati/aggiorna/controllo-prezzo.ts'
 import { fineMese, meseDopo, meseEAnno, NomeMese, nomeMese, ultimaSeduta } from '../dati/aggiorna/calendario.ts'
-import { eUfficiale, FONTE, FONTE_CAMBIO, fonteDaVersione2, nomeBreve } from '../dati/aggiorna/fonti.ts'
+import { eUfficiale, FONTE, FONTE_CAMBIO, fonteDaMostrare, fonteDaVersione2, nomeBreve } from '../dati/aggiorna/fonti.ts'
 import {
   cambioDi,
   confrontoConPrima,
@@ -99,7 +99,7 @@ function Lista({ agg }: { agg: Aggiornamento }) {
   return (
     <>
       <div className="testata">
-        <h1>{agg.rifai ? `Rifai ${nomeMese(agg.mese)}` : 'Aggiorna fine mese'}</h1>
+        <h1>{agg.rifai ? `Ripeti l’aggiornamento di ${nomeMese(agg.mese)}` : 'Aggiorna fine mese'}</h1>
         <span className="tenue">
           {meseEAnno(agg.mese)}: prezzi di chiusura del {giorno(seduta)}, ultimo giorno di borsa
         </span>
@@ -117,12 +117,12 @@ function Lista({ agg }: { agg: Aggiornamento }) {
       )}
       <div className="numeri">
         <div className="numero">
-          <small>Valore dei titoli a fine {nomeMese(agg.mese)}</small>
+          <small>Controvalore a fine {nomeMese(agg.mese)}</small>
           <b>{valore !== null ? euro(valore) : '…'}</b>
           {valore !== null && prima !== null ? (
-            <span className={valore - prima >= 0 ? 'agg-su' : 'agg-giu'}>{euroConSegno(valore - prima)} rispetto al mese prima</span>
+            <span className={valore - prima >= 0 ? 'agg-su' : 'agg-giu'}>{euroConSegno(valore - prima)} rispetto al mese precedente</span>
           ) : (
-            <span>si calcola quando arrivano tutti i prezzi</span>
+            <span>calcolato quando tutti i prezzi sono disponibili</span>
           )}
         </div>
         <div className="numero">
@@ -131,7 +131,7 @@ function Lista({ agg }: { agg: Aggiornamento }) {
             {prezziPronti(agg)} di {agg.titoli.length}
           </b>
           <span>
-            {manca.titoli.length ? `${manca.titoli.length} da riprovare o scrivere a mano` : scarica ? 'in arrivo' : 'tutti arrivati'}
+            {manca.titoli.length ? `${manca.titoli.length} da richiedere di nuovo o inserire manualmente` : scarica ? 'in arrivo' : 'tutti ricevuti'}
           </span>
         </div>
         {agg.cambi.length > 0 && (
@@ -141,19 +141,19 @@ function Lista({ agg }: { agg: Aggiornamento }) {
               {cambiPronti} di {agg.cambi.length}
             </b>
             <span>
-              {manca.cambi.length ? 'da riprovare o scrivere a mano' : cambiPronti === agg.cambi.length ? 'arrivati' : 'in arrivo'}
+              {manca.cambi.length ? 'da richiedere di nuovo o inserire manualmente' : cambiPronti === agg.cambi.length ? 'ricevuti' : 'in arrivo'}
             </span>
           </div>
         )}
         {agg.rif && <RiquadriRiferimenti p={agg.rif} />}
         {agg.rifai && (
           <div className="numero">
-            <small>Rispetto a prima</small>
+            <small>Rispetto ai valori precedenti</small>
             <b>
               {pd.uguali + pd.tenuti} uguali su {agg.titoli.length}
             </b>
             <span>
-              {pd.diversi.length ? `diversi: ${elenco(pd.diversi.map(etichetta))}` : scarica ? 'in arrivo' : 'nessun prezzo cambiato'}
+              {pd.diversi.length ? `diversi: ${elenco(pd.diversi.map(etichetta))}` : scarica ? 'in arrivo' : 'nessun prezzo modificato'}
             </span>
           </div>
         )}
@@ -164,8 +164,8 @@ function Lista({ agg }: { agg: Aggiornamento }) {
           <span>
             <Icona nome="info" />
             <span>
-              Il controllo di investing.com non si fa per {senzaCodici === 1 ? '1 titolo' : `${senzaCodici} titoli`}: nel file{' '}
-              {senzaCodici === 1 ? 'manca il suo codice' : 'mancano i loro codici'} investing.com. I prezzi arrivano lo stesso dalla borsa.
+              Il controllo con investing.com non è possibile per {senzaCodici === 1 ? '1 titolo' : `${senzaCodici} titoli`}: nel file{' '}
+              {senzaCodici === 1 ? 'manca il relativo codice' : 'mancano i relativi codici'} investing.com. I prezzi arrivano comunque dalla borsa.
               I codici si cercano nella pagina <Link className="link" to="/dati">
                 Dati
               </Link>, scheda Prezzi dei titoli.
@@ -176,8 +176,8 @@ function Lista({ agg }: { agg: Aggiornamento }) {
       <div className="riquadro">
         <div className="agg-attrezzi">
           {scarica
-            ? 'La lista si riempie riga per riga. Nel file non si scrive niente finché non premi Salva.'
-            : 'Clic su un prezzo per vedere da dove viene o per scriverlo a mano.'}
+            ? 'La lista si completa riga per riga. Il file dei dati non viene modificato fino al salvataggio.'
+            : 'Selezionare un prezzo per vederne la provenienza o inserirlo manualmente.'}
           {scarica && <Gira />}
         </div>
         <div className="agg-scorre">
@@ -188,20 +188,20 @@ function Lista({ agg }: { agg: Aggiornamento }) {
                 <th>Borsa</th>
                 <th className="n">Prezzo</th>
                 <th className="n">Sul mese</th>
-                <th>Da dove viene</th>
+                <th>Provenienza</th>
                 <th>
                   Controllo
                   <br />
                   investing.com
                 </th>
-                {agg.rifai && <th>Prima</th>}
+                {agg.rifai && <th>Precedente</th>}
                 <th className="n" aria-label="Stato" />
               </tr>
             </thead>
             <tbody>
               <tr className="agg-gruppo">
                 <td colSpan={colonne}>
-                  Prezzi dei titoli <span className="tenue">· servono tutti per salvare</span>
+                  Prezzi dei titoli <span className="tenue">· tutti necessari per salvare</span>
                 </td>
               </tr>
               {agg.titoli.map((r) => (
@@ -213,7 +213,7 @@ function Lista({ agg }: { agg: Aggiornamento }) {
               {agg.cambi.length > 0 && (
                 <tr className="agg-gruppo">
                   <td colSpan={colonne}>
-                    Cambi <span className="tenue">· servono per salvare</span>
+                    Cambi <span className="tenue">· necessari per salvare</span>
                   </td>
                 </tr>
               )}
@@ -243,7 +243,7 @@ function Fonte({ fonte, nota }: { fonte: string; nota?: string }) {
     <>
       <span className={`agg-fonte ${eUfficiale(fonte) || fonte === FONTE_CAMBIO.bce ? 'borsa' : 'riserva'}`}>
         <span className="punto" />
-        {fonte}
+        {fonteDaMostrare(fonte)}
       </span>
       {nota && <span className="agg-sotto">{nota[0].toUpperCase() + nota.slice(1)}</span>}
     </>
@@ -253,13 +253,13 @@ function Fonte({ fonte, nota }: { fonte: string; nota?: string }) {
 function AMano() {
   return (
     <span className="agg-amano">
-      <Matita /> a mano
+      <Matita /> manuale
     </span>
   )
 }
 
-/** Il nome della fonte di prima, anche se il file è ancora alla versione 2 ("file (foglio …)" → "dal tuo file Excel"). */
-const fontePrima = (fonte: string) => fonteDaVersione2(fonte)
+/** Il nome della fonte di prima, anche se il file è ancora alla versione 2 ("file (foglio …)" → "file Excel iniziale"). */
+const fontePrima = (fonte: string) => fonteDaMostrare(fonteDaVersione2(fonte))
 
 function Prima({
   prima,
@@ -271,15 +271,15 @@ function Prima({
   /** Solo per i titoli: tieni il prezzo di prima, o usa quello nuovo. */
   tieni?: { tenuto: boolean; cambia: (tieni: boolean) => void; nuovo?: number }
 }) {
-  if (!prima) return <span className="tenue">non c’era</span>
+  if (!prima) return <span className="tenue">assente</span>
   if (tieni?.tenuto)
     return (
       <span>
-        <b>tenuto com’era</b>
+        <b>mantenuto</b>
         <span className="agg-sotto">
-          {tieni.nuovo !== undefined && <>dalla borsa sarebbe {prezzo(tieni.nuovo)} · </>}
+          {tieni.nuovo !== undefined && <>prezzo della borsa: {prezzo(tieni.nuovo)} · </>}
           <button type="button" className="link" onClick={() => tieni.cambia(false)}>
-            Usa quello nuovo
+            Usa il nuovo prezzo
           </button>
         </span>
       </span>
@@ -303,12 +303,12 @@ function Prima({
         <s className="tenue">{prezzo(prima.prezzo)}</s> → {prezzo(dopo)}
       </b>
       <span className="agg-sotto">
-        diverso di {percentuale(c.differenza)} · prima {fontePrima(prima.fonte)}
+        differenza di {percentuale(c.differenza)} · prima: {fontePrima(prima.fonte)}
         {tieni && (
           <>
             {' · '}
             <button type="button" className="link" onClick={() => tieni.cambia(true)}>
-              Tieni quello di prima
+              Mantieni il precedente
             </button>
           </>
         )}
@@ -357,7 +357,7 @@ function RigaDelTitolo({ r, rifai, aperta, apri }: { r: RigaTitolo; rifai: boole
         {nome}
         <td className="agg-borsa">{r.nomeBorsa}</td>
         <td className="n">
-          <b>manca</b>
+          <b>mancante</b>
         </td>
         <td />
         <td colSpan={rifai ? 3 : 2}>
@@ -369,7 +369,7 @@ function RigaDelTitolo({ r, rifai, aperta, apri }: { r: RigaTitolo; rifai: boole
               <Icona nome="aggiorna" piccola /> Riprova
             </button>
             <button type="button" className="btn" aria-expanded={aperta} onClick={apri}>
-              <Matita /> Scrivo a mano
+              <Matita /> Inserisci manualmente
             </button>
           </span>
         </td>
@@ -389,7 +389,7 @@ function RigaDelTitolo({ r, rifai, aperta, apri }: { r: RigaTitolo; rifai: boole
         {r.aMano !== undefined ? (
           <AMano />
         ) : r.tieni && r.prima ? (
-          <Fonte fonte={fontePrima(r.prima.fonte)} nota="tenuto com’era" />
+          <Fonte fonte={fontePrima(r.prima.fonte)} nota="mantenuto" />
         ) : r.stato.tipo === 'arrivato' ? (
           <Fonte fonte={r.stato.esito.fonte} nota={r.stato.esito.nota} />
         ) : null}
@@ -446,7 +446,7 @@ function RigaDelCambio({ c, rifai, aperta, apri }: { c: RigaCambio; rifai: boole
         {nome}
         <td>BCE</td>
         <td className="n">
-          <b>manca</b>
+          <b>mancante</b>
         </td>
         <td />
         <td colSpan={rifai ? 3 : 2}>
@@ -458,7 +458,7 @@ function RigaDelCambio({ c, rifai, aperta, apri }: { c: RigaCambio; rifai: boole
               <Icona nome="aggiorna" piccola /> Riprova
             </button>
             <button type="button" className="btn" aria-expanded={aperta} onClick={apri}>
-              <Matita /> Scrivo a mano
+              <Matita /> Inserisci manualmente
             </button>
           </span>
         </td>
@@ -491,7 +491,7 @@ function RigaDelCambio({ c, rifai, aperta, apri }: { c: RigaCambio; rifai: boole
   )
 }
 
-// ---------- il dettaglio di una riga: da dove viene, e "Scrivo a mano" ----------
+// ---------- il dettaglio di una riga: la provenienza, e "Inserisci manualmente" ----------
 
 function CasellaAMano({
   etichettaCampo,
@@ -532,16 +532,16 @@ function CasellaAMano({
       </label>
       <span className="bottoni">
         <button type="button" className="btn primario" onClick={conferma}>
-          <Matita /> Scrivo a mano
+          <Matita /> Inserisci manualmente
         </button>
         {togli && (
           <button type="button" className="btn" onClick={togli}>
-            Togli quello a mano
+            Rimuovi il valore manuale
           </button>
         )}
       </span>
-      {sbagliato && <span className="agg-errore" role="alert">Scrivi un numero più di zero, per esempio 12,75.</span>}
-      <span className="agg-sotto">Resta segnato “a mano”. Nel file non si scrive niente finché non premi Salva.</span>
+      {sbagliato && <span className="agg-errore" role="alert">Inserire un numero maggiore di zero, per esempio 12,75.</span>}
+      <span className="agg-sotto">Il valore resta segnato come manuale. Il file dei dati non viene modificato fino al salvataggio.</span>
     </div>
   )
 }
@@ -560,10 +560,10 @@ function Dettaglio({ r, agg, colonne, chiudi }: { r: RigaTitolo; agg: Aggiorname
           <div>
             {r.aMano !== undefined ? (
               <p>
-                <AMano /> scritto adesso
+                <AMano /> inserito ora
                 {r.stato.tipo === 'arrivato' && (
                   <>
-                    . Era <s>{prezzo(r.stato.esito.prezzo)}</s> da {r.stato.esito.fonte}
+                    . Prezzo ricevuto: <s>{prezzo(r.stato.esito.prezzo)}</s> da {r.stato.esito.fonte}
                   </>
                 )}
                 .
@@ -574,7 +574,7 @@ function Dettaglio({ r, agg, colonne, chiudi }: { r: RigaTitolo; agg: Aggiorname
               </p>
             ) : (
               <p>
-                Il prezzo di chiusura del {giorno(seduta)} non è arrivato. Puoi trovarlo sul sito della borsa o nel PDF di fine mese della
+                Il prezzo di chiusura del {giorno(seduta)} non è disponibile. Si trova sul sito della borsa o nel PDF di fine mese della
                 banca.
               </p>
             )}
@@ -606,7 +606,7 @@ function Dettaglio({ r, agg, colonne, chiudi }: { r: RigaTitolo; agg: Aggiorname
                   </div>
                 )}
                 <div>
-                  <span>Valore a fine {nomeMese(agg.mese)}</span>
+                  <span>Controvalore a fine {nomeMese(agg.mese)}</span>
                   <span>{c !== undefined ? euro((r.quote * p) / c) : '…'}</span>
                 </div>
               </div>
@@ -616,8 +616,8 @@ function Dettaglio({ r, agg, colonne, chiudi }: { r: RigaTitolo; agg: Aggiorname
           <CasellaAMano
             etichettaCampo={
               p === undefined
-                ? `Scrivi il prezzo di chiusura del ${giorno(seduta)}, in ${r.valuta}`
-                : 'Se il prezzo è sbagliato, scrivi quello giusto'
+                ? `Prezzo di chiusura del ${giorno(seduta)}, in ${r.valuta}`
+                : 'Prezzo corretto, se quello ricevuto è errato'
             }
             segnaposto={p !== undefined ? prezzo(p) : r.precedente ? prezzo(r.precedente.prezzo) : ''}
             usa={(n) => {
@@ -642,22 +642,21 @@ function DettaglioCambio({ c, agg, colonne, chiudi }: { c: RigaCambio; agg: Aggi
           <div>
             {c.aMano !== undefined ? (
               <p>
-                <AMano /> scritto adesso.
+                <AMano /> inserito ora.
               </p>
             ) : c.stato.tipo === 'arrivato' ? (
               <p>
-                Cambio di riferimento della <b>BCE</b> del <b>{giorno(c.stato.esito.seduta)}</b>: quante{' '}
-                {nomeValuta(c.valuta).toLowerCase()} per 1 euro.
+                Cambio di riferimento della <b>BCE</b> del <b>{giorno(c.stato.esito.seduta)}</b>: {c.valuta} per 1 euro.
               </p>
             ) : (
               <p>
-                Il cambio di fine {nomeMese(agg.mese)} non è arrivato. Lo trovi sul sito della BCE (“euro foreign exchange reference
+                Il cambio di fine {nomeMese(agg.mese)} non è disponibile. Si trova sul sito della BCE (“euro foreign exchange reference
                 rates”).
               </p>
             )}
           </div>
           <CasellaAMano
-            etichettaCampo={v === undefined ? `Scrivi il cambio: ${c.valuta} per 1 euro` : 'Se il cambio è sbagliato, scrivi quello giusto'}
+            etichettaCampo={v === undefined ? `Cambio: ${c.valuta} per 1 euro` : 'Cambio corretto, se quello ricevuto è errato'}
             segnaposto={v !== undefined ? cambio(v) : c.precedente ? cambio(c.precedente) : ''}
             usa={(n) => {
               cambioAMano(c.valuta, n)
@@ -680,19 +679,19 @@ function BarraFerma({ agg, versione }: { agg: Aggiornamento; versione: number })
   const pronto = puoSalvare(agg)
   const pd = primaEDopo(agg)
   let frase
-  if (esci) frase = <b>Esci senza salvare? I prezzi scaricati si perdono, il file resta com’era.</b>
-  else if (salvando) frase = <span>Faccio la copia e salvo…</span>
+  if (esci) frase = <b>Uscire senza salvare? I prezzi scaricati andranno persi; il file dei dati non viene modificato.</b>
+  else if (salvando) frase = <span>Copia di sicurezza e salvataggio in corso…</span>
   else if (pronto)
     frase = (
       <span>
         {agg.rifai &&
           `${elenco([
-            `${pd.uguali} ${pd.uguali === 1 ? 'prezzo uguale' : 'prezzi uguali'} a prima`,
-            ...(pd.tenuti ? [`${pd.tenuti} ${pd.tenuti === 1 ? 'tenuto' : 'tenuti'} com’era`] : []),
+            `${pd.uguali} ${pd.uguali === 1 ? 'prezzo uguale al precedente' : 'prezzi uguali ai precedenti'}`,
+            ...(pd.tenuti ? [`${pd.tenuti} ${pd.tenuti === 1 ? 'mantenuto' : 'mantenuti'}`] : []),
             ...(pd.diversi.length ? [`${pd.diversi.length} ${pd.diversi.length === 1 ? 'diverso' : 'diversi'}`] : []),
           ])}. `}
-        Tutto pronto. Prima di salvare faccio una copia del file com’è adesso, in <b>copie</b>.
-        {versione < 3 && ' Il file passa alla versione 3, dove ogni prezzo porta scritto da dove viene.'}
+        Pronto per il salvataggio. Prima di salvare viene fatta una copia del file attuale nella cartella <b>copie</b>.
+        {versione < 3 && ' Il file passa alla versione 3, in cui ogni prezzo riporta la propria provenienza.'}
         {fraseBarraRiferimenti(agg.rif)}
       </span>
     )
@@ -703,10 +702,10 @@ function BarraFerma({ agg, versione }: { agg: Aggiornamento; versione: number })
     ]
     frase = (
       <span>
-        <b>Manca {elenco(cosa)}</b>: riprova o scrivilo a mano per poter salvare.
+        <b>Manca {elenco(cosa)}</b>: per poter salvare, richiederlo di nuovo o inserirlo manualmente.
       </span>
     )
-  } else frase = <span>Sto scaricando…</span>
+  } else frase = <span>Scaricamento in corso…</span>
   return (
     <div className="agg-piede" role="region" aria-label="Salvataggio">
       {frase}
@@ -714,7 +713,7 @@ function BarraFerma({ agg, versione }: { agg: Aggiornamento; versione: number })
         {esci ? (
           <>
             <button type="button" className="btn" onClick={() => setEsci(false)}>
-              No, resto
+              No, continua
             </button>
             <button type="button" className="btn primario" onClick={annulla}>
               Sì, esci senza salvare
@@ -740,9 +739,9 @@ function BarraFerma({ agg, versione }: { agg: Aggiornamento; versione: number })
 function frasiFonti(fonti: [string, number][]): string {
   return elenco(
     fonti.map(([f, n]) => {
-      if (f === FONTE.aMano) return `${n} scritt${n === 1 ? 'o' : 'i'} a mano`
-      if (f === TENUTO) return `${n} ${n === 1 ? 'tenuto' : 'tenuti'} com’era`
-      if (f === FONTE.fileExcel) return `${n} dal tuo file Excel`
+      if (f === FONTE.aMano) return `${n} inserit${n === 1 ? 'o' : 'i'} manualmente`
+      if (f === TENUTO) return `${n} ${n === 1 ? 'mantenuto' : 'mantenuti'}`
+      if (f === FONTE.fileExcel) return `${n} dal file Excel iniziale`
       return `${n} da ${f}`
     }),
   )
@@ -763,34 +762,34 @@ function RiquadroSalvato({ s }: { s: Salvato }) {
           <span className="agg-ok">
             <Icona nome="ok" />
           </span>
-          {NomeMese(s.mese)} è salvato
+          Aggiornamento di {nomeMese(s.mese)} salvato
         </h2>
         <ul>
           <li>
-            Prima di scrivere ho fatto la copia <b>copie\{s.copia}</b>.
+            Prima della scrittura è stata fatta la copia <b>copie\{s.copia}</b>.
           </li>
           <li>
             {totale} prezzi dei titoli: {frasiFonti(s.fonti)}.
           </li>
           {s.rifai && (
             <li>
-              {s.uguali} uguali a quelli di prima (a parte gli arrotondamenti del file Excel)
-              {s.tenuti ? `, ${s.tenuti} ${s.tenuti === 1 ? 'tenuto' : 'tenuti'} com’era` : ''}
+              {s.uguali} uguali ai precedenti (salvo gli arrotondamenti del file Excel)
+              {s.tenuti ? `, ${s.tenuti} ${s.tenuti === 1 ? 'mantenuto' : 'mantenuti'}` : ''}
               {s.diversi.length
-                ? `; cambiati: ${elenco(s.diversi.map((d) => `${d.titolo} ${prezzo(d.prima)} → ${prezzo(d.dopo)}`))}`
-                : ', nessuno cambiato'}
+                ? `; modificati: ${elenco(s.diversi.map((d) => `${d.titolo} ${prezzo(d.prima)} → ${prezzo(d.dopo)}`))}`
+                : ', nessuno modificato'}
               .
             </li>
           )}
           {s.controlli && s.controlli.uguali + s.controlli.diversi.length + s.controlli.nonFatti > 0 && (
             <li>
-              Controllo di investing.com:{' '}
+              Controllo con investing.com:{' '}
               {elenco([
                 ...(s.controlli.uguali ? [`${s.controlli.uguali} ${s.controlli.uguali === 1 ? 'uguale' : 'uguali'}`] : []),
-                ...s.controlli.diversi.map((d) => `${d.titolo} diverso di ${differenza(d.differenza)}`),
+                ...s.controlli.diversi.map((d) => `${d.titolo} con differenza di ${differenza(d.differenza)}`),
                 ...(s.controlli.nonFatti
                   ? [
-                      `${s.controlli.nonFatti} non ${s.controlli.nonFatti === 1 ? 'fatto' : 'fatti'}${
+                      `${s.controlli.nonFatti} non ${s.controlli.nonFatti === 1 ? 'eseguito' : 'eseguiti'}${
                         s.controlli.senzaCodice === s.controlli.nonFatti
                           ? ` perché nel file ${s.controlli.nonFatti === 1 ? 'manca il codice' : 'mancano i codici'} investing.com (si cercano nella pagina Dati)`
                           : ''
@@ -803,14 +802,14 @@ function RiquadroSalvato({ s }: { s: Salvato }) {
           )}
           {s.versione3 && (
             <li>
-              Il file è passato alla versione 3: ogni prezzo porta scritto da dove viene.{' '}
-              {s.rifai ? 'Gli altri mesi' : 'I prezzi che c’erano'} sono rimasti come prima.
+              Il file è passato alla versione 3: ogni prezzo riporta la propria provenienza.{' '}
+              {s.rifai ? 'Gli altri mesi' : 'I prezzi già presenti'} sono invariati.
             </li>
           )}
           {s.frasiRiferimenti.map((f) => (
             <li key={f}>{f}</li>
           ))}
-          {prossimo && <li>Manca ancora {nomeMese(prossimo)}: si fa adesso, un mese alla volta.</li>}
+          {prossimo && <li>Resta da aggiornare {nomeMese(prossimo)}: si procede un mese alla volta.</li>}
         </ul>
         <p className="bottoni">
           {prossimo && (
@@ -822,10 +821,10 @@ function RiquadroSalvato({ s }: { s: Salvato }) {
             Vai ai titoli
           </Link>
           <Link to="/dati" className="btn">
-            Vedi da dove vengono i prezzi
+            Provenienza dei prezzi
           </Link>
           <button type="button" className="btn" onClick={() => inizia(s.mese)}>
-            Rifai {nomeMese(s.mese)}
+            Ripeti {nomeMese(s.mese)}
           </button>
         </p>
       </div>
@@ -846,14 +845,14 @@ function NienteDaFare() {
         </div>
         <div className="riquadro agg-salvato">
           <h2>
-            {elenco(mesiDaFare.map(NomeMese))} {mesiDaFare.length === 1 ? 'è finito' : 'sono finiti'}: i prezzi di fine mese non ci sono
-            ancora
+            {elenco(mesiDaFare.map(NomeMese))} {mesiDaFare.length === 1 ? 'è concluso' : 'sono conclusi'}: i prezzi di fine mese non sono
+            ancora presenti
           </h2>
           <ul>
             <li>
-              I prezzi arrivano dalle borse in cui sono quotati i titoli, i cambi dalla BCE. Si fa un mese alla volta, dal più vecchio.
+              I prezzi arrivano dalle borse in cui sono quotati i titoli, i cambi dalla BCE. Si procede un mese alla volta, dal meno recente.
             </li>
-            <li>Nel file non si scrive niente finché non premi Salva, e prima si fa una copia.</li>
+            <li>Il file dei dati viene modificato solo al salvataggio, dopo una copia di sicurezza.</li>
           </ul>
           <p className="bottoni">
             <button type="button" className="btn primario" onClick={() => inizia(mesiDaFare[0])}>
@@ -887,27 +886,27 @@ function NienteDaFare() {
           <span className="agg-ok">
             <Icona nome="ok" />
           </span>
-          {NomeMese(ultimo)} è salvato
+          Aggiornamento di {nomeMese(ultimo)} salvato
         </h2>
         <ul>
           <li>
             {prezzi.length} prezzi dei titoli: {frasiFonti(fonti)}.
           </li>
           <li>
-            {NomeMese(prossimo)} si aggiorna dal 1° {nomeMese(meseDopo(prossimo))}: in alto su ogni pagina comparirà la striscia “
-            {NomeMese(prossimo)} è finito”.
+            L’aggiornamento di {nomeMese(prossimo)} sarà possibile dal 1° {nomeMese(meseDopo(prossimo))}: in cima a ogni pagina comparirà l’avviso
+            “{NomeMese(prossimo)} è concluso”.
           </li>
           <li>
-            “Rifai {nomeMese(ultimo)}” riscarica i prezzi dalle borse e ti mostra prima e dopo. Scrive solo se premi Salva, e prima fa una
-            copia.
+            “Ripeti {nomeMese(ultimo)}” scarica di nuovo i prezzi dalle borse e li mette a confronto con i precedenti. Il file dei dati
+            viene modificato solo al salvataggio, dopo una copia di sicurezza.
           </li>
         </ul>
         <p className="bottoni">
           <button type="button" className="btn primario" onClick={() => inizia(ultimo)}>
-            <Icona nome="aggiorna" piccola /> Rifai {nomeMese(ultimo)}
+            <Icona nome="aggiorna" piccola /> Ripeti {nomeMese(ultimo)}
           </button>
           <Link to="/dati" className="btn">
-            Vedi da dove vengono i prezzi
+            Provenienza dei prezzi
           </Link>
         </p>
       </div>

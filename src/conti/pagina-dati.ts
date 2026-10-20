@@ -13,7 +13,7 @@ import { baseNic, primaDelDato, trovaDato, valoreDelDato, type RifDato } from '.
 import type { RifPrezzo } from '../dati/correzione.ts'
 import { RIFERIMENTI, type FileDati, type PrezzoFineMese } from '../dati/tipi.ts'
 import { cambio as cambioTesto, data as dataTesto, mese as meseTesto, numero, percentuale } from '../formato.ts'
-import { fonteInParole, type FonteInParole } from './fonti.ts'
+import { fonteInParole, NOME_FILE_EXCEL, type FonteInParole } from './fonti.ts'
 import { cambio, euro, prezzo, riga, testo, type RigaConto, type Spiegazione } from './spiegazione.ts'
 
 // ---------- prezzi dei titoli ----------
@@ -88,11 +88,15 @@ export function contaFonti(righe: RigaPrezzo[]): { nome: string; quanti: number 
   return [...conta].map(([nome, quanti]) => ({ nome, quanti })).sort((a, b) => b.quanti - a.quanti || a.nome.localeCompare(b.nome, 'it'))
 }
 
-/** "12 da Borsa Italiana · 1 da investing.com (riserva) · 1 scritto a mano · 2 dal tuo file Excel" */
+/** "12 da Borsa Italiana · 1 da investing.com (riserva) · 1 inserito manualmente · 2 dal file Excel iniziale" */
 export function fraseFonti(conto: { nome: string; quanti: number }[]): string {
   return conto
     .map(({ nome, quanti }) =>
-      nome === FONTE.aMano ? `${quanti} ${quanti === 1 ? 'scritto' : 'scritti'} a mano` : nome.startsWith('dal ') || nome.startsWith('prezzo') || nome === 'stima' ? `${quanti} ${nome}` : `${quanti} da ${nome}`,
+      nome === FONTE.aMano
+        ? `${quanti} ${quanti === 1 ? 'inserito' : 'inseriti'} manualmente`
+        : nome === NOME_FILE_EXCEL
+          ? `${quanti} dal ${nome}`
+          : nome.startsWith('dal ') || nome.startsWith('prezzo') || nome === 'stima' ? `${quanti} ${nome}` : `${quanti} da ${nome}`,
     )
     .join(' · ')
 }
@@ -117,14 +121,14 @@ export function spiegaPrezzo(grezzi: FileDati, rif: RifPrezzo): Spiegazione | nu
   if (t) note.push(`Borsa di quotazione: ${t.nomeBorsa}.`)
   const pp = perche(p)
   if (pp) note.push(pp + '.')
-  if (f.nome === 'dal tuo file Excel' && p.nota) note.push(`Nel file Excel stava qui: ${p.nota.replace(/^file\s*/i, '')}.`)
+  if (f.nome === NOME_FILE_EXCEL && p.nota) note.push(`Posizione nel file Excel iniziale: ${p.nota.replace(/^file\s*/i, '')}.`)
   const controllo = controlloInParole(p.prezzo, p.valuta, p.controllo)
   if (controllo) note.push(controllo)
-  else if (f.nome === 'dal tuo file Excel') note.push('Il controllo di investing.com si fa solo per i prezzi scaricati dall’applicazione.')
+  else if (f.nome === NOME_FILE_EXCEL) note.push('Il controllo con investing.com si esegue solo sui prezzi scaricati dall’applicazione.')
   return {
     titolo: `Prezzo di ${nome} a fine ${meseTesto(p.data)}`,
     grande: prezzo(p.prezzo, p.valuta),
-    frase: `Il prezzo di chiusura dell’ultimo giorno di borsa di ${nomeMese(meseDi(p.data))}${t?.paroleSemplici ? `, per ${t.paroleSemplici.toLowerCase()}` : ''}.`,
+    frase: `Prezzo di chiusura dell’ultimo giorno di borsa di ${nomeMese(meseDi(p.data))}${t?.paroleSemplici ? `, per ${t.paroleSemplici.toLowerCase()}` : ''}.`,
     conto,
     note,
     correggi: { titolo: p.titolo, data: p.data },
@@ -179,14 +183,16 @@ export function senzaRiferimenti(dati: FileDati): boolean {
 
 function perchéManca(dati: FileDati, d: RifDato, ultimo: string): string {
   const mese = meseDi(d.data)
-  const prossimo = 'Si riprende da solo al prossimo aggiornamento; puoi anche scaricarlo di nuovo adesso o scriverlo a mano.'
+  const prossimo = 'Viene recuperato al prossimo aggiornamento; in alternativa si può scaricare di nuovo ora o inserire manualmente.'
   if (d.tipo === 'nic') {
     if (mese === ultimo) return `ISTAT di solito pubblica il NIC di ${nomeMese(mese)} ${quandoEsceNic(mese)}. ${prossimo}`
     return `Il NIC di ${nomeMese(mese)} non è nel file. ${prossimo}`
   }
-  if (d.tipo === 'cambio') return `Il cambio BCE di fine ${nomeMese(mese)} non è nel file: senza, il valore in euro dei titoli in ${d.valuta} usa il cambio scritto sul prezzo.`
-  if (senzaRiferimenti(dati)) return 'I riferimenti non sono ancora nel file: arrivano con il prossimo Aggiorna fine mese, che la prima volta scarica tutta la storia.'
-  return `investing.com non ha dato il valore di fine ${nomeMese(mese)}. ${prossimo}`
+  if (d.tipo === 'cambio')
+    return `Il cambio BCE di fine ${nomeMese(mese)} non è nel file: per il controvalore in euro dei titoli in ${d.valuta} si usa il cambio indicato sul prezzo.`
+  if (senzaRiferimenti(dati))
+    return 'I riferimenti non sono ancora nel file: saranno scaricati con il prossimo Aggiorna fine mese, che la prima volta recupera l’intera serie storica.'
+  return `investing.com non ha fornito il valore di fine ${nomeMese(mese)}. ${prossimo}`
 }
 
 function cella(dati: FileDati, d: RifDato, serve: boolean, ultimo: string): CellaDato {
@@ -271,7 +277,7 @@ export function spiegaDato(grezzi: FileDati, d: RifDato): Spiegazione {
   const note: string[] = []
   let frase: string
   if (d.tipo === 'nic') {
-    frase = 'L’indice dei prezzi al consumo per l’intera collettività (NIC) di ISTAT, indice generale: dice di quanto sono cresciuti i prezzi.'
+    frase = 'Indice dei prezzi al consumo per l’intera collettività (NIC) di ISTAT, indice generale: misura la variazione dei prezzi al consumo.'
     const prima = trovaDato(dati, { tipo: 'nic', data: fineMese(meseDopo(mese, -1)) }) as { valore: number; base: 2015 | 2025 } | undefined
     if (x && prima) {
       const n = x as { valore: number; base: 2015 | 2025 }
@@ -287,10 +293,10 @@ export function spiegaDato(grezzi: FileDati, d: RifDato): Spiegazione {
     note.push(aMano ? `Indice in ${base}.` : `Fonte: ${x ? x.fonte : 'ISTAT'}, ${base}.`)
   } else if (d.tipo === 'cambio') {
     const quante = d.valuta === 'GBP' ? 'sterline' : d.valuta === 'USD' ? 'dollari' : d.valuta
-    frase = `Quante ${quante} valeva 1 euro a fine mese, secondo la BCE. Il prezzo in ${quante} diviso il cambio dà il prezzo in euro.`
+    frase = `Cambio BCE di fine mese: ${quante} per 1 euro. Il prezzo in ${quante} diviso per il cambio dà il prezzo in euro.`
     const c = x as { seduta?: string } | undefined
     if (!aMano) note.push(`Fonte: ${x ? x.fonte : 'BCE'}${c?.seduta ? `, cambio di riferimento del ${dataTesto(c.seduta)}` : ''}.`)
-    if (x) note.push('Correggendolo cambia anche il cambio scritto sui prezzi dei titoli in questa valuta, a fine mese.')
+    if (x) note.push('Una correzione del cambio si applica anche ai prezzi di fine mese dei titoli in questa valuta.')
   } else {
     const r = DESCRIZIONE[d.riferimento]
     frase = `${r.cosa[0].toUpperCase() + r.cosa.slice(1)}: il valore di chiusura a fine mese.`

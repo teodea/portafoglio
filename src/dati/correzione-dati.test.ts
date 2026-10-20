@@ -178,7 +178,7 @@ describe('i rifiuti e i perché', () => {
     const dati = conDati()
     expect(controllaCorrezioneDato(dati, { azione: 'correggi', dato: NIC_AGOSTO, valore: 0 }).ok).toBe(false)
     const ora = (trovaDato(dati, NIC_AGOSTO) as { valore: number }).valore
-    expect(controllaCorrezioneDato(dati, { azione: 'correggi', dato: NIC_AGOSTO, valore: ora })).toEqual({ ok: false, perche: 'il numero nuovo è uguale a quello che c’è già' })
+    expect(controllaCorrezioneDato(dati, { azione: 'correggi', dato: NIC_AGOSTO, valore: ora })).toEqual({ ok: false, perche: 'il numero nuovo è uguale a quello presente' })
     expect(controllaCorrezioneDato(dati, { azione: 'torna', dato: NIC_AGOSTO }).ok).toBe(false)
     expect(() => applica(dati, { azione: 'torna', dato: NIC_AGOSTO })).toThrow()
   })

@@ -114,7 +114,7 @@ export function dataDelPdf(testo: string | undefined): string | null {
 const testo = (c: CampiPdf, k: string) => (c[k] ?? '').trim()
 
 const NON_RICONOSCIUTO =
-  'non sembra un acquisto, una vendita o un dividendo di Fineco (non ha i campi del modulo della banca). Puoi scrivere il movimento a mano'
+  'non risulta un acquisto, una vendita o un dividendo di Fineco (mancano i campi del modulo della banca). Il movimento si può inserire manualmente'
 
 /** Dai campi del modulo al movimento letto. Se manca qualcosa di importante, dice cosa. */
 export function leggiCampi(nome: string, percorso: string | null, c: CampiPdf): Esito<Letto> {
@@ -123,7 +123,7 @@ export function leggiCampi(nome: string, percorso: string | null, c: CampiPdf): 
   if (!operazione || !isin) return { ok: false, perche: `${nome} ${NON_RICONOSCIUTO}` }
   const data = dataDelPdf(c.Valuta_regolamento)
   const comune = { nome, percorso, isin, simbolo: testo(c, 'Simbolo'), descrizione: testo(c, 'Descrizione'), avvisi: [] as string[] }
-  const manca = (cosa: string): Esito<Letto> => ({ ok: false, perche: `in ${nome} non trovo ${cosa}` })
+  const manca = (cosa: string): Esito<Letto> => ({ ok: false, perche: `in ${nome} manca ${cosa}` })
   if (!data) return manca('la data di valuta')
 
   if (/DIVIDEND|CEDOL|PROVENT/.test(operazione)) {
@@ -147,10 +147,10 @@ export function leggiCampi(nome: string, percorso: string | null, c: CampiPdf): 
     const inValuta = [c.Controvalore_lordo, c.Importo_ritenuta].map(valutaDellImporto).find((v) => v && v !== 'EUR')
     if (valuta !== 'EUR' || inValuta)
       l.avvisi.push(
-        `Il PDF è in ${inValuta ?? valuta}: un dividendo in un’altra valuta non l’abbiamo ancora visto. Controlla che lordo e imposte siano in euro, come quelli arrivati sul conto.`,
+        `Il PDF è in ${inValuta ?? valuta}: un dividendo in un’altra valuta non si è ancora presentato. Verificare che lordo e imposte siano in euro, come gli importi accreditati sul conto.`,
       )
     const spese = (numeroDelPdf(c.Commissioni) ?? 0) + (numeroDelPdf(c.Spese) ?? 0) + (numeroDelPdf(c.Commissioni_valutarie) ?? 0)
-    if (spese > 0) l.avvisi.push(`Il PDF ha anche ${spese.toFixed(2).replace('.', ',')} € di commissioni o spese, che qui non si registrano.`)
+    if (spese > 0) l.avvisi.push(`Il PDF riporta anche ${spese.toFixed(2).replace('.', ',')} € di commissioni o spese, che qui non si registrano.`)
     return { ok: true, letto: l }
   }
 
@@ -186,7 +186,7 @@ export function leggiCampi(nome: string, percorso: string | null, c: CampiPdf): 
   const bolli = numeroDelPdf(c.Bolli) ?? 0
   const rateo = numeroDelPdf(c.Ritenuta_rateo) ?? 0
   if (bolli > 0 || rateo > 0)
-    l.avvisi.push('Il PDF ha anche bolli o una ritenuta sul rateo: il totale della banca li comprende già, ed è quello che conta.')
+    l.avvisi.push('Il PDF riporta anche bolli o una ritenuta sul rateo: sono già compresi nel totale della banca, che è l’importo registrato.')
   return { ok: true, letto: l }
 }
 
@@ -206,7 +206,7 @@ export function unisciPdf(letti: Letto[]): Esito<LettoUnito> {
   const base = { pdf: unici.map((l) => l.nome), percorsi: unici.map((l) => l.percorso) }
   if (unici.length === 1) return { ok: true, letto: { ...primo, ...base, pezzi: null } }
   const diversi =
-    'Hai scelto PDF di movimenti diversi. Registrane uno alla volta; insieme solo i pezzi dello stesso ordine (per esempio “a” e “b”)'
+    'I PDF scelti sono di movimenti diversi. Registrarli uno alla volta; insieme solo le parti dello stesso ordine (per esempio “a” e “b”)'
   if (primo.tipo === 'dividendo') return { ok: false, perche: diversi }
   const ops = unici as LettoOperazione[]
   if (!ops.every((o) => o.tipo === primo.tipo && o.isin === primo.isin && o.rifOrdine !== null && o.rifOrdine === primo.rifOrdine))
@@ -214,9 +214,9 @@ export function unisciPdf(letti: Letto[]): Esito<LettoUnito> {
   const quantita = ops.reduce((s, o) => s + o.quantita, 0)
   const avvisi = [...new Set(ops.flatMap((o) => o.avvisi))]
   const date = [...new Set(ops.map((o) => o.data))].sort()
-  if (date.length > 1) avvisi.push(`I pezzi hanno date di valuta diverse (${date.map((d) => d.split('-').reverse().join('/')).join(', ')}): uso l’ultima.`)
+  if (date.length > 1) avvisi.push(`Le parti hanno date di valuta diverse (${date.map((d) => d.split('-').reverse().join('/')).join(', ')}): si usa l’ultima.`)
   const cambi = [...new Set(ops.map((o) => o.cambio))]
-  if (cambi.length > 1) avvisi.push('I pezzi hanno cambi diversi: uso quello del primo. Il totale della banca è comunque la somma dei pezzi.')
+  if (cambi.length > 1) avvisi.push('Le parti hanno cambi diversi: si usa quello della prima. Il totale della banca è comunque la somma delle parti.')
   const esecuzioni = ops.map((o) => o.esecuzione).filter((x): x is string => x !== null).sort()
   return {
     ok: true,
@@ -263,7 +263,7 @@ export function titoloDelPdf(dati: FileDati, l: Letto): TitoloDelPdf {
       quale: 'non-hai',
       perche:
         stessoIsin.length === 0
-          ? `nel file non c’è ${nome} (ISIN ${l.isin}): registra prima il suo acquisto, poi il dividendo`
+          ? `nel file non c’è ${nome} (ISIN ${l.isin}): registrare prima il suo acquisto, poi il dividendo`
           : `nel file ci sono più titoli con l’ISIN ${l.isin} e nessuno aveva quote il ${l.data.split('-').reverse().join('/')}`,
     }
   }
@@ -286,8 +286,8 @@ export function titoloDelPdf(dati: FileDati, l: Letto): TitoloDelPdf {
     quale: 'non-hai',
     perche:
       stessoIsin.length === 0
-        ? `nel file non c’è ${nome} (ISIN ${l.isin}): non puoi venderlo. Se l’hai comprato, registra prima l’acquisto`
-        : `il ${l.data.split('-').reverse().join('/')} non avevi quote di ${nome}`,
+        ? `nel file non c’è ${nome} (ISIN ${l.isin}): non se ne può registrare la vendita. Se è stato acquistato, registrare prima l’acquisto`
+        : `il ${l.data.split('-').reverse().join('/')} non c’erano quote di ${nome}`,
   }
 }
 

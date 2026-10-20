@@ -76,7 +76,7 @@ export function qualeValore(rif: RifValore): string {
 /** Si può fare? Il numero nuovo deve essere sensato; per tornare indietro serve quello di prima. */
 export function controllaScrittura(dati: FileDati, s: ScritturaRiferimento): { ok: true } | { ok: false; perche: string } {
   if (s.tipo === 'scaricati') {
-    if (!s.riferimenti.length && !s.nic.length) return { ok: false, perche: 'non è arrivato niente da scrivere' }
+    if (!s.riferimenti.length && !s.nic.length) return { ok: false, perche: 'non è arrivato alcun valore da scrivere' }
     if (s.riferimenti.some((v) => v.riferimento !== s.id) || (s.id !== 'nic' && s.nic.length) || (s.id === 'nic' && s.riferimenti.length))
       return { ok: false, perche: 'i valori arrivati non sono di questo riferimento' }
     if (s.riferimenti.some((v) => v.fonte !== FONTE_RIFERIMENTO.investing) || s.nic.some((n) => n.fonte !== FONTE_NIC.istat))
@@ -86,15 +86,15 @@ export function controllaScrittura(dati: FileDati, s: ScritturaRiferimento): { o
   const c = trovaValore(dati, s)
   const quale = qualeValore(s)
   if (s.tipo === 'torna') {
-    if (!c || c.fonte !== FONTE_RIFERIMENTO.aMano || !c.prima) return { ok: false, perche: `${quale} non ha un valore di prima` }
+    if (!c || c.fonte !== FONTE_RIFERIMENTO.aMano || !c.prima) return { ok: false, perche: `${quale} non ha un valore precedente` }
     return { ok: true }
   }
-  if (!positivo(s.valore)) return { ok: false, perche: 'il valore nuovo deve essere un numero più di zero' }
-  if (s.cambio !== undefined && !positivo(s.cambio)) return { ok: false, perche: 'il cambio deve essere un numero più di zero' }
+  if (!positivo(s.valore)) return { ok: false, perche: 'il valore nuovo deve essere un numero maggiore di zero' }
+  if (s.cambio !== undefined && !positivo(s.cambio)) return { ok: false, perche: 'il cambio deve essere un numero maggiore di zero' }
   if (valutaDel(s.id) === 'USD' && !positivo(s.cambio ?? (c as ValoreRiferimento | undefined)?.cambio))
     return { ok: false, perche: `per ${quale} serve anche il cambio BCE del dollaro` }
   const cambioUguale = s.cambio === undefined || s.cambio === (c as ValoreRiferimento | undefined)?.cambio
-  if (c && c.valore === s.valore && cambioUguale) return { ok: false, perche: 'il valore nuovo è uguale a quello che c’è già' }
+  if (c && c.valore === s.valore && cambioUguale) return { ok: false, perche: 'il valore nuovo è uguale a quello presente' }
   return { ok: true }
 }
 

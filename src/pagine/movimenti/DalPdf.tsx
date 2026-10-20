@@ -1,6 +1,6 @@
 // Registra dal PDF (ticket 12): la zona dove trascinare o scegliere il PDF della banca, e i riquadri
-// che accompagnano la frase quando il movimento viene da un PDF: da dove è letto con "Guarda il PDF",
-// i pezzi dello stesso ordine sommati, gli avvisi, e il rifiuto di un PDF già registrato con "Apri quel movimento".
+// che accompagnano la frase quando il movimento viene da un PDF: da dove è letto con "Apri il PDF",
+// i pezzi dello stesso ordine sommati, gli avvisi, e il rifiuto di un PDF già registrato con "Apri il movimento".
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { spiegazioneDelMovimento } from '../../conti/movimenti.ts'
@@ -26,7 +26,7 @@ export function ZonaPdf({ quandoLetto }: { quandoLetto: (b: BozzaPdf) => void })
   const [errore, setErrore] = useState<string | null>(null)
 
   const leggi = async (file: File[]) => {
-    if (file.length === 0) return setErrore('Questo non è un PDF. Trascina qui il PDF della banca (il file che finisce con .pdf).')
+    if (file.length === 0) return setErrore('Il file non è un PDF. Trascinare qui il PDF della banca (file con estensione .pdf).')
     setErrore(null)
     setLeggo(true)
     try {
@@ -34,7 +34,7 @@ export function ZonaPdf({ quandoLetto }: { quandoLetto: (b: BozzaPdf) => void })
       if (esito.ok) quandoLetto(esito.bozza)
       else setErrore(esito.perche)
     } catch (e) {
-      setErrore(`Non riesco a leggere il PDF: ${percheInParole(e)}`)
+      setErrore(`Si è verificato un errore nella lettura del PDF: ${percheInParole(e)}`)
     } finally {
       setLeggo(false)
     }
@@ -65,15 +65,15 @@ export function ZonaPdf({ quandoLetto }: { quandoLetto: (b: BozzaPdf) => void })
         }}
       >
         <Icona nome="doc" />
-        <b>Trascina qui il PDF della banca</b>
+        <b>Trascinare qui il PDF della banca</b>
         <span>
           oppure{' '}
           <button type="button" className="link" disabled={leggo} onClick={() => input.current?.click()}>
-            scegli il file
+            selezionare il file
           </button>
-          . Se un ordine è in due pezzi (“a” e “b”), mettili insieme.
+          . Se un ordine è stato eseguito in due parti (“a” e “b”), selezionarle insieme.
         </span>
-        <small>I campi si compilano da soli e li rivedi prima di registrare.</small>
+        <small>I campi si compilano automaticamente e si verificano prima della registrazione.</small>
         <input
           ref={input}
           type="file"
@@ -89,7 +89,7 @@ export function ZonaPdf({ quandoLetto }: { quandoLetto: (b: BozzaPdf) => void })
       </div>
       {leggo && (
         <p className="nota-scrittura" role="status">
-          Leggo il PDF…
+          Lettura del PDF in corso…
         </p>
       )}
       {errore && (
@@ -103,7 +103,7 @@ export function ZonaPdf({ quandoLetto }: { quandoLetto: (b: BozzaPdf) => void })
 
 // ---------- accanto alla frase ----------
 
-/** "Letto da …" e "Guarda il PDF". */
+/** "Letto da …" e "Apri il PDF". */
 export function LettoDa({ bozza }: { bozza: BozzaPdf }) {
   const info = bozza.dalPdfInfo
   if (!bozza.pdf?.length) return null
@@ -119,7 +119,7 @@ export function LettoDa({ bozza }: { bozza: BozzaPdf }) {
             percorsi[i] ? (
               <button key={nome} type="button" className="btn piccolo" onClick={() => void ponte.guardaPdf(percorsi[i]!)}>
                 <Icona nome="doc" piccola />
-                {bozza.pdf!.length > 1 ? `Guarda ${nome}` : 'Guarda il PDF'}
+                {bozza.pdf!.length > 1 ? `Apri ${nome}` : 'Apri il PDF'}
               </button>
             ) : null,
           )}
@@ -140,8 +140,8 @@ export function Pezzi({ bozza }: { bozza: BozzaPdf }) {
       <Icona nome="info" />
       <div>
         <p>
-          Questi {info.pezzi.length} PDF sono <b>lo stesso ordine</b>
-          {info.ordine ? ` (n. ${info.ordine})` : ''} eseguito in {info.pezzi.length} pezzi: li sommo in {cosa} di <b>{quote(tot)} quote</b>.
+          I {info.pezzi.length} PDF riguardano <b>lo stesso ordine</b>
+          {info.ordine ? ` (n. ${info.ordine})` : ''}, eseguito in {info.pezzi.length} parti: sono sommati in {cosa} di <b>{quote(tot)} quote</b>.
         </p>
         <ul className="pezzi">
           {info.pezzi.map((p) => (
@@ -166,7 +166,7 @@ export function AvvisiPdf({ bozza }: { bozza: BozzaPdf }) {
     const q = quoteAlGiorno(dati, bozza.testi.titolo, giorno)
     if (Math.abs(q - info.quotePdf) > 1e-6)
       avvisi.push(
-        `Il PDF dice ${quote(info.quotePdf)} quote, ma nel file quel giorno ne avevi ${quote(q)}. Controlla i movimenti di questo titolo: forse manca un acquisto o una vendita.`,
+        `Il PDF indica ${quote(info.quotePdf)} quote, ma nel file a quella data ne risultano ${quote(q)}. Verificare i movimenti del titolo: potrebbe mancare un acquisto o una vendita.`,
       )
   }
   if (avvisi.length === 0) return null
@@ -195,9 +195,9 @@ export function GiaRegistrato({ id, indietro }: { id: string; indietro: string }
       <Icona nome="info" />
       <div>
         <p>
-          <b>Questo movimento è già registrato:</b> {movimentoInParole(dati, t)}
+          <b>Movimento già registrato:</b> {movimentoInParole(dati, t)}
           {t.tipo === 'operazione' ? `, ${quote(t.operazione.quantita)} quote, ${euro(t.operazione.totale, 2)}` : `, ${euro(t.dividendo.lordo, 2)} lordi`}
-          {fonte ? ` (fonte: ${fonte})` : ''}. Non lo registro due volte.
+          {fonte ? ` (fonte: ${fonte})` : ''}. Non può essere registrato due volte.
         </p>
         <div className="bottoni">
           <button
@@ -209,7 +209,7 @@ export function GiaRegistrato({ id, indietro }: { id: string; indietro: string }
               if (s) spiega(s)
             }}
           >
-            Apri quel movimento
+            Apri il movimento
           </button>
         </div>
       </div>

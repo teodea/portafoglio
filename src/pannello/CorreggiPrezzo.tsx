@@ -1,6 +1,6 @@
 // La correzione a mano di un prezzo, nel pannello "Da dove viene" (ticket 8, mappa 25 e DESIGN.md):
-// "Se il prezzo è sbagliato, scrivi quello giusto", "Correggi a mano", una conferma, poi la scrittura sicura
-// con la copia prima. Dopo, il prezzo porta "a mano" e quello di prima barrato, con "Torna al prezzo di prima".
+// "Se il prezzo è errato, inserire quello corretto", "Correggi", una conferma, poi la scrittura sicura
+// con la copia prima. Dopo, il prezzo porta "manuale" e quello di prima barrato, con "Torna al prezzo di prima".
 // Il prezzo si legge dal file di adesso, non dalla spiegazione: dopo la correzione si vede subito com'è.
 import { useRef, useState } from 'react'
 import { leggiNumero } from '../aggiorna/numeri.ts'
@@ -35,7 +35,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
 
   const chiedi = () => {
     const n = leggiNumero(testo)
-    const problema = n === null ? 'Scrivi un numero più di zero, per esempio 12,75.' : n === p.prezzo ? 'È uguale al prezzo che c’è già.' : null
+    const problema = n === null ? 'Inserire un numero maggiore di zero, per esempio 12,75.' : n === p.prezzo ? 'Il prezzo è uguale a quello già presente.' : null
     if (problema || n === null) {
       setSbagliato(problema)
       campo.current?.focus()
@@ -54,28 +54,28 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
     setConferma(null)
     const r = risposta as EsitoCorrezione | null
     if (!r) return // l'errore lo mostra già la striscia in alto
-    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Non ho scritto niente: ${r.perche}.` })
+    if (r.esito === 'errore') return setEsito({ ok: false, testo: `Si è verificato un errore: ${r.perche}. Il file non è stato modificato.` })
     if (r.esito === 'cambiato')
       return setEsito({
         ok: false,
-        testo: 'Il file è stato cambiato da un altro PC (o fuori dall’applicazione): non ho scritto niente e ho ricaricato i dati. Controlla il prezzo e rifai la correzione.',
+        testo: 'Il file è stato modificato da un altro computer o fuori dall’applicazione: non è stato scritto nulla e i dati sono stati ricaricati. Verificare il prezzo e ripetere la correzione.',
       })
     setTesto('')
     setEsito({
       ok: true,
-      testo: `${c.tipo === 'correggi' ? 'Corretto' : 'Rimesso il prezzo di prima'}. ${FRASE_COPIA}`,
+      testo: `${c.tipo === 'correggi' ? 'Correzione salvata' : 'Prezzo precedente ripristinato'}. ${FRASE_COPIA}`,
     })
   }
 
   return (
-    <section className="correzione" aria-label="Correzione a mano">
+    <section className="correzione" aria-label="Correzione manuale">
       {aMano && (
         <p className="stato-mano">
           <ChipAMano lungo={!!prima} />
           {p.quando ? ` il ${data(p.quando)}` : ''}
           {prima ? (
             <>
-              . Prima era <s>{scrivi(prima.prezzo)}</s>, {fonteInParole(prima.fonte).nome}.
+              . Prezzo precedente: <s>{scrivi(prima.prezzo)}</s>, {fonteInParole(prima.fonte).nome}.
             </>
           ) : (
             '.'
@@ -88,14 +88,14 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
           <p>
             {conferma.tipo === 'correggi' ? (
               <>
-                Scrivo <b>{scrivi(conferma.prezzo)}</b> al posto di {scrivi(p.prezzo)} come prezzo di {quale}. Resterà segnato “a mano”.
+                Si scrive <b>{scrivi(conferma.prezzo)}</b> al posto di {scrivi(p.prezzo)} come prezzo di {quale}. Il prezzo resterà segnato come “manuale”.
               </>
             ) : (
               <>
-                Rimetto <b>{scrivi(prima!.prezzo)}</b> ({fonteInParole(prima!.fonte).nome}) al posto di {scrivi(p.prezzo)} scritto a mano.
+                Si ripristina <b>{scrivi(prima!.prezzo)}</b> ({fonteInParole(prima!.fonte).nome}) al posto di {scrivi(p.prezzo)}, inserito manualmente.
               </>
             )}{' '}
-            Prima di scrivere faccio una copia del file.
+            Prima della scrittura si salva una copia del file.
           </p>
           <div className="bottoni">
             <button type="button" className="btn primario" autoFocus disabled={occupato} onClick={() => void scriviNelFile(conferma)}>
@@ -109,7 +109,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
       ) : (
         <>
           <label>
-            Se il prezzo è sbagliato, scrivi quello giusto
+            Se il prezzo è errato, inserire quello corretto
             <span className="campo-valuta">
               <input
                 ref={campo}
@@ -138,7 +138,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
           )}
           <div className="bottoni">
             <button type="button" className="btn primario" disabled={occupato} onClick={chiedi}>
-              Correggi a mano
+              Correggi
             </button>
             {prima && (
               <button type="button" className="btn" disabled={occupato} onClick={() => {
@@ -158,7 +158,7 @@ export function CorreggiPrezzo({ rif }: { rif: RifPrezzo }) {
           <span>{esito.testo}</span>
         </p>
       )}
-      <p className="tenue piccolo">Il prezzo corretto resta segnato “a mano” in tutte le tabelle. Niente si scrive nel file finché non confermi.</p>
+      <p className="tenue piccolo">Il prezzo corretto resta segnato come “manuale” in tutte le tabelle. Il file non viene modificato fino alla conferma.</p>
     </section>
   )
 }

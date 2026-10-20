@@ -125,7 +125,7 @@ describe('"Torna all’ultima copia" con il file rotto', () => {
     await writeFile(join(cartella, 'copie', "portafoglio 2026-10-01 1000 all'apertura.json"), '{')
     const dopo = await tornaAllaCopia(cartella, "portafoglio 2026-10-01 1000 all'apertura.json", letto.impronta)
     expect(dopo.apertura.stato).toBe('rotto')
-    if (dopo.apertura.stato === 'rotto') expect(dopo.apertura.avviso).toContain('non si legge')
+    if (dopo.apertura.stato === 'rotto') expect(dopo.apertura.avviso).toContain('non è leggibile')
     expect(await fileDati()).toBe(rotto)
   })
 

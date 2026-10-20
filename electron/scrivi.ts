@@ -44,7 +44,7 @@ export async function scriviConCopia(
 
   const nuovo = testoDelFile(cambia(esito.dati))
   const controllo = controllaFile(nuovo)
-  if (!controllo.ok) throw new Error(`il file nuovo non sarebbe a posto (${controllo.problema.spiegazione}): non ho scritto niente`)
+  if (!controllo.ok) throw new Error(`il file risultante non sarebbe valido (${controllo.problema.spiegazione}): non è stato scritto nulla`)
 
   // 2. La copia del file com'era.
   const copia = await faiCopia(percorso, typeof perche === 'string' ? perche : perche(esito.dati), orologio())

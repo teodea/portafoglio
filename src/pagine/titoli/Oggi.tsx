@@ -41,23 +41,23 @@ export function Oggi({ conti }: { conti: ContiTitoli }) {
   )
   const colonne: { k: Chiave; nome: string; numeri: boolean }[] = [
     { k: 'nome', nome: 'Titolo', numeri: false },
-    { k: 'valore', nome: 'Valore', numeri: true },
-    { k: 'pagato', nome: 'Pagato', numeri: true },
-    { k: 'guadagno', nome: 'Guadagno', numeri: true },
-    { k: 'dallAcquisto', nome: 'Dall’acquisto', numeri: true },
-    { k: 'medioAnnuo', nome: 'Medio annuo', numeri: true },
+    { k: 'valore', nome: 'Controvalore', numeri: true },
+    { k: 'pagato', nome: 'Costo', numeri: true },
+    { k: 'guadagno', nome: 'Plus/minus', numeri: true },
+    { k: 'dallAcquisto', nome: 'Rendimento', numeri: true },
+    { k: 'medioAnnuo', nome: 'Annualizzato', numeri: true },
     { k: 'ultimoMese', nome: conti.fine ? NomeMese(conti.fine) : 'Ultimo mese', numeri: true },
     { k: 'prezzo', nome: 'Prezzo', numeri: true },
   ]
   const cambiaOrdine = (k: Chiave) =>
     setOrdine((o) => (o.chiave === k ? { chiave: k, verso: o.verso === 1 ? -1 : 1 } : { chiave: k, verso: k === 'nome' ? 1 : -1 }))
 
-  if (righe.length === 0) return <div className="vuoto">Oggi non hai titoli: quelli venduti sono nella scheda Venduti.</div>
+  if (righe.length === 0) return <div className="vuoto">Nessun titolo in portafoglio: i titoli venduti sono nella scheda Venduti.</div>
 
   return (
     <>
       <div className="attrezzi">
-        <span>Clic su un titolo per aprirne la scheda; clic su un numero per sapere la provenienza.</span>
+        <span>Selezionare un titolo per aprirne la scheda; selezionare un valore per il dettaglio del calcolo.</span>
       </div>
       <div className="scorre">
         <table>

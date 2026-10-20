@@ -54,22 +54,22 @@ export type ProblemaMese = { ok: false; perche: string }
 
 /** Controlla che il mese mandato dalla schermata sia completo e sensato, prima di toccare il file. */
 export function controllaMese(dati: FileDati, m: MeseDaSalvare): { ok: true } | ProblemaMese {
-  if (!/^\d{4}-\d{2}$/.test(m.mese)) return { ok: false, perche: `il mese "${m.mese}" non va` }
+  if (!/^\d{4}-\d{2}$/.test(m.mese)) return { ok: false, perche: `il mese "${m.mese}" non è valido` }
   const titoli = new Map((dati.titoli ?? []).map((t) => [t.id, t]))
   const valute = new Set(m.cambi.map((c) => c.valuta))
   for (const p of m.prezzi) {
     const t = titoli.get(p.titolo)
     if (!t) return { ok: false, perche: `il titolo ${p.titolo} non è nel file` }
     if (!(typeof p.prezzo === 'number' && Number.isFinite(p.prezzo) && p.prezzo > 0))
-      return { ok: false, perche: `il prezzo di ${t.simbolo ?? t.isin} non è un numero più di zero` }
+      return { ok: false, perche: `il prezzo di ${t.simbolo ?? t.isin} non è un numero maggiore di zero` }
     const valuta = valutaDelTitolo(dati, t)
     if (valuta !== 'EUR' && !valute.has(valuta)) return { ok: false, perche: `manca il cambio ${valuta}` }
     if ('controllo' in p && p.controllo !== undefined && !controlloValido(p.controllo))
-      return { ok: false, perche: `il controllo del prezzo di ${t.simbolo ?? t.isin} non va` }
+      return { ok: false, perche: `il controllo del prezzo di ${t.simbolo ?? t.isin} non è valido` }
   }
   for (const c of m.cambi)
     if (!(typeof c.cambio === 'number' && Number.isFinite(c.cambio) && c.cambio > 0))
-      return { ok: false, perche: `il cambio ${c.valuta} non è un numero più di zero` }
+      return { ok: false, perche: `il cambio ${c.valuta} non è un numero maggiore di zero` }
   return controllaRiferimenti(m)
 }
 

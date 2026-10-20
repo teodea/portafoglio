@@ -256,7 +256,7 @@ describe('le parole semplici', () => {
 
 describe('fonti e numeri scritti', () => {
   it('i nomi delle fonti', () => {
-    expect(fonteInParole('file (foglio qualunque)').nome).toBe('dal tuo file Excel')
+    expect(fonteInParole('file (foglio qualunque)').nome).toBe('file Excel iniziale')
     expect(fonteInParole('Borsa Italiana')).toEqual({ nome: 'Borsa Italiana', borsa: true, dettaglio: null })
     expect(fonteInParole('stima: rimborso alla pari').dettaglio).toBe('rimborso alla pari')
   })

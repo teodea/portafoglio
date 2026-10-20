@@ -18,7 +18,7 @@ export function correzioneDatoFinta(accesso: AccessoFinto): PonteCorrezioneDato 
       await new Promise((fatto) => setTimeout(fatto, 300))
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
-      if (!esito?.ok) return { esito: 'errore', perche: 'il file non si legge' }
+      if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
       const v3 = aVersione3(esito.dati)
       const ok = controllaCorrezioneDato(v3, c)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }
@@ -38,7 +38,7 @@ export function codiciFinti(accesso: AccessoFinto): PonteCodici {
       await new Promise((fatto) => setTimeout(fatto, 300))
       const testo = accesso.leggi()
       const esito = testo ? controllaFile(testo) : null
-      if (!esito?.ok) return { esito: 'errore', perche: 'il file non si legge' }
+      if (!esito?.ok) return { esito: 'errore', perche: 'il file dei dati non è leggibile' }
       const ok = controllaCodici(esito.dati, s)
       if (!ok.ok) return { esito: 'errore', perche: ok.perche }
       accesso.scrivi(comeTesto(applicaCodici(esito.dati, s)), PERCHE_CODICI)

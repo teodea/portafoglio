@@ -90,7 +90,7 @@ describe('leggere i campi', () => {
   it('un PDF senza i campi della banca non si riconosce', () => {
     const l = leggiCampi('foto.pdf', null, {})
     expect(l.ok).toBe(false)
-    expect(!l.ok && l.perche).toMatch(/non sembra un acquisto/)
+    expect(!l.ok && l.perche).toMatch(/non risulta un acquisto/)
   })
   it('manca un numero importante: lo dice', () => {
     const l = leggiCampi('x.pdf', null, campiAcquisto({ Tot_EUR_debito_credito: '' }))
@@ -140,7 +140,7 @@ describe('quale titolo è', () => {
     const v = titoloDelPdf(base(), letto('v.pdf', campiAcquisto({ Isin: 'ZZ0000000009', Operazione: 'VENDITA TITOLI' })))
     expect(v.quale).toBe('non-hai')
     const d = titoloDelPdf(base(), letto('d.pdf', campiDividendo({ Isin: 'ZZ0000000009' })))
-    expect(d.quale === 'non-hai' && d.perche).toMatch(/registra prima il suo acquisto/)
+    expect(d.quale === 'non-hai' && d.perche).toMatch(/registrare prima il suo acquisto/)
   })
   it('un dividendo si riconosce dall’ISIN', () => {
     expect(titoloDelPdf(base(), letto('d.pdf', campiDividendo()))).toEqual({ quale: 'trovato', id: MOND })

@@ -1,5 +1,5 @@
 // Registra dal PDF nel ponte finto, per guardare le pagine in un browser qualsiasi (ticket 12):
-// i campi del PDF si leggono qui con la stessa funzione del processo principale; "Guarda il PDF" lo apre
+// i campi del PDF si leggono qui con la stessa funzione del processo principale; "Apri il PDF" lo apre
 // in una scheda; la ricerca dei codici è finta (trova solo i titoli inventati, con ISIN che comincia con ZZ).
 import type { PontePdf } from '../../dati/titolo-nuovo.ts'
 

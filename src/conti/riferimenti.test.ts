@@ -90,10 +90,10 @@ describe('gli stessi euro, nelle stesse date', () => {
 
   it('il pannello ha i quattro numeri, il conto movimento per movimento e il riferimento da scaricare o correggere', () => {
     expect(btp.perche.titolo).toBe('BTP 10 anni: gli stessi euro')
-    expect(btp.perche.conto.map((r) => r.etichetta)).toEqual(['Soldi investiti (messi − tolti)', 'Valore a fine settembre', 'Anno 2026', "Dall'inizio", 'Medio annuo'])
+    expect(btp.perche.conto.map((r) => r.etichetta)).toEqual(['Capitale investito (versamenti − prelievi)', 'Valore a fine settembre', 'Rendimento da inizio 2026', "Rendimento dall'inizio", 'Rendimento annualizzato'])
     const passi = btp.perche.passi!.righe
     expect(passi).toHaveLength(1 + 3 + 1)
-    expect(passi[1].etichetta).toBe('14/03/2025: messi (INV) 1.000,00 € × 160,00 ÷ 100,00')
+    expect(passi[1].etichetta).toBe('14/03/2025: versamento (INV) 1.000,00 € × 160,00 ÷ 100,00')
     expect(passi[1].cifra).toMatchObject({ tipo: 'euro', n: 1600 })
     expect(passi[3].cifra).toMatchObject({ tipo: 'euro' })
     expect((passi[3].cifra as { n: number }).n).toBeCloseTo(-320, 9)
@@ -129,7 +129,7 @@ describe("l'inflazione", () => {
     expect(inf.fino).toBe('2026-08-31')
     expect(inf.valore).toBeCloseTo(1020, 6)
     expect(inf.perche.dopo).toBe('a fine agosto')
-    expect(inf.perche.note.some((x) => x.startsWith('Il NIC di settembre non c’è ancora'))).toBe(true)
+    expect(inf.perche.note.some((x) => x.startsWith('Il NIC di settembre non è ancora disponibile'))).toBe(true)
     // Il pannello offre di scrivere il NIC che manca, quello di settembre.
     expect(inf.perche.riferimento).toEqual({ id: 'nic', data: '2026-09-30' })
   })
@@ -140,9 +140,9 @@ describe('quando mancano dei valori', () => {
     const c = confronto(file({ operazioni: OPS, prezzi: PREZZI }))
     const sp = riga(c, 'sp500')
     expect(sp.valore).toBeNull()
-    expect(sp.manca).toBe('Nel file non ci sono ancora i valori di S&P 500: arrivano con Aggiorna fine mese.')
+    expect(sp.manca).toBe('Nel file non ci sono ancora i valori di S&P 500: saranno scaricati con Aggiorna fine mese.')
     expect(sp.perche.grande).toEqual({ tipo: 'testo', testo: 'manca' })
-    expect(riga(c, 'nic').manca).toBe('Nel file non ci sono ancora i valori del NIC: arrivano con Aggiorna fine mese.')
+    expect(riga(c, 'nic').manca).toBe('Nel file non ci sono ancora i valori del NIC: saranno scaricati con Aggiorna fine mese.')
   })
 
   it('se manca il valore del giorno di un movimento, lo dice con la data', () => {
@@ -155,14 +155,14 @@ describe('quando mancano dei valori', () => {
     const btp = riga(confronto(file({ operazioni: OPS, prezzi: PREZZI, riferimenti: BTP.filter((v) => v.data !== '2025-12-31') })), 'btp10')
     expect(btp.anno).toBeNull()
     expect(btp.medio).not.toBeNull()
-    expect(btp.perche.note).toContain("L'anno non c'è: manca il valore di fine dicembre 2025.")
+    expect(btp.perche.note).toContain('Rendimento da inizio anno non disponibile: manca il valore di fine dicembre 2025.')
   })
 
   it('un valore scritto a mano segna la riga', () => {
     const aMano = BTP.map((v) => (v.data === '2026-09-30' ? { ...v, fonte: 'a mano' } : v))
     const btp = riga(confronto(file({ operazioni: OPS, prezzi: PREZZI, riferimenti: aMano })), 'btp10')
     expect(btp.aMano).toBe(true)
-    expect(btp.perche.note).toContain('Il valore di fine settembre è scritto a mano.')
+    expect(btp.perche.note).toContain('Il valore di fine settembre è inserito manualmente.')
   })
 })
 
@@ -179,7 +179,7 @@ describe('il portafoglio nel confronto', () => {
     expect(c.portafoglio.medio).toBe(conti.medioAnnuo.n)
     expect(c.portafoglio.anno).toBe(conti.annoInCorso.n)
     expect(c.portafoglio.inizio).toBe(conti.dallInizio.n)
-    expect(c.portafoglio.perche.passi!.righe.map((r) => r.etichetta)).toEqual(['Valore dei titoli a fine settembre', '+ dividendi netti incassati', 'Valore nel confronto'])
+    expect(c.portafoglio.perche.passi!.righe.map((r) => r.etichetta)).toEqual(['Controvalore dei titoli a fine settembre', '+ dividendi netti', 'Valore nel confronto'])
   })
 
   it('senza prezzi di fine mese non c’è confronto', () => {
@@ -204,7 +204,7 @@ describe('la classifica', () => {
   it('mette i riferimenti dal migliore al peggiore, e in fondo quelli che mancano', () => {
     const k = classifica(c, 'inizio')
     const nomi = k.righe.map((x) => x.riga.nome)
-    expect(nomi.slice(0, 4)).toEqual(['FTSE MIB', 'BTP 10 anni', 'Il tuo portafoglio', 'Euro Stoxx 50'])
+    expect(nomi.slice(0, 4)).toEqual(['FTSE MIB', 'BTP 10 anni', 'Portafoglio', 'Euro Stoxx 50'])
     expect(nomi.slice(4)).toEqual(['Nasdaq-100', 'Dow Jones', 'S&P 500', 'Inflazione'])
     expect(k.righe.slice(4).every((x) => x.n === null)).toBe(true)
   })
@@ -223,7 +223,7 @@ describe('la classifica', () => {
   })
 
   it('i bottoni della misura', () => {
-    expect(nomeMisura('medio', '2026')).toBe('All’anno in media')
+    expect(nomeMisura('medio', '2026')).toBe('Annualizzato')
     expect(nomeMisura('anno', '2026')).toBe('Anno 2026')
     expect(nomeMisura('inizio', '2026')).toBe('Dall’inizio')
   })

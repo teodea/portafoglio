@@ -71,7 +71,7 @@ describe('scrivere un movimento', () => {
   it('vendere più quote di quelle che hai non scrive niente e dice perché', async () => {
     const testo = await readFile(file(), 'utf8')
     const r = await scriviMovimento(cartella, impronta(testo), { azione: 'registra', movimento: { ...vendita, quantita: 101 } }, orologioDaProva())
-    expect(r).toEqual({ esito: 'errore', perche: 'il 12/10/2026 avevi solo 100 quote di MOND: non puoi venderne 101' })
+    expect(r).toEqual({ esito: 'errore', perche: 'il 12/10/2026 c’erano solo 100 quote di MOND: non se ne possono vendere 101' })
     expect(await readFile(file(), 'utf8')).toBe(testo)
   })
 })

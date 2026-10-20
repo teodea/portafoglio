@@ -119,16 +119,16 @@ export function controllaCorrezioneDato(dati: FileDati, c: CorrezioneDato): { ok
   const x = trovaDato(dati, c.dato)
   const quale = `${nomeDelDato(c.dato)} di ${meseInParole(c.dato.data)}`
   if (c.azione === 'torna') {
-    if (!x || x.fonte !== A_MANO || !primaDelDato(x)) return { ok: false, perche: `${quale} non ha un valore di prima` }
+    if (!x || x.fonte !== A_MANO || !primaDelDato(x)) return { ok: false, perche: `${quale} non ha un valore precedente` }
     return { ok: true }
   }
-  if (!positivo(c.valore)) return { ok: false, perche: 'il numero nuovo deve essere più di zero' }
-  if (c.cambio !== undefined && !positivo(c.cambio)) return { ok: false, perche: 'il cambio deve essere un numero più di zero' }
+  if (!positivo(c.valore)) return { ok: false, perche: 'il numero nuovo deve essere maggiore di zero' }
+  if (c.cambio !== undefined && !positivo(c.cambio)) return { ok: false, perche: 'il cambio deve essere un numero maggiore di zero' }
   if (inDollari(c.dato) && c.cambio === undefined && !(x && 'cambio' in x && positivo(x.cambio)) && cambioDelGiorno(dati, c.dato.data) === undefined)
     return { ok: false, perche: `per ${quale} serve il cambio BCE del dollaro di quel giorno` }
   if (c.dato.tipo === 'cambio' && x === undefined && !(dati.prezzi ?? []).some((p) => p.valuta === (c.dato as { valuta: string }).valuta))
     return { ok: false, perche: `nel file non c’è nessun titolo in ${c.dato.valuta}` }
-  if (c.azione === 'correggi' && x && valoreDelDato(x) === c.valore) return { ok: false, perche: 'il numero nuovo è uguale a quello che c’è già' }
+  if (c.azione === 'correggi' && x && valoreDelDato(x) === c.valore) return { ok: false, perche: 'il numero nuovo è uguale a quello presente' }
   return { ok: true }
 }
 

@@ -90,20 +90,20 @@ describe('registrare un movimento scritto a mano', () => {
     const vendita: NuovaOperazione = { ...acquisto, tipo: 'vendita', quantita: 101, totale: 1207 }
     expect(controllaModifica(base(), { azione: 'registra', movimento: vendita })).toEqual({
       ok: false,
-      perche: 'il 12/10/2026 avevi solo 100 quote di MOND: non puoi venderne 101',
+      perche: 'il 12/10/2026 c’erano solo 100 quote di MOND: non se ne possono vendere 101',
     })
     expect(controllaModifica(base(), { azione: 'registra', movimento: { ...vendita, quantita: 100, totale: 1195 } }).ok).toBe(true)
     // Prima del primo acquisto non c'è niente da vendere.
     expect(controllaModifica(base(), { azione: 'registra', movimento: { ...vendita, quantita: 1, totale: 7, data: '2024-01-02' } })).toEqual({
       ok: false,
-      perche: 'il 02/01/2024 non avevi quote di MOND: non puoi venderne 1',
+      perche: 'il 02/01/2024 non c’erano quote di MOND: non se ne possono vendere 1',
     })
     expect(() => fai(base(), { azione: 'registra', movimento: vendita })).toThrow(/solo 100 quote/)
   })
 
   it('i numeri devono essere sensati', () => {
     const prova = (m: Partial<NuovaOperazione>) => controllaModifica(base(), { azione: 'registra', movimento: { ...acquisto, ...m } })
-    expect(prova({ titolo: '' })).toEqual({ ok: false, perche: 'scegli il titolo' })
+    expect(prova({ titolo: '' })).toEqual({ ok: false, perche: 'scegliere il titolo' })
     expect(prova({ data: '2026-02-30' }).ok).toBe(false)
     expect(prova({ quantita: 0 }).ok).toBe(false)
     expect(prova({ cambio: 0.9 })).toEqual({ ok: false, perche: 'il titolo è in euro: il cambio è 1' })
@@ -111,7 +111,7 @@ describe('registrare un movimento scritto a mano', () => {
     const div = (lordo: number, imposte: number, data = '2026-08-31') =>
       controllaModifica(base(), { azione: 'registra', movimento: { tipo: 'dividendo', titolo: MOND, data, lordo, imposte } })
     expect(div(10, 11)).toEqual({ ok: false, perche: 'le imposte non possono essere più del lordo' })
-    expect(div(10, 1, '2024-01-01')).toEqual({ ok: false, perche: 'il 01/01/2024 non avevi quote di MOND' })
+    expect(div(10, 1, '2024-01-01')).toEqual({ ok: false, perche: 'il 01/01/2024 non c’erano quote di MOND' })
   })
 })
 
@@ -159,7 +159,7 @@ describe('correggere a mano, tornare a com’era, togliere', () => {
     const d = base()
     expect(controllaModifica(d, { azione: 'togli', id: 'op-3' })).toEqual({
       ok: false,
-      perche: 'il 15/09/2025 non avevi quote di Obbligazione Inventata 2027: non puoi venderne 1.000',
+      perche: 'il 15/09/2025 non c’erano quote di Obbligazione Inventata 2027: non se ne possono vendere 1.000',
     })
     expect(controllaModifica(d, { azione: 'correggi', id: 'op-3', campi: { quantita: 900 } }).ok).toBe(false)
     expect(controllaModifica(d, { azione: 'correggi', id: 'op-4', campi: { data: '2024-02-01' } }).ok).toBe(false)
@@ -169,8 +169,8 @@ describe('correggere a mano, tornare a com’era, togliere', () => {
 
   it('i rifiuti dicono perché', () => {
     const d = base()
-    expect(controllaModifica(d, { azione: 'torna', id: 'op-1' })).toEqual({ ok: false, perche: 'l’acquisto di MOND del 12/02/2024 non è stato corretto a mano' })
-    expect(controllaModifica(d, { azione: 'correggi', id: 'op-1', campi: { prezzo: 10 } })).toEqual({ ok: false, perche: 'non hai cambiato niente' })
+    expect(controllaModifica(d, { azione: 'torna', id: 'op-1' })).toEqual({ ok: false, perche: 'l’acquisto di MOND del 12/02/2024 non è stato corretto manualmente' })
+    expect(controllaModifica(d, { azione: 'correggi', id: 'op-1', campi: { prezzo: 10 } })).toEqual({ ok: false, perche: 'nessun valore modificato' })
     expect(controllaModifica(d, { azione: 'correggi', id: 'div-1', campi: { imposte: 30 } })).toEqual({ ok: false, perche: 'le imposte non possono essere più del lordo' })
     expect(controllaModifica(d, { azione: 'togli', id: 'non-c-e' })).toEqual({ ok: false, perche: 'nel file non c’è più questo movimento' })
     expect(controllaModifica(d, { azione: 'correggi', id: 'op-1', campi: { valuta: 'USD' } as never }).ok).toBe(false)

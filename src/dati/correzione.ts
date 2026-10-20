@@ -59,11 +59,11 @@ export function controllaCorrezione(dati: FileDati, c: Correzione): { ok: true }
   const nome = nomeDelTitolo(dati, c.titolo)
   if (!p) return { ok: false, perche: `nel file non c’è il prezzo di ${nome} a fine ${meseInParole(c.data)}` }
   if (c.tipo === 'torna') {
-    if (p.fonte !== FONTE.aMano || !p.prima) return { ok: false, perche: `il prezzo di ${nome} a fine ${meseInParole(c.data)} non ha un prezzo di prima` }
+    if (p.fonte !== FONTE.aMano || !p.prima) return { ok: false, perche: `il prezzo di ${nome} a fine ${meseInParole(c.data)} non ha un prezzo precedente` }
     return { ok: true }
   }
-  if (!(Number.isFinite(c.prezzo) && c.prezzo > 0)) return { ok: false, perche: 'il prezzo nuovo deve essere un numero più di zero' }
-  if (c.prezzo === p.prezzo) return { ok: false, perche: 'il prezzo nuovo è uguale a quello che c’è già' }
+  if (!(Number.isFinite(c.prezzo) && c.prezzo > 0)) return { ok: false, perche: 'il prezzo nuovo deve essere un numero maggiore di zero' }
+  if (c.prezzo === p.prezzo) return { ok: false, perche: 'il prezzo nuovo è uguale a quello presente' }
   return { ok: true }
 }
 

@@ -25,7 +25,7 @@ export type Cifra =
 export type RigaConto = { etichetta: string; cifra: Cifra }
 
 export type Spiegazione = {
-  /** La testata del pannello, in parole: "Guadagno di MOND". */
+  /** La testata del pannello, in parole: "Plusvalenza di MOND". */
   titolo: string
   /** Il numero spiegato, in grande. */
   grande: Cifra

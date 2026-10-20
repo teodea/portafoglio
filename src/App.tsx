@@ -64,14 +64,14 @@ export default function App() {
             <Barra />
             <main>
               {nelBrowser && (
-                <p className="prova-browser">Prova nel browser: dati inventati, nessun file vero viene letto o scritto.</p>
+                <p className="prova-browser">Versione di prova nel browser: dati di esempio, nessun file viene letto o scritto.</p>
               )}
               <VersioneNuova />
               {errore && (
                 <div className="striscia" role="alert">
                   <span>
                     <Icona nome="info" />
-                    <span>Qualcosa non è andato: {errore}</span>
+                    <span>Si è verificato un errore: {errore}</span>
                   </span>
                   <button type="button" className="btn solo-icona" aria-label="Chiudi" onClick={() => setErrore(null)}>
                     <Icona nome="x" piccola />
@@ -124,10 +124,10 @@ function DallAlto() {
   return null
 }
 
-// Dopo essere tornati a una copia, si dice in parole che cosa è successo.
+// Dopo il ripristino di una copia, si dice in parole che cosa è successo.
 function messaggioDopo(vecchia: Apertura | null, nuova: Apertura): string | null {
   if (vecchia?.stato !== 'rotto' || nuova.stato !== 'pronto') return null
   const giaViste = new Set(vecchia.copie.map((c) => c.file))
   const messoDaParte = nuova.copie.find((c) => c.rotta && !giaViste.has(c.file))
-  return `Il file si legge di nuovo.${messoDaParte ? ` Il file rotto non è cancellato: è nella cartella copie come “${messoDaParte.file}” (${quandoInParole(messoDaParte.quando)}).` : ''}`
+  return `Il file dei dati è di nuovo leggibile.${messoDaParte ? ` Il file danneggiato non è stato cancellato: si trova nella cartella copie come “${messoDaParte.file}” (${quandoInParole(messoDaParte.quando)}).` : ''}`
 }

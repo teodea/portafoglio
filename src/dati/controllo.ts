@@ -87,7 +87,7 @@ function dataValida(s: string): boolean {
 const eOggetto = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 
 function descrivi(v: unknown): string {
-  if (v === undefined) return 'niente'
+  if (v === undefined) return 'nessun valore'
   if (v === null) return 'null'
   if (typeof v === 'string') return `"${v.length > 40 ? v.slice(0, 40) + '…' : v}"`
   if (Array.isArray(v)) return 'una lista'
@@ -116,7 +116,7 @@ function controllaCampo(nome: string, v: unknown, regola: Regola, facoltativo: b
     if (typeof v === 'number' && regola.numeri.includes(v)) return null
     return {
       spiegazione: `"${nome}" dovrebbe essere uno di questi numeri: ${regola.numeri.join(', ')}; invece c’è ${descrivi(v)}`,
-      breve: `qui "${nome}" non va`,
+      breve: `qui "${nome}" non è valido`,
     }
   }
   switch (regola) {
@@ -130,26 +130,26 @@ function controllaCampo(nome: string, v: unknown, regola: Regola, facoltativo: b
       if (typeof v === 'string' && dataValida(v)) return null
       return {
         spiegazione: `"${nome}" dovrebbe essere una data scritta AAAA-MM-GG tra virgolette (es. "2026-09-30"), invece c’è ${descrivi(v)}`,
-        breve: 'qui la data non va',
+        breve: 'qui la data non è valida',
       }
     case 'numero':
     case 'numero-positivo':
     case 'numero-non-negativo': {
       if (typeof v !== 'number' || !Number.isFinite(v)) {
-        const consiglio = comeTesto ? ` (togli le virgolette${String(v).includes(',') ? ' e usa il punto per i decimali' : ''})` : ''
+        const consiglio = comeTesto ? ` (togliere le virgolette${String(v).includes(',') ? ' e usare il punto per i decimali' : ''})` : ''
         return { spiegazione: `"${nome}" dovrebbe essere un numero, invece c’è ${descrivi(v)}${consiglio}`, breve: `qui "${nome}" non è un numero` }
       }
       if (regola === 'numero-positivo' && v <= 0)
-        return { spiegazione: `"${nome}" dovrebbe essere più di zero, invece c’è ${v}`, breve: `qui "${nome}" non va` }
+        return { spiegazione: `"${nome}" dovrebbe essere maggiore di zero, invece c’è ${v}`, breve: `qui "${nome}" non è valido` }
       if (regola === 'numero-non-negativo' && v < 0)
-        return { spiegazione: `"${nome}" non può essere negativo, invece c’è ${v}`, breve: `qui "${nome}" non va` }
+        return { spiegazione: `"${nome}" non può essere negativo, invece c’è ${v}`, breve: `qui "${nome}" non è valido` }
       return null
     }
     default:
       if (typeof v === 'string' && regola.scelta.includes(v)) return null
       return {
         spiegazione: `"${nome}" dovrebbe essere uno di questi: ${regola.scelta.map((s) => `"${s}"`).join(', ')}; invece c’è ${descrivi(v)}`,
-        breve: `qui "${nome}" non va`,
+        breve: `qui "${nome}" non è valido`,
       }
   }
 }
@@ -282,7 +282,7 @@ function controllaForma(radice: unknown): Trovato[] {
   if (!eOggetto(radice) || radice.formato !== 'portafoglio') {
     trova(
       eOggetto(radice) ? percorso('formato') : '',
-      'non sembra il file dei dati di Portafoglio titoli: all’inizio manca "formato": "portafoglio"',
+      'non è un file dei dati di Portafoglio titoli: all’inizio manca "formato": "portafoglio"',
       'qui manca "formato": "portafoglio"',
     )
     return trovati
@@ -293,9 +293,9 @@ function controllaForma(radice: unknown): Trovato[] {
     trova(
       percorso('versione'),
       piuNuova
-        ? `il file è della versione ${versione}, più nuova di questa applicazione: aggiorna l’applicazione`
+        ? `il file è della versione ${versione}, più recente di questo programma: aggiornare il programma`
         : `la versione del file dovrebbe essere ${VERSIONI_CONOSCIUTE.join(' o ')}, invece c’è ${descrivi(versione)}`,
-      'qui la versione non va',
+      'qui la versione non è valida',
     )
     return trovati
   }
@@ -320,7 +320,7 @@ function controllaForma(radice: unknown): Trovato[] {
     }
     elenco.forEach((voce, n) => {
       if (!eOggetto(voce)) {
-        trova(percorso(chiave, n), `${NOMI_ELENCHI[chiave]} c’è ${descrivi(voce)} al posto di un gruppo di dati tra { }`, 'qui non va')
+        trova(percorso(chiave, n), `${NOMI_ELENCHI[chiave]} c’è ${descrivi(voce)} al posto di un gruppo di dati tra { }`, 'qui il dato non è valido')
         return
       }
       for (const [campo, { regola, facoltativo }] of Object.entries(schema)) {
@@ -340,7 +340,7 @@ function controllaForma(radice: unknown): Trovato[] {
     elenco.forEach((voce, n) => {
       if (!eOggetto(voce) || typeof voce.id !== 'string') return
       if (visti.has(voce.id))
-        trova(percorso(chiave, n, 'id'), `${NOMI_ELENCHI[chiave]} il codice "${voce.id}" compare due volte`, 'qui il codice è doppio')
+        trova(percorso(chiave, n, 'id'), `${NOMI_ELENCHI[chiave]} il codice "${voce.id}" compare due volte`, 'qui il codice è ripetuto')
       visti.add(voce.id)
     })
   }
@@ -362,7 +362,7 @@ function controllaForma(radice: unknown): Trovato[] {
       if (!eOggetto(voce) || typeof voce.titolo !== 'string' || typeof voce.data !== 'string') return
       const k = voce.titolo + '|' + voce.data
       if (visti.has(k))
-        trova(percorso('prezzi', n), `ci sono due prezzi dello stesso titolo per lo stesso giorno (${voce.data})`, 'qui il prezzo è doppio')
+        trova(percorso('prezzi', n), `ci sono due prezzi dello stesso titolo per lo stesso giorno (${voce.data})`, 'qui il prezzo è ripetuto')
       visti.add(k)
     })
   }
@@ -379,7 +379,7 @@ function controllaForma(radice: unknown): Trovato[] {
         trova(
           percorso('prezzi', n, 'controllo'),
           `${NOMI_ELENCHI.prezzi}, il prezzo n. ${n + 1}: "controllo" dovrebbe avere "prezzo" e "seduta", oppure "perche"`,
-          'qui il controllo non va',
+          'qui il controllo non è valido',
         )
     })
   // Un movimento corretto a mano: "prima" è un gruppo con i campi cambiati, e c'è anche "quando".
@@ -397,8 +397,8 @@ function controllaForma(radice: unknown): Trovato[] {
       if (!eOggetto(prima) || campi.length === 0 || campi.some((c) => !(c in schema))) {
         trova(
           percorso(chiave, n, 'prima'),
-          `${dove}: "prima" dovrebbe avere i campi corretti a mano (${Object.keys(schema).map((c) => `"${c}"`).join(', ')}) con il valore di prima`,
-          'qui "prima" non va',
+          `${dove}: "prima" dovrebbe avere i campi corretti manualmente (${Object.keys(schema).map((c) => `"${c}"`).join(', ')}) con il valore di prima`,
+          'qui "prima" non è valido',
         )
         return
       }
@@ -415,7 +415,7 @@ function controllaForma(radice: unknown): Trovato[] {
       if (!eOggetto(voce) || typeof voce.valuta !== 'string' || typeof voce.data !== 'string') return
       const k = voce.valuta + '|' + voce.data
       if (visti.has(k))
-        trova(percorso('cambi', n), `ci sono due cambi della stessa valuta per lo stesso giorno (${voce.valuta}, ${voce.data})`, 'qui il cambio è doppio')
+        trova(percorso('cambi', n), `ci sono due cambi della stessa valuta per lo stesso giorno (${voce.valuta}, ${voce.data})`, 'qui il cambio è ripetuto')
       visti.add(k)
     })
   }

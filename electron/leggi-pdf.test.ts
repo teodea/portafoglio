@@ -55,7 +55,7 @@ describe('apriPdf', () => {
     const finto = join(cartella, 'finto.pdf')
     await writeFile(finto, 'non sono un pdf')
     expect(await apriPdf(finto)).toMatchObject({ perche: 'il file non si apre come PDF' })
-    expect(await apriPdf(join(cartella, 'manca.pdf'))).toMatchObject({ perche: 'il file non c’è più' })
+    expect(await apriPdf(join(cartella, 'manca.pdf'))).toMatchObject({ perche: 'il file non esiste più' })
     expect(await apriPdf(join(cartella, 'foto.jpg'))).toMatchObject({ perche: 'non è un PDF' })
   })
 })

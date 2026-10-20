@@ -7,5 +7,5 @@ const NOME_ERRORE = /^(?:[A-Z][A-Za-z]*)?Error:\s*/
 export function percheInParole(e: unknown): string {
   const testo = e instanceof Error ? e.message : String(e)
   const pulito = testo.replace(PREFISSO_ELECTRON, '').replace(NOME_ERRORE, '').trim()
-  return pulito || 'non so perché'
+  return pulito || 'motivo sconosciuto'
 }

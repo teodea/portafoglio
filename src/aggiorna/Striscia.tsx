@@ -1,5 +1,5 @@
 // La striscia in alto su ogni pagina, quando un mese è finito e non è aggiornato:
-// "Ottobre è finito: aggiorna i prezzi di fine mese", con il tasto. E il tasto nella barra a sinistra.
+// "Ottobre è concluso: aggiornare i prezzi di fine mese", con il tasto. E il tasto nella barra a sinistra.
 import { NavLink, useLocation } from 'react-router-dom'
 import { NomeMese } from '../dati/aggiorna/calendario.ts'
 import { Icona } from '../icone.tsx'
@@ -20,11 +20,11 @@ export function StrisciaFineMese() {
           <span>
             <b>
               {agg.rifai
-                ? `Stai rifacendo ${NomeMese(agg.mese).toLowerCase()}`
-                : `L’aggiornamento di ${NomeMese(agg.mese).toLowerCase()} è aperto`}
+                ? `Aggiornamento di ${NomeMese(agg.mese).toLowerCase()} in ripetizione`
+                : `Aggiornamento di ${NomeMese(agg.mese).toLowerCase()} in corso`}
               :
             </b>{' '}
-            niente è ancora salvato.
+            nessuna modifica ancora salvata.
           </span>
         </span>
         <NavLink to={PERCORSO_AGGIORNA} className="btn primario">
@@ -34,13 +34,13 @@ export function StrisciaFineMese() {
     )
   if (!mesiDaFare.length) return null
   const nomi = mesiDaFare.map(NomeMese)
-  const frase = nomi.length === 1 ? `${nomi[0]} è finito` : `${nomi.slice(0, -1).join(', ')} e ${nomi.at(-1)!.toLowerCase()} sono finiti`
+  const frase = nomi.length === 1 ? `${nomi[0]} è concluso` : `${nomi.slice(0, -1).join(', ')} e ${nomi.at(-1)!.toLowerCase()} sono conclusi`
   return (
     <div className="striscia" role="status">
       <span>
         <Icona nome="info" />
         <span>
-          <b>{frase}:</b> aggiorna i prezzi di fine mese.
+          <b>{frase}:</b> aggiornare i prezzi di fine mese.
         </span>
       </span>
       <NavLink to={PERCORSO_AGGIORNA} className="btn primario">
@@ -59,7 +59,7 @@ export function TastoAggiorna() {
         type="button"
         className="btn primario"
         disabled
-        title={apertura.stato === 'rotto' ? 'Prima bisogna rimettere a posto il file dei dati' : 'Prima scegli la cartella dei dati'}
+        title={apertura.stato === 'rotto' ? 'Il file dei dati non è leggibile: correggerlo prima' : 'Scegliere prima la cartella dei dati'}
       >
         <Icona nome="aggiorna" piccola /> Aggiorna fine mese
       </button>

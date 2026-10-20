@@ -24,8 +24,8 @@ export async function tornaAQuestaCopia(
 ): Promise<Ritorno> {
   // Solo un nome di copia dentro "copie", niente percorsi; il file rotto messo da parte non è una copia a cui tornare.
   const scelta = basename(fileCopia) === fileCopia ? leggiNome(fileCopia) : null
-  if (!scelta) return { esito: 'errore', perche: 'non trovo quella copia' }
-  if (scelta.rotta) return { esito: 'errore', perche: 'quello è il file rotto messo da parte, non una copia a cui tornare' }
+  if (!scelta) return { esito: 'errore', perche: 'la copia scelta non è stata trovata' }
+  if (scelta.rotta) return { esito: 'errore', perche: 'si tratta del file non leggibile messo da parte, non di una copia a cui tornare' }
 
   const file = join(percorso, FILE_DATI)
   let attuale: Buffer | null
@@ -42,13 +42,13 @@ export async function tornaAQuestaCopia(
   try {
     copia = await readFile(join(percorso, CARTELLA_COPIE, fileCopia))
   } catch {
-    return { esito: 'errore', perche: `non trovo ${fileCopia} nella cartella copie` }
+    return { esito: 'errore', perche: `${fileCopia} non è nella cartella copie` }
   }
   const esito = controllaFile(copia.toString('utf8'))
   if (!esito.ok)
     return {
       esito: 'errore',
-      perche: `la copia ${fileCopia} non si legge${esito.problema.riga ? ` (riga ${esito.problema.riga})` : ''}: non l’ho usata`,
+      perche: `la copia ${fileCopia} non è leggibile${esito.problema.riga ? ` (riga ${esito.problema.riga})` : ''} e non è stata usata`,
     }
 
   // 3. La copia del file di adesso.

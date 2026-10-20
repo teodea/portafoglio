@@ -81,7 +81,7 @@ describe('la scrittura sicura', () => {
     const copiePrima = await copie()
     await expect(
       scriviConCopia(cartella, aperto.impronta, 'prova', (d) => ({ ...d, prezzi: [{ ...d.prezzi![0], prezzo: -1 }] }), orologio),
-    ).rejects.toThrow('non ho scritto niente')
+    ).rejects.toThrow('non è stato scritto nulla')
     expect(await readFile(file(), 'utf8')).toBe(prima)
     expect(await copie()).toEqual(copiePrima)
   })

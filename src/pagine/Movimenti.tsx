@@ -86,14 +86,14 @@ export function Movimenti() {
       </div>
 
       <div className="numeri">
-        <Riquadro numero={q.investiti} nome={anno ? `Soldi messi${nel}` : 'Soldi investiti'} sotto="comprato meno venduto" segno={!!anno} />
-        <Riquadro numero={q.comprato} nome={`Comprato${nel}`} sotto={`${quanti(q.acquisti, 'acquisto', 'acquisti')}, commissioni comprese`} />
-        <Riquadro numero={q.venduto} nome={`Venduto${nel}`} sotto={`${quanti(q.vendite, 'vendita', 'vendite')}, commissioni tolte`} />
-        <Riquadro numero={q.dividendi} nome={`Dividendi incassati${nel}`} sotto={`netti, ${quanti(q.pagamenti, 'pagamento', 'pagamenti')}`} />
+        <Riquadro numero={q.investiti} nome={anno ? `Investimento netto${nel}` : 'Capitale investito'} sotto="costo degli acquisti meno ricavo delle vendite" segno={!!anno} />
+        <Riquadro numero={q.comprato} nome={`Acquisti${nel}`} sotto={`${quanti(q.acquisti, 'acquisto', 'acquisti')}, commissioni comprese`} />
+        <Riquadro numero={q.venduto} nome={`Ricavo delle vendite${nel}`} sotto={`${quanti(q.vendite, 'vendita', 'vendite')}, al netto delle commissioni`} />
+        <Riquadro numero={q.dividendi} nome={`Dividendi netti${nel}`} sotto={quanti(q.pagamenti, 'accredito', 'accrediti')} />
       </div>
 
       <div className="riquadro">
-        <div className="schede" role="tablist" aria-label="Quali movimenti">
+        <div className="schede" role="tablist" aria-label="Tipo di movimento">
           {SCHEDE.map((s, i) => (
             <button
               key={s}
@@ -114,7 +114,7 @@ export function Movimenti() {
           ))}
         </div>
         <div className="attrezzi">
-          <span>Dal più recente. Clic su un movimento per vedere da dove viene e, se serve, correggerlo.</span>
+          <span>Ordinati dal più recente. Selezionare un movimento per la provenienza e l’eventuale correzione.</span>
           {anni.length > 0 && (
             <div className="segmenti" role="group" aria-label="Anno">
               {[null, ...anni].map((a) => (
@@ -127,7 +127,7 @@ export function Movimenti() {
         </div>
         <div role="tabpanel" id="pannello-movimenti" aria-labelledby={`movimenti-${scheda}`}>
           {tutte.length === 0 ? (
-            <div className="vuoto">Nel file non ci sono ancora movimenti: premi “Registra” per scrivere il primo acquisto.</div>
+            <div className="vuoto">Nessun movimento registrato: selezionare “Registra” per inserire il primo acquisto.</div>
           ) : righe.length === 0 ? (
             <div className="vuoto">{scheda === 'div' ? `Nessun dividendo${nel}.` : `Nessun movimento${nel}.`}</div>
           ) : scheda === 'div' ? (
@@ -174,7 +174,7 @@ function perAnno(righe: RigaMovimento[], colonne: number, riga: (r: RigaMoviment
   return out
 }
 
-/** Il clic su tutta la riga apre "Da dove viene" (come il clic sui soldi). */
+/** Il clic su tutta la riga apre "Da dove viene" (come il clic sull'importo). */
 function useRiga() {
   const spiega = useSpiega()
   return (r: RigaMovimento) => ({
@@ -212,7 +212,7 @@ function Fonte({ r }: { r: RigaMovimento }) {
 }
 
 function Appena({ r, appena }: { r: RigaMovimento; appena: ReadonlySet<string> }) {
-  return appena.has(r.id) ? <span className="etichetta nuova">appena registrato</span> : null
+  return appena.has(r.id) ? <span className="etichetta nuova">registrato ora</span> : null
 }
 
 function TabellaMovimenti({ righe, appena }: { righe: RigaMovimento[]; appena: ReadonlySet<string> }) {
@@ -223,7 +223,7 @@ function TabellaMovimenti({ righe, appena }: { righe: RigaMovimento[]; appena: R
         <thead>
           <tr>
             <th>Data</th>
-            <th>Cosa</th>
+            <th>Operazione</th>
             <th>Titolo</th>
             <th className="n">Quote</th>
             <th className="n">Prezzo</th>
@@ -231,7 +231,7 @@ function TabellaMovimenti({ righe, appena }: { righe: RigaMovimento[]; appena: R
               Commissioni
               <br />o imposte
             </th>
-            <th className="n">Soldi</th>
+            <th className="n">Importo</th>
             <th>Fonte</th>
           </tr>
         </thead>
@@ -289,7 +289,7 @@ function TabellaMovimenti({ righe, appena }: { righe: RigaMovimento[]; appena: R
                       {euro(r.soldi.n ?? 0, 2)}
                     </b>
                   </Num>
-                  <span className="sotto">{r.verso < 0 ? 'pagati' : 'incassati'}</span>
+                  <span className="sotto">{r.verso < 0 ? 'addebito' : 'accredito'}</span>
                 </td>
                 <td>
                   <Fonte r={r} />
@@ -317,7 +317,7 @@ function TabellaDividendi({ righe, appena }: { righe: RigaMovimento[]; appena: R
             <th className="n">Per quota</th>
             <th className="n">Lordo</th>
             <th className="n">Imposte</th>
-            <th className="n">Netto incassato</th>
+            <th className="n">Netto</th>
             <th>Fonte</th>
           </tr>
         </thead>

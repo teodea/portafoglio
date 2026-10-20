@@ -45,12 +45,12 @@ describe('uguale o diverso', () => {
   })
 
   it('in una frase, per il pannello', () => {
-    expect(controlloInParole(13.1, 'EUR', { prezzo: 13.1, seduta: '2026-10-30' })).toBe('Controllo di investing.com: stesso prezzo.')
+    expect(controlloInParole(13.1, 'EUR', { prezzo: 13.1, seduta: '2026-10-30' })).toBe('Controllo con investing.com: stesso prezzo.')
     expect(controlloInParole(50, 'EUR', { prezzo: 50.3, seduta: '2026-10-30' })).toBe(
-      'Controllo di investing.com: dice 50,30 €, diverso di +0,6%. Di solito vale la borsa.',
+      'Controllo con investing.com: 50,30 €, differenza di +0,6%. Di norma vale il prezzo della borsa.',
     )
     expect(controlloInParole(13.1, 'EUR', { perche: 'il prezzo viene già da investing.com' })).toBe(
-      'Controllo di investing.com non fatto: il prezzo viene già da investing.com.',
+      'Controllo con investing.com non eseguito: il prezzo viene già da investing.com.',
     )
     expect(controlloInParole(13.1, 'EUR', undefined)).toBeNull()
   })
@@ -144,7 +144,7 @@ describe('la lista di Aggiorna con le riserve e il controllo', () => {
       expect.arrayContaining([
         expect.stringContaining('investing.com (riserva)'),
         'Borsa Italiana non ha risposto (errore 503).',
-        'Controllo di investing.com non fatto: il prezzo viene già da investing.com.',
+        'Controllo con investing.com non eseguito: il prezzo viene già da investing.com.',
       ]),
     )
   })

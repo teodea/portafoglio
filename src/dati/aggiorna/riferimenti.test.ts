@@ -194,8 +194,8 @@ describe('dalla lista al file', () => {
     expect(storiaMancante(dopo, '2026-09')).toEqual({ riferimenti: {}, nic: ['2026-09'] })
     expect(frasiDopoIlSalvataggio(dopo, '2026-09', true)).toEqual([
       'I 6 riferimenti di borsa hanno il valore di fine settembre.',
-      'La storia dei riferimenti da febbraio 2024 è completa, con il valore alle date dei movimenti.',
-      'L’inflazione arriva fino ad agosto: settembre esce verso metà ottobre e si prende al prossimo aggiornamento.',
+      'Lo storico dei riferimenti da febbraio 2024 è completo, con il valore alle date dei movimenti.',
+      'L’inflazione è disponibile fino ad agosto: il dato di settembre esce verso metà ottobre e si acquisisce al prossimo aggiornamento.',
     ])
     // Rifai: lo stesso valore sostituisce quello di prima, non si raddoppia.
     const ancora = scriviRiferimenti(dopo, { riferimenti: [valore('sp500', '2026-09-30', 7777)] })
