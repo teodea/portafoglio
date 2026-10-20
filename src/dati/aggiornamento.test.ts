@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fonteDiProva, inParole, NESSUNO, prossimoStato, type EventoAggiornamento, type StatoAggiornamento } from './aggiornamento.ts'
+import { allaChiusura, fonteDiProva, inParole, NESSUNO, prossimoStato, type EventoAggiornamento, type StatoAggiornamento } from './aggiornamento.ts'
 
 function dopo(...eventi: EventoAggiornamento[]): StatoAggiornamento {
   return eventi.reduce(prossimoStato, NESSUNO)
@@ -28,14 +28,14 @@ describe("l'aggiornamento all'apertura", () => {
     expect(dopo({ tipo: 'trovata', versione: '0.2.0' }, { tipo: 'risposta', installa: false })).toEqual(NESSUNO)
   })
 
-  it('con il sì scarica e poi si installa alla chiusura', () => {
+  it('con il sì scarica e poi si installa alla chiusura, e il programma si riapre', () => {
     const scarico = dopo({ tipo: 'trovata', versione: '0.2.0' }, { tipo: 'risposta', installa: true }, { tipo: 'avanzamento', percento: 41.6 })
     expect(scarico).toEqual({ stato: 'scarico', versione: '0.2.0', percento: 42 })
-    expect(inParole(scarico)?.testo).toBe("Scaricamento della versione 0.2.0… 42%. L'installazione avverrà alla chiusura del programma.")
+    expect(inParole(scarico)?.testo).toBe("Scaricamento della versione 0.2.0… 42%. L'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.")
 
     const pronta = prossimoStato(scarico, { tipo: 'scaricata' })
     expect(pronta).toEqual({ stato: 'pronta', versione: '0.2.0' })
-    expect(inParole(pronta)?.testo).toBe("La versione 0.2.0 è pronta: l'installazione avverrà alla chiusura del programma.")
+    expect(inParole(pronta)?.testo).toBe("La versione 0.2.0 è pronta: l'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.")
     expect(inParole(pronta)?.bottoni).toEqual([])
   })
 
@@ -64,6 +64,22 @@ describe("l'aggiornamento all'apertura", () => {
     expect(prossimoStato(pronta, { tipo: 'risposta', installa: false })).toEqual(pronta)
     expect(prossimoStato(pronta, { tipo: 'errore' })).toEqual(pronta)
     expect(prossimoStato(pronta, { tipo: 'trovata', versione: '0.3.0' })).toEqual(pronta)
+  })
+})
+
+describe('alla chiusura del programma', () => {
+  it('con una versione pronta la installa e riapre il programma, senza doverlo riaprire manualmente', () => {
+    expect(allaChiusura({ stato: 'pronta', versione: '0.2.0' }, { prova: false })).toBe('installa-e-riapri')
+  })
+
+  it('senza una versione pronta chiude e basta', () => {
+    expect(allaChiusura(NESSUNO, { prova: false })).toBe('chiudi')
+    expect(allaChiusura({ stato: 'scarico', versione: '0.2.0', percento: 50 }, { prova: false })).toBe('chiudi')
+    expect(allaChiusura({ stato: 'non-scaricata', versione: '0.2.0' }, { prova: false })).toBe('chiudi')
+  })
+
+  it('con la finta fonte di versioni non installa mai', () => {
+    expect(allaChiusura({ stato: 'pronta', versione: '0.2.0' }, { prova: true })).toBe('chiudi')
   })
 })
 

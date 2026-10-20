@@ -1,6 +1,7 @@
 // L'aggiornamento dell'applicazione installata, con electron-updater.
 // All'apertura (una volta sola) si guarda nelle Release di GitHub se c'è una versione nuova; se c'è,
-// le pagine chiedono "la installo?". Con il sì si scarica e si installa alla chiusura, senza riaprire niente.
+// le pagine chiedono "la installo?". Con il sì si scarica e si installa alla chiusura; finita l'installazione
+// il programma si riapre da solo, così nessuno lo riapre a metà installazione trovando la versione vecchia.
 // Ad applicazione chiusa non resta acceso niente: nessun controllo, nessun servizio.
 //
 // Per le prove: --fonte-versioni=http://localhost:<porta>/ usa una finta fonte di versioni su questo PC
@@ -10,11 +11,12 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { appendFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import updater from 'electron-updater'
-import { CANALI_AGGIORNAMENTO, NESSUNO, prossimoStato, type EventoAggiornamento, type StatoAggiornamento } from '../src/dati/aggiornamento.ts'
+import { allaChiusura, CANALI_AGGIORNAMENTO, NESSUNO, prossimoStato, type EventoAggiornamento, type StatoAggiornamento } from '../src/dati/aggiornamento.ts'
 
 const { autoUpdater } = updater
 
 let stato: StatoAggiornamento = NESSUNO
+let diProva = false
 
 function registro(): string {
   return join(app.getPath('userData'), 'aggiornamento.log')
@@ -61,11 +63,26 @@ export function registraFunzioniAggiornamento() {
 }
 
 /**
+ * Da chiamare quando si chiude l'ultima finestra, al posto di app.quit(). Con una versione pronta la installa
+ * in silenzio e poi riapre il programma; altrimenti chiude e basta.
+ */
+export function chiudi() {
+  if (allaChiusura(stato, { prova: diProva }) === 'installa-e-riapri') {
+    scrivi('info', 'Chiusura: installo la versione nuova e poi riapro il programma')
+    // Fa partire subito l'installatore, in silenzio e con la riapertura alla fine. Se non parte,
+    // il programma si chiude lo stesso e la domanda torna alla prossima apertura.
+    autoUpdater.quitAndInstall(true, true)
+  }
+  app.quit()
+}
+
+/**
  * Il controllo all'apertura. Si fa solo nell'applicazione installata (o con la finta fonte delle prove):
  * con "npm run dev" non si controlla niente.
  */
 export function controllaVersioneNuova(fonteDiProva: string | null) {
   if (!app.isPackaged && !fonteDiProva) return
+  diProva = fonteDiProva !== null
 
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = !fonteDiProva

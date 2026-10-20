@@ -24,7 +24,7 @@ Il file da scaricare è **Portafoglio-titoli-‹versione›.exe**, dalla [pagina
 3. L'installazione si completa con un clic, non richiede la password di amministratore e al termine apre il programma.
 4. Sul desktop e nel menu Start compare l'icona **Portafoglio titoli**.
 
-**Gli aggiornamenti sono automatici.** Quando è disponibile una nuova versione, in cima alle pagine compare **«È disponibile una nuova versione: installarla?»**. Con **Installa** la versione si scarica e si installa alla chiusura del programma; con **Non ora** la richiesta si ripete all'avvio successivo. La disinstallazione non tocca i dati in OneDrive.
+**Gli aggiornamenti sono automatici.** Quando è disponibile una nuova versione, in cima alle pagine compare **«È disponibile una nuova versione: installarla?»**. Con **Installa** la versione si scarica e si installa alla chiusura del programma, che al termine si riapre automaticamente (circa un minuto); con **Non ora** la richiesta si ripete all'avvio successivo. La disinstallazione non tocca i dati in OneDrive.
 
 ## Primo avvio
 

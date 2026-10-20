@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { CARTELLA_COPIE } from '../src/dati/tipi.ts'
 import { CANALI, type Apertura, type QualeCartella } from '../src/dati/ponte.ts'
 import { fonteDiProva } from '../src/dati/aggiornamento.ts'
-import { controllaVersioneNuova, registraFunzioniAggiornamento } from './aggiornamento.ts'
+import { chiudi, controllaVersioneNuova, registraFunzioniAggiornamento } from './aggiornamento.ts'
 import { apriCartella, creaFileVuoto, tornaAllaCopia, type Letto } from './cartella-dati.ts'
 import { leggiImpostazioni, scriviImpostazioni } from './impostazioni.ts'
 import { registraAggiorna } from './aggiorna.ts'
@@ -197,8 +197,9 @@ app.on('second-instance', () => {
   finestra.focus()
 })
 
-// Chiusa la finestra, l'applicazione finisce: non resta acceso niente.
-app.on('window-all-closed', () => app.quit())
+// Chiusa la finestra, l'applicazione finisce: non resta acceso niente
+// (con una versione nuova pronta, si installa e il programma si riapre: vedi aggiornamento.ts).
+app.on('window-all-closed', () => chiudi())
 
 void app.whenReady().then(() => {
   // Niente barra dei menu: le pagine hanno già tutto. Il tema segue quello di Windows.

@@ -8,7 +8,7 @@ export type StatoAggiornamento =
   | { stato: 'nessuno' }
   | { stato: 'disponibile'; versione: string }
   | { stato: 'scarico'; versione: string; percento: number }
-  /** Scaricata: si installa quando si chiude l'applicazione. */
+  /** Scaricata: si installa quando si chiude l'applicazione, che poi si riapre automaticamente. */
   | { stato: 'pronta'; versione: string }
   | { stato: 'non-scaricata'; versione: string }
 
@@ -44,6 +44,16 @@ export function prossimoStato(s: StatoAggiornamento, e: EventoAggiornamento): St
   }
 }
 
+/**
+ * Che cosa fare quando si chiude la finestra. Con una versione pronta la si installa e poi il programma
+ * si riapre da solo: l'installazione dura circa un minuto senza niente a schermo, e chi riapriva il programma
+ * manualmente in quel minuto ritrovava la versione vecchia e la domanda "installarla?".
+ * Con la finta fonte di versioni (prove) non si installa mai.
+ */
+export function allaChiusura(s: StatoAggiornamento, { prova }: { prova: boolean }): 'installa-e-riapri' | 'chiudi' {
+  return s.stato === 'pronta' && !prova ? 'installa-e-riapri' : 'chiudi'
+}
+
 export type Bottone = { testo: string; installa: boolean; primario?: boolean }
 
 export type InParole = {
@@ -69,13 +79,13 @@ export function inParole(s: StatoAggiornamento): InParole | null {
       }
     case 'scarico':
       return {
-        testo: `Scaricamento della versione ${s.versione}… ${s.percento}%. L'installazione avverrà alla chiusura del programma.`,
+        testo: `Scaricamento della versione ${s.versione}… ${s.percento}%. L'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.`,
         bottoni: [],
         chiudibile: true,
       }
     case 'pronta':
       return {
-        testo: `La versione ${s.versione} è pronta: l'installazione avverrà alla chiusura del programma.`,
+        testo: `La versione ${s.versione} è pronta: l'installazione avverrà alla chiusura del programma, che poi si riaprirà automaticamente.`,
         bottoni: [],
         chiudibile: true,
       }
